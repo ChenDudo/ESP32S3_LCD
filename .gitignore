@@ -1,0 +1,3 @@
+# 本地 PlatformIO 虚拟环境（仅用于命令行编译，不入库）
+.pioenv/
+.cache/

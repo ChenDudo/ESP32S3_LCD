@@ -1,0 +1,30 @@
+﻿接口,脚号,信号,网络名,接到,说明
+J4A(XH2.54-4P 卧式),1,3V3,+3V3,底板 +3V3,方形焊盘 + 丝印三角"1"；就近 100nF
+J4A(XH2.54-4P 卧式),2,GND,GND,底板 GND,
+J4A(XH2.54-4P 卧式),3,SCL,TP_SCL,IO41,与触摸、J4B 并联；模块内 4.7K 上拉
+J4A(XH2.54-4P 卧式),4,SDA,TP_SDA,IO42,同上
+J4B(XH2.54-4P 卧式),1,3V3,+3V3,底板 +3V3,与 J4A 同网络
+J4B(XH2.54-4P 卧式),2,GND,GND,底板 GND,
+J4B(XH2.54-4P 卧式),3,SCL,TP_SCL,IO41,
+J4B(XH2.54-4P 卧式),4,SDA,TP_SDA,IO42,
+J5(XH2.54-5P 卧式),1,VCC,GPS_VCC,JP1 选 3V3 或 5V,串 10Ω + 并 100µF；裸模块选 3V3
+J5(XH2.54-5P 卧式),2,GND,GND,底板 GND,
+J5(XH2.54-5P 卧式),3,TXD,GPS_TX,IO44(ESP32 RX),接模块的 TXD
+J5(XH2.54-5P 卧式),4,RXD,GPS_RX,IO43(ESP32 TX),接模块的 RXD
+J5(XH2.54-5P 卧式),5,PPS,GPS_PPS,IO47,可省略；开发板模式 IO47 让给 TP_RST
+AHT20 模块(4P),1,VDD,+3V3,J4A-1,2.2~5.5V
+AHT20 模块(4P),2,GND,GND,J4A-2,
+AHT20 模块(4P),3,SCL,TP_SCL,J4A-3,注意接 J4A 的 3 脚
+AHT20 模块(4P),4,SDA,TP_SDA,J4A-4,地址 0x38
+GY-BMP280 模块(4P),1,VCC,+3V3,J4B-1,模块带 LDO，3.3V 可直接供
+GY-BMP280 模块(4P),2,GND,GND,J4B-2,
+GY-BMP280 模块(4P),3,SCL,TP_SCL,J4B-3,
+GY-BMP280 模块(4P),4,SDA,TP_SDA,J4B-4,地址 0x76（SDO 拉高为 0x77）
+GPS 模块(5P),1,VCC,GPS_VCC,J5-1,峰值 100mA；带 LDO 的成品模块通常给 5V
+GPS 模块(5P),2,GND,GND,J5-2,
+GPS 模块(5P),3,TXD,GPS_TX,J5-3,模块发 → ESP32 收
+GPS 模块(5P),4,RXD,GPS_RX,J5-4,ESP32 发 → 模块收
+GPS 模块(5P),5,PPS,GPS_PPS,J5-5,可选，秒脉冲
+备注,线材,,,,"AHT20 用 20~30cm、BMP280 10~20cm、GPS 20~50cm 的 XH 成品线"
+备注,压线注意,,,,"各家模块的 4P 线序不统一（VCC-RX-TX-GND 很常见），压端子前按模块丝印逐一核对，别照库存线的顺序插"
+备注,热插拔,,,,"I2C 建议断电拔插；带电拔插使 SDA 被拉低会让总线卡死到下次复位，需要的话在 SDA/SCL 串 22Ω"
