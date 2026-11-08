@@ -108,6 +108,23 @@ def CIRCLE(x, y, r, color=INK, lw=0.35, fill=None, dash=None):
     if dash: c.setDash()
 
 
+def MARKS(xoff, yoff, sc, color=INK):
+    """顶板一体成型凸字（geom_v2.json 字形轮廓，even-odd 填充挖空内孔）。"""
+    c.setFillColor(color)
+    for item in G.get("TEXT_MARKS", []):
+        for poly in item["polys"]:
+            p = c.beginPath()
+            for ring in [poly["outer"]] + poly["holes"]:
+                if len(ring) < 3:
+                    continue
+                p.moveTo((xoff + ring[0][0] * sc) * mm,
+                         (yoff + ring[0][1] * sc) * mm)
+                for x, y in ring[1:]:
+                    p.lineTo((xoff + x * sc) * mm, (yoff + y * sc) * mm)
+                p.close()
+            c.drawPath(p, stroke=0, fill=1, fillMode=1)
+
+
 def DIMH(x1, x2, y, label, color=DIMC, size=6.2, above=True):
     LN(x1, y, x2, y, color, 0.25)
     for xx, s in ((x1, 1), (x2, -1)):
@@ -175,10 +192,12 @@ TC("侧壁让位窗", FX + (AX0 + AX1) / 2 * S, FY + AY0 * S + 0.4, 4.6, BLUE)
 for a, b in G["I2C_GROUPS"]:
     RECT(FX + a * S, FY + (H - 1.6) * S, (b - a) * S, 1.6 * S,
          GREEN, 0.45, fill=GRNF)
-# 复位孔
+# 复位孔 + 顶板一体成型接口凸字
 CIRCLE(FX + RST[0] * S, FY + RST[1] * S, RSTD / 2 * S,
        REDC, 0.6, fill=WINF)
-T("Φ4 复位孔", FX + RST[0] * S + 4, FY + RST[1] * S - 3.5, 6, REDC)
+MARKS(FX, FY, S)
+# 孔标注移到左侧，避免与凸字 "RST" 叠字
+T("Φ4 孔", FX + (RST[0] - 14) * S, FY + (RST[1] - 1.5) * S - 2, 5.6, REDC)
 # 4 个四角连接柱（隐藏线）
 for x, y in SCREW_POS:
     CIRCLE(FX + x * S, FY + y * S, G["POST_D"] / 2 * S, BLUE, 0.4, dash=(1.5, 1))
@@ -301,11 +320,14 @@ specs = [
     (f"统一开口带 Z {AZ0:.2f}~{AZ1:.2f}（四边平齐）", BLUE),
     (f"上边：天线 {AX1-AX0:.2f} + I2C 合并宽窗 25.10/24.90", BLUE),
     (f"下边双 Type-C {G['DUAL_USBC'][1]-G['DUAL_USBC'][0]:.2f}；右边 18.00/23.00", GREEN),
-    (f"PCB 四角 φ{G['PCB_HOLE_D']:.1f} 孔距 91.34 × 48.70（定位销位）", INK),
+    (f"PCB 四角 φ{G['PCB_HOLE_D']:.1f} 孔距 91.34 × 48.70（2 个对角有销）", INK),
     (f"四角柱距 {G['SCREW_POS'][2][0]-G['SCREW_POS'][0][0]:.2f} × "
      f"{G['SCREW_POS'][1][1]-G['SCREW_POS'][0][1]:.2f}；M3×12 ×4 不穿板", INK),
     (f"四角 Φ{G['POST_D']:.1f} 连接柱在 PCB 板框外；M3 不穿板", REDC),
-    (f"PCB 由底座 Φ{G['LOCATOR_D']:.1f} 定位销定位；φ4 孔空置", INK),
+    (f"PCB 由 2 个对角销定位（圆 Φ{G['LOCATOR_D']:.1f} + 菱形 {G['DIAMOND_W']:.2f}）", INK),
+    ("另 2 个 φ4 孔空置；菱形销沿对角削扁吸收 0.31 mm 收缩", INK),
+    (f"顶板凸字：USB / COM / Power / 5P / RST，高 {G['TEXT_SIZE']:.2f} 凸 {G['TEXT_RAISE']:.2f}", GREEN),
+    ("凸字在显示窗外边框带，勿打磨/喷砂；不影响天线", INK),
     ("材料：PETG / 韧性树脂，绝缘非金属", INK),
 ]
 for i, (s, col) in enumerate(specs):
@@ -322,7 +344,7 @@ notes = [
     "   I2C 合并宽窗上下沿完全平齐（统一 Z 4.00~14.20）。",
     "④ 右视图 = 从右侧看：5V Type-C（18.00）与 XH2.54-5P（23.00）；",
     "   ③ 辅助下视图补双 Type-C 共用 36.00 窗；均含插线余量。",
-    "各视图均按 1.6:1 绘制，尺寸数字为实物 mm；隐藏轮廓用虚线。",
+    "各视图 1.6:1，尺寸数字为实物 mm；深灰实心字 = 顶板一体成型凸字。",
 ]
 for i, s in enumerate(notes):
     T(s, JX, JY - 7 - i * 5.9, 6.3, INK)
@@ -340,6 +362,7 @@ RECT(JX, 27, 7, 3.5, REDC, 0.4, fill=WINF); T("显示窗 / 复位孔", JX + 10, 
 RECT(JX + 70, 27, 7, 3.5, GREEN, 0.4, fill=GRNF); T("接口开窗", JX + 80, 28, 6.2, INK)
 RECT(JX + 130, 27, 7, 3.5, BLUE, 0.4, fill=ANTF); T("天线让位窗（仅侧壁）", JX + 140, 28, 6.2, INK)
 LN(JX, 24, JX + 7, 24, GRAY, 0.35, dash=(2, 1.2)); T("虚线 = PCB 参考 / 四角连接柱隐藏线", JX + 10, 23.5, 6.2, INK)
+T("深灰字 = 顶板凸字，勿打磨", JX + 70, 23.5, 6.2, INK)
 RECT(JX + 130, 22.5, 7, 3.5, INK, 0.4, fill=SIDE); T("浅蓝 = 顶板 / 底板实体", JX + 140, 23.5, 6.2, INK)
 
 c.save()
@@ -351,7 +374,7 @@ d = ezdxf.new("R2010", setup=True)
 d.header["$INSUNITS"] = 4
 LAY = [("OUTLINE", 7), ("WINDOW", 1), ("HOLE", 1), ("PCB_REF", 8),
        ("DIM", 4), ("CENTER", 8), ("TEXT", 7), ("SLOT", 3), ("ANT", 5),
-       ("SECTION", 5), ("TOPPLATE", 5)]
+       ("SECTION", 5), ("TOPPLATE", 5), ("MARK", 6)]
 for n, col in LAY:
     d.layers.new(n, dxfattribs={"color": col})
 m = d.modelspace()
@@ -404,6 +427,12 @@ rr_dxf(G["OX"], G["OY"], G["PCB_PY"], G["PCB_PX"], G["PCB_R"], "PCB_REF")
 rr_dxf(wx, wy, ww, wh, G["WIN_R"], "WINDOW")
 dr(AX0, AY0, AX1, AY1, "ANT")
 dc(RST[0], RST[1], RSTD / 2, "HOLE")
+# 顶板一体成型接口凸字（MARK 层，1:1 轮廓）
+for item in G.get("TEXT_MARKS", []):
+    for poly in item["polys"]:
+        for ring in [poly["outer"]] + poly["holes"]:
+            m.add_lwpolyline([(float(x), float(y)) for x, y in ring],
+                             close=True, dxfattribs={"layer": "MARK"})
 for x, y in SCREW_POS:
     dc(x, y, G["POST_D"] / 2, "CENTER")
     dl((x - 4.5, y), (x + 4.5, y), "CENTER"); dl((x, y - 4.5), (x, y + 4.5), "CENTER")
@@ -412,7 +441,7 @@ for a, b in G["I2C_GROUPS"]:
 dh(0, W, 0, f"{W:.2f}", -10); dv(0, H, 0, f"{H:.2f}", -10)
 dh(wx, wx + ww, H, f"{ww:.2f}", 8); dh(SCREW_POS[0][0], SCREW_POS[2][0], 0, "104.20 柱距", -19)
 dt("① 正视图（屏幕正面 / +Z）  1:1   顶板完整无镂空", 0, H + 18, 3.4)
-dt("蓝色 = 侧壁让位窗投影（顶板不开）；红色 = 显示窗；Φ4 复位孔", 0, -27, 2.8)
+dt("蓝色 = 侧壁让位窗投影（顶板不开）；红色 = 显示窗；紫色 = 顶板凸字；Φ4 复位孔", 0, -27, 2.8)
 
 # 上视图 1:1（放在 y=-45 起，z 映射到 y+（-45+z））
 SY0 = -45.0
@@ -450,7 +479,7 @@ for y0, y1, z0, z1, n in RGT_SLOTS:
 dh(RX0, RX0 + H, 0, f"{H:.2f}", -9); dv(0, HT, RX0, f"{HT:.2f}", -10)
 dt("④ 右视图（+Xo）  1:1   横轴 Yo：左=下边，右=上边（天线侧）", RX0, HT + 18, 3.4)
 
-dt("ESP32S3-LCD-EN-I-VIEW  Rev I  |  单位 mm  1:1  |  四角连接柱在板框外 / M3 不穿板",
+dt("ESP32S3-LCD-EN-I-VIEW  Rev I  |  单位 mm  1:1  |  柱在板框外 / M3 不穿板 / 顶板凸字 / 2 对角定位销",
    0, -112, 3.6)
 DXF = os.path.join(OUT, "ESP32S3_LCD_全覆盖外壳_三视图.dxf")
 d.saveas(DXF)

@@ -16,7 +16,9 @@ STEP 版用解析圆弧，两者轮廓差 <0.01 mm，外形尺寸 / 孔径 / 开
 """
 import os
 import cadquery as cq
+from shapely.geometry import Polygon
 import params_v2 as P
+import text_geom as TG
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "deliverables")
@@ -42,6 +44,19 @@ def cylinder(r, z0, z1, cx, cy):
             .extrude(z1 - z0).translate((cx, cy, 0)).val())
 
 
+def poly_prism(poly, z0, z1):
+    """把 shapely 多边形（可带内孔）挤成 BREP 实体，与 STL 版共用同一轮廓。"""
+    outer = [tuple(p) for p in list(poly.exterior.coords)[:-1]]
+    w = (cq.Workplane("XY").workplane(offset=z0)
+         .polyline(outer).close().extrude(z1 - z0))
+    for h in poly.interiors:
+        pts = [tuple(p) for p in list(h.coords)[:-1]]
+        cutter = (cq.Workplane("XY").workplane(offset=z0 - 0.1)
+                  .polyline(pts).close().extrude(z1 - z0 + 0.2))
+        w = w.cut(cq.Workplane(obj=cutter.val()))
+    return w.val()
+
+
 def build_top(win_w, win_h):
     outer = rr_prism(P.W, P.H, P.R_OUT, P.W / 2, P.H / 2,
                      P.T_BASE, P.H_TOTAL)
@@ -65,7 +80,10 @@ def build_top(win_w, win_h):
         pilot = cylinder(P.POST_PILOT_D / 2, P.POST_Z0 - 0.2,
                          P.POST_PILOT_Z1, x, y)
         posts.append(post.cut(pilot))
-    return shell.fuse(*posts)
+    # 顶板外表面一体成型接口凸字（与 STL 共用 text_geom.py 的字形轮廓）
+    marks = [poly_prism(p, TG.mark_z0(), TG.mark_z1())
+             for _, _, _, _, polys, _ in TG.all_marks() for p in polys]
+    return shell.fuse(*(posts + marks)).clean()
 
 
 def build_base():
@@ -74,8 +92,14 @@ def build_base():
                   for x, y in P.SCREW_POS]
     pcb_boss = [cylinder(P.BASE_BOSS_D / 2, P.T_BASE - 0.1, P.Z_PCB_BOT, x, y)
                 for x, y in P.HOLES]
-    pins = [cylinder(P.LOCATOR_D / 2, P.Z_PCB_BOT - 0.1, P.LOCATOR_Z1, x, y)
-            for x, y in P.HOLES]
+    # A 方案：4 个 Φ7 支撑台保留，定位销只留 2 个对角（圆销 + 菱形销）
+    pins = [
+        cylinder(P.LOCATOR_D / 2, P.LOCATOR_Z0 - 0.1, P.LOCATOR_Z1,
+                 *P.LOCATOR_ROUND),
+        poly_prism(Polygon(TG.diamond_pin_points(
+            P.LOCATOR_DIAMOND, P.LOCATOR_ROUND)),
+            P.LOCATOR_Z0 - 0.1, P.LOCATOR_Z1),
+    ]
     solid = body.fuse(*(screw_boss + pcb_boss + pins))
     cuts = []
     for x, y in P.SCREW_POS:

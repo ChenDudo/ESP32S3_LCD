@@ -1,21 +1,29 @@
 # -*- coding: utf-8 -*-
 """ESP32S3_LCD 全覆盖不透明外壳 Rev I —— 生成 STL / DXF / 报价 / 下单说明
 
-结构：上盖（完整不透明顶板 + 四周侧壁 + 4 个四角连接柱，仅开显示区窗口 + Φ4 复位孔）
-      底座（平板 + 4 定位销台 + 4 连接柱台 + 4 沉孔）
+结构：上盖（完整不透明顶板 + 四周侧壁 + 4 个四角连接柱，仅开显示区窗口 + Φ4 复位孔
+             + 顶板外表面一体成型的 5 组接口凸字标注 USB / COM / Power / 5P / RST）
+      底座（平板 + 4 支撑台 + 2 个对角定位销 + 4 连接柱台 + 4 沉孔）
       Rev I：4 个连接柱移到 PCB 板框之外的外壳四角，M3 不再穿过 PCB；
-      PCB 由底座 Φ3.8 定位销定位。四边所有对外开口统一开口带 Z 4.00~14.20，上下沿完全平齐；
+      PCB 由底座定位销定位。四边所有对外开口统一开口带 Z 4.00~14.20，上下沿完全平齐；
       天线让位窗 27.00 与 I2C 合并宽窗同高；双 Type-C / 5V / XH-5P 均按
       带壳插头 + 线材外径留余量。顶板保持完整不镂空。
+
+11-08 追加修订：
+  A 方案 —— 原 4 个 Φ3.8 定位销过约束（单边间隙 0.10 mm < SLA 收缩 0.31 mm），
+  改为 HOLES[0] 圆销 + HOLES[3] 菱形销（沿两销连线削扁到 3.20），另 2 孔只留支撑台。
+  顶面接口凸字 —— 字高 3.20、凸出 0.40、底面嵌入顶板 0.05，字形由 text_geom.py
+  统一生成，STL / STEP / DXF / PDF / 预览完全一致。
 """
 import os, json, csv, math
 import numpy as np
-from shapely.geometry import box, Point
+from shapely.geometry import box, Point, Polygon
 from shapely.ops import unary_union
 import trimesh
 from trimesh.creation import extrude_polygon
 import ezdxf
 import params_v2 as P
+import text_geom as TG
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "deliverables")
@@ -103,7 +111,12 @@ def build_top(win_w, win_h):
                       cyl(P.POST_PILOT_D / 2, P.POST_Z0 - 0.2, P.POST_PILOT_Z1, x, y)])
         posts.append(post)
     # 顶板完整封闭，无需加强筋
-    return bunion([shell] + posts)
+    # 顶板外表面一体成型接口凸字（USB / COM / Power / 5P / RST）
+    marks = []
+    for _, _, _, _, polys, _ in TG.all_marks():
+        for poly in polys:
+            marks.append(prism(poly, TG.mark_z0(), TG.mark_z1()))
+    return bunion([shell] + posts + marks)
 
 
 # ---------------- 底座 ----------------
@@ -112,11 +125,15 @@ def build_base():
     # 新四角连接柱台（带 M3 通孔 + 沉孔），位于 PCB 板框之外
     screw_boss = [cyl(P.POST_D / 2, P.T_BASE - 0.1, P.Z_PCB_BOT, x, y)
                   for x, y in P.SCREW_POS]
-    # PCB 孔位：Φ7 支撑台 + Φ3.8 定位销（穿过 PCB 四角 φ4 孔）
+    # PCB 孔位：4 个 Φ7 支撑台托底；A 方案只留 2 个对角定位销
     pcb_boss = [cyl(P.BASE_BOSS_D / 2, P.T_BASE - 0.1, P.Z_PCB_BOT, x, y)
                 for x, y in P.HOLES]
-    pins = [cyl(P.LOCATOR_D / 2, P.Z_PCB_BOT - 0.1, P.LOCATOR_Z1, x, y)
-            for x, y in P.HOLES]
+    round_pin = cyl(P.LOCATOR_D / 2, P.LOCATOR_Z0 - 0.1, P.LOCATOR_Z1,
+                    *P.LOCATOR_ROUND)
+    diamond_pin = prism(Polygon(TG.diamond_pin_points(
+        P.LOCATOR_DIAMOND, P.LOCATOR_ROUND)),
+        P.LOCATOR_Z0 - 0.1, P.LOCATOR_Z1)
+    pins = [round_pin, diamond_pin]
     solid = bunion([body] + screw_boss + pcb_boss + pins)
     cuts = []
     for x, y in P.SCREW_POS:
@@ -187,7 +204,18 @@ def DIMV(m, y1, y2, x, label, off=0):
 
 LAYERS = [("OUTLINE", 7), ("WINDOW", 1), ("CUT", 1), ("HOLE", 1),
           ("PCB_REF", 8), ("DIM", 4), ("CENTER", 8), ("TEXT", 7),
-          ("TABLE", 7), ("ANT", 2), ("SECTION", 5), ("NOTE", 6), ("SLOT", 3)]
+          ("TABLE", 7), ("ANT", 2), ("SECTION", 5), ("NOTE", 6), ("SLOT", 3),
+          ("MARK", 6)]
+
+
+def MARK_TEXT(m, layer="MARK"):
+    """顶面接口凸字的 1:1 轮廓（每个字母的外环 + 内孔各一条闭合多段线）。"""
+    for _, _, _, _, polys, _ in TG.all_marks():
+        for poly in polys:
+            for ring in [poly.exterior] + list(poly.interiors):
+                pts = [(round(x, 3), round(y, 3))
+                       for x, y in list(ring.coords)[:-1]]
+                m.add_lwpolyline(pts, close=True, dxfattribs={"layer": layer})
 
 WIN = (P.WIN_CX - P.WIN_W / 2, P.WIN_CY - P.WIN_H / 2,
        P.WIN_CX + P.WIN_W / 2, P.WIN_CY + P.WIN_H / 2)
@@ -207,6 +235,8 @@ RECT(m, P.ANT_X0, P.ANT_Y0, P.ANT_X1, P.H, "ANT")
 # 顶板复位键孔
 m.add_circle(P.RESET_POS, P.RESET_HOLE_D / 2, dxfattribs={"layer": "HOLE"})
 T(m, "复位孔 Φ4.0", P.RESET_POS[0] + 3, P.RESET_POS[1] + 1, 1.8, "NOTE")
+# 顶板外表面一体成型接口凸字（MARK 层，1:1 轮廓）
+MARK_TEXT(m)
 for x, y in P.SCREW_POS:
     m.add_circle((x, y), P.POST_D / 2, dxfattribs={"layer": "CENTER", "linetype": "DASHED"})
     LN(m, (x - 4.5, y), (x + 4.5, y), "CENTER")
@@ -233,6 +263,9 @@ T(m, f"Rev I 偏心屏：显示窗中心 X={P.WIN_CX:.2f} / Y={P.WIN_CY:.2f}"
   0, P.H + 32, 2.8, "ANT")
 T(m, f"单版本：窗口 {P.WIN_W:.2f} x {P.WIN_H:.2f} 比实测 A.A {P.LCD_AA_X:.2f} x {P.LCD_AA_Y:.2f} 四周各放大 {P.WIN_CLEAR_X:.2f} / {P.WIN_CLEAR_Y:.2f}",
   0, P.H + 37, 2.8, "ANT")
+T(m, f"顶板凸字：USB / COM / Power / 5P / RST，字高 {P.TEXT_SIZE:.2f}、凸出 {P.TEXT_RAISE:.2f}"
+     f"（MARK 层 1:1 轮廓，一体打印，勿打磨掉）",
+  0, P.H + 42, 2.8, "NOTE")
 # 四边侧壁展开图（放在右侧 x=125 起）
 SX, SY = 125.0, 0.0
 def side_view(title, length, segments, y):
@@ -269,17 +302,27 @@ for x, y in P.SCREW_POS:
     m2.add_circle((x, y), P.SCREW_CS_D / 2, dxfattribs={"layer": "CENTER", "linetype": "DASHED"})
     LN(m2, (x - 5, y), (x + 5, y), "CENTER")
     LN(m2, (x, y - 5), (x, y + 5), "CENTER")
-# PCB 四角孔位：底座定位销（不是螺丝孔）
+# PCB 四角孔位：4 个 Φ7 支撑台；A 方案只留 2 个对角定位销
 for x, y in P.HOLES:
-    m2.add_circle((x, y), P.LOCATOR_D / 2, dxfattribs={"layer": "PCB_REF"})
-    m2.add_circle((x, y), P.BASE_BOSS_D / 2, dxfattribs={"layer": "PCB_REF", "linetype": "DASHED"})
+    m2.add_circle((x, y), P.BASE_BOSS_D / 2,
+                  dxfattribs={"layer": "PCB_REF", "linetype": "DASHED"})
+m2.add_circle(P.LOCATOR_ROUND, P.LOCATOR_D / 2, dxfattribs={"layer": "HOLE"})
+m2.add_lwpolyline(TG.diamond_pin_points(P.LOCATOR_DIAMOND, P.LOCATOR_ROUND),
+                  close=True, dxfattribs={"layer": "HOLE"})
+T(m2, "圆销 Φ3.8（主定位）", P.LOCATOR_ROUND[0] + 4.5,
+  P.LOCATOR_ROUND[1] + 2.5, 1.8, "NOTE")
+T(m2, "菱形销 3.20（沿对角连线削扁）", P.LOCATOR_DIAMOND[0] - 22,
+  P.LOCATOR_DIAMOND[1] + 5, 1.8, "NOTE")
 DIMH(m2, 0, P.W, 0, f"{P.W:.2f}", -11)
 DIMV(m2, 0, P.H, 0, f"{P.H:.2f}", -11)
 DIMH(m2, P.SCREW_POS[0][0], P.SCREW_POS[2][0], 0, "104.20 柱距", -20)
 DIMV(m2, P.SCREW_POS[0][1], P.SCREW_POS[1][1], 0, "66.00", -20)
 T(m2, "底座俯视 1:1 (单位 mm)", 0, -30, 3.6)
 T(m2, "四角 4x Φ3.4 通孔 + 底面 Φ6.5 深 1.6 沉孔（M3 沉头螺丝；不穿 PCB）", 0, P.H + 8, 2.8)
-T(m2, "PCB 孔位：4x Φ7 支撑台 + Φ3.8x1.6 定位销（PCB 底面 Z=3.4）", 0, P.H + 13, 2.8)
+T(m2, "PCB 孔位：4x Φ7 支撑台 + 2 个对角定位销（1 圆 Φ3.8 + 1 菱形 3.20，PCB 底面 Z=3.4）",
+  0, P.H + 13, 2.8)
+T(m2, "A 方案：另 2 个 φ4 孔空置只托底；菱形销沿两销连线削扁吸收打印收缩，避免顶销",
+  0, P.H + 18, 2.8, "NOTE")
 T(m2, "四角 Φ6 连接柱在 PCB 板框之外；底板厚 2.40；总装配高 16.00", 0, P.H + 23, 2.8)
 d2.saveas(os.path.join(OUT, "ESP32S3_LCD_全覆盖外壳_底座_加工图.dxf"))
 
@@ -292,6 +335,7 @@ m3.add_lwpolyline(rr_pts(P.WIN_W, P.WIN_H, P.WIN_R, WIN[0], WIN[1]),
                   close=True, dxfattribs={"layer": "WINDOW"})
 RECT(m3, P.ANT_X0, P.ANT_Y0, P.ANT_X1, P.H, "ANT")
 m3.add_circle(P.RESET_POS, P.RESET_HOLE_D / 2, dxfattribs={"layer": "HOLE"})
+MARK_TEXT(m3)
 for x, y in P.SCREW_POS:
     m3.add_circle((x, y), P.POST_D / 2, dxfattribs={"layer": "HOLE"})
 DIMH(m3, 0, P.W, 0, f"{P.W:.2f}", -11)
@@ -362,7 +406,10 @@ notes = [
     "   所有窗口按带壳插头宽 14~16 / 线材 Φ3~5 留余量，非按母座贴边开孔。",
     "6. Rev I：4x M3x12 自底面沉孔穿入，直接拧进外壳四角 Φ6 柱（底孔 Φ2.6）；",
     "   不穿过 PCB。LCD 板 97.92 覆盖 PCB 四角 φ4 孔且左端无孔，旧穿板方案装不上。",
-    "   PCB 由底座 4 个 Φ3.8x1.6 定位销 + Φ7 支撑台定位，φ4 孔空置不用螺丝。",
+    "   PCB 由底座 2 个对角定位销（1 圆 Φ3.8 + 1 菱形 3.20）+ 4 个 Φ7 支撑台定位；",
+    "   另 2 个 φ4 孔空置只托底。菱形销沿两销连线削扁，吸收 SLA 收缩约 0.31 mm。",
+    "6b. 顶板外表面一体成型接口凸字（MARK 层）：USB / COM（下边双 Type-C）、",
+    "    Power（右边 5V）、5P（右边 XH2.54-5P）、RST（上边复位孔）；字高 3.20、凸出 0.40。",
     "7. 材料必须绝缘非金属；不喷金属漆、不镀层、不用碳纤维/导电料；建议 PETG 或韧性树脂。",
     "8. 未注公差按 3D 打印常规工艺；本图不作 GB/ISO 符合性声明。",
 ]
@@ -388,9 +435,9 @@ vol_base = base.volume / 1000
 vol_all = vol_top + vol_base
 quote = [
     ["项目", "规格/工艺", "数量", "单价参考(¥)", "小计(¥)", "备注"],
-    ["上盖 FDM 3D打印", f"PLA/PETG 不透明，约 {vol_top:.1f} cm3", "1件", "16~26", "16~26", "发 STL，推荐 PETG"],
+    ["上盖 FDM 3D打印", f"PLA/PETG 不透明，约 {vol_top:.1f} cm3", "1件", "16~26", "16~26", "发 STL，推荐 PETG；含 5 组顶面凸字"],
     ["底座 FDM 3D打印", f"PLA/PETG，约 {vol_base:.1f} cm3", "1件", "14~24", "14~24", "与上盖同单打印更便宜"],
-    ["整套 SLA 光敏树脂", f"约 {vol_all:.1f} cm3，精度高", "1套", "55~95", "55~95", "替代方案，表面更好"],
+    ["整套 SLA 光敏树脂", f"约 {vol_all:.1f} cm3，精度高", "1套", "55~95", "55~95", "替代方案，表面更好；凸字一体成型不加价"],
     ["整套 亚克力/CNC", "需改造为叠层结构", "1套", "120~220", "120~220", "不推荐，成本高"],
     ["M3 自攻螺丝", "M3x12 沉头 304 不锈钢", "4颗", "0.4~0.8", "1.6~3.2", "搜：M3*12 沉头螺丝"],
     ["硅胶脚垫", "Φ8x1.5 自粘（可选）", "4片", "0.3~0.6", "1~2", "遮住螺丝头"],
@@ -417,14 +464,35 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev I —— 淘宝打样下单
     4 个连接柱移到外壳四角（PCB 板框之外，柱心 ({P.SCREW_C:.2f},{P.SCREW_C:.2f}) 等，Φ{P.POST_D:.1f}）。
     因 LCD 板完全在 PCB 板框内，柱子与屏幕绝无干涉；柱心到 PCB 圆角实体
     净距 3.80 mm > 柱半径 3.00，余量 0.80 mm。
-  ★ PCB 四角 φ4 孔【不再穿螺丝】，改由底座 4 个 Φ{P.LOCATOR_D:.1f}x1.6 定位销
-    （Z 3.40~5.00）水平定位，底座原 4 个 Φ{P.BASE_BOSS_D:.1f} 支撑台托住 PCB 底面。
+  ★ PCB 四角 φ4 孔【不再穿螺丝】；11-08 按 A 方案改为 2 个对角定位销：
+    1 个 Φ{P.LOCATOR_D:.1f}x1.6 圆销（主定位，X={P.LOCATOR_ROUND[0]:.2f} / Y={P.LOCATOR_ROUND[1]:.2f}）
+    + 1 个菱形销（次定位，沿两销连线方向削扁到 {P.DIAMOND_W:.2f}，
+      X={P.LOCATOR_DIAMOND[0]:.2f} / Y={P.LOCATOR_DIAMOND[1]:.2f}）；Z 3.40~5.00。
+    另 2 个 φ4 孔空置，只由 4 个 Φ{P.BASE_BOSS_D:.1f} 支撑台托住 PCB 底面（4 台全保留）。
+    ★ 为什么改：原 4 销是过约束，销 Φ3.8 / 孔 φ4 单边间隙仅 0.10 mm，而 SLA
+      ±0.2mm 或 0.3% 收缩在对角距 103.51 mm 上可达 0.31 mm，常出现「前三颗进去、
+      第四颗顶住、PCB 落不到底」。菱形销沿两销连线留 (4.00-3.20)/2 = 0.40 mm 单边
+      间隙，正好吸收 0.31 mm；垂直连线方向仍由 Φ3.8 接触定位，平面 3 自由度刚好
+      约束完，不再过约束。
     4 颗 M3x12 只连接上盖与底座的四角柱，不再经过 PCB / LCD。
   ★ 顶板内表面 Z=14.20 与 LCD 板顶（约 12.1）留约 2.1 mm；
     若装配后觉得 PCB/LCD 有轻微晃动，在顶板内侧贴 1~2 mm 自粘泡棉垫即可，
     不要擅自加高柱或缩小显示窗。
   ★ 若不接受外形变大：可改「右侧 2 颗加长 M3 穿过 LCD 安装孔 + 左侧 2 个卡扣」，
     外形可回到 105.20x67.00，但只剩 2 颗螺丝、卡扣对打印精度敏感。需整套重出。
+
+  【顶面接口凸字标注（11-08 追加，已做进 STL / STEP）】
+  ★ 顶板外表面一体成型 5 组凸字，正视屏幕（天线朝上）时全部横排可读：
+      下边双 Type-C：左 "USB"、右 "COM"
+      右边 5V Type-C："Power"；右边 XH2.54-5P："5P"
+      上边 Φ4 复位孔右侧："RST"
+  ★ 字高 {P.TEXT_SIZE:.2f} mm、凸出顶板 {P.TEXT_RAISE:.2f} mm（顶面 Z 16.00→16.40），
+    笔画最细约 0.5 mm，SLA / FDM 都能成型；底面嵌入顶板 {P.TEXT_EMBED:.2f} mm 防掉字。
+    5 组字都在显示窗外的顶板边框带内：距显示窗 >=2.87 mm、距外形边 >=2.19 mm，
+    不压显示窗 / 复位孔 / 四角连接柱；树脂绝缘非金属，不影响 2.4GHz 天线。
+  ★ 给商家：凸字与壳体一体打印，不额外收费；后处理请选「不需要打磨」，
+    不要把字磨平，也不要喷漆盖住。想更清晰可用黑色模型漆 / 马克笔涂凸字表面
+    （可选后处理，非必需）。字形由 text_geom.py 统一生成，STL / STEP / DXF / PDF 一致。
 
   【显示窗：单版本 + 按实测 A.A 放大让位】
   ★ 已实测确认 LCD A.A（发光显示区）= 73.44 x 48.96 mm，本版据此定窗。
@@ -450,7 +518,7 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev I —— 淘宝打样下单
   工程 .epru 里 4 个 FILL CIRCLE 第三个参数是【半径】78.7402 mil = 2.000 mm，
   孔径 = Φ4.000；用户导出的 PCB PDF 底层隔离圈实测 4.48 mm 也吻合。
   φ4 是 M3 的加大过孔（M3 标准过孔 φ3.2~3.4），不是 M4（M4 需 φ4.5 过孔）。
-  本版 φ4 孔只用于底座定位销对准，不再过螺丝。
+  本版 2 个对角 φ4 孔用于底座定位销对准，另 2 个空置；4 孔都不再过螺丝。
 
   【LCD 屏固定】按你确认：不用 M3 螺丝/螺母锁 LCD，屏幕靠 H1 插座插装、
   底座定位销把 PCB 定位、顶板压住黑边限位；LCD 那 2 个安装孔空置不用。
@@ -464,6 +532,7 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev I —— 淘宝打样下单
        ESP32S3_LCD_全覆盖外壳_底座_3D打印.stl
        + ESP32S3_LCD_全覆盖外壳_工程图.pdf（给尺寸与要求）
      材料：不透明 PLA / PETG（便宜、绝缘）；要更精细选 SLA 光敏树脂/韧性树脂
+     顶板 5 组接口凸字为一体化特征，后处理选「不需要打磨」，别把字磨掉
      禁止：金属打印、碳纤维填充、导电料、金属漆、电镀
   2) 若想用亚克力激光切割：这套是闭合腔体，不能直接切平板叠层，
      请让商家按 PDF 剖面改为「顶板 + 4 条边框 + 底板」5 件粘接，或直接选 3D 打印。
@@ -479,7 +548,10 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev I —— 淘宝打样下单
   窗口四周已按实测 A.A 放大让位以吸收装配偏差，请勿擅自缩小或移回居中；
   顶板天线区不要开洞、不要加支撑。
   外壳四角有 4 个 Φ{P.POST_D:.1f} 连接柱（在 PCB 板框之外，别误当成 PCB 安装孔）；
-  底座另有 4 个 Φ{P.BASE_BOSS_D:.1f} 支撑台和 Φ{P.LOCATOR_D:.1f} 定位销，用来定位 PCB。
+  底座有 4 个 Φ{P.BASE_BOSS_D:.1f} 支撑台和 2 个对角定位销（1 圆 Φ{P.LOCATOR_D:.1f}
+  + 1 菱形 {P.DIAMOND_W:.2f}），用来定位 PCB；另 2 个 PCB 孔空置。
+  顶板外表面有 5 组一体成型凸字标注 USB / COM / Power / 5P / RST，字高 {P.TEXT_SIZE:.2f}、
+  凸出 {P.TEXT_RAISE:.2f} mm，请按 STL 原样保留，不要打磨掉、不要喷漆盖住。
   不透明绝缘非金属，不喷金属漆；请按 STL 原尺寸 1:1 打印，不要缩放、不要加支撑在窗口内。
   建议顶板朝上平放打印，层高 0.2 mm 以下，窗口与四角连接柱精度优先。
 
@@ -489,9 +561,10 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev I —— 淘宝打样下单
   1~2 mm 自粘泡棉垫（可选）  贴在顶板内侧，压住 LCD 板顶消除轻微晃动
 
 【四、装配顺序】
-  1. 底座朝上，PCB 放入：4 个 φ4 孔对准底座 4 个 Φ{P.BASE_BOSS_D:.1f} 支撑台上的
-     Φ{P.LOCATOR_D:.1f} 定位销（PCB 底面 Z=3.4）。四角连接柱位在 PCB 板框之外，
-     不要试图把螺丝穿进 PCB 孔。
+  1. 底座朝上，PCB 放入：2 个对角 φ4 孔对准底座的 Φ{P.LOCATOR_D:.1f} 圆销与
+     {P.DIAMOND_W:.2f} 菱形销，另 2 个 φ4 孔空置、只落在 Φ{P.BASE_BOSS_D:.1f} 支撑台上
+     （PCB 底面 Z=3.4）。四角连接柱位在 PCB 板框之外，不要试图把螺丝穿进 PCB 孔。
+     若现场仍觉得紧：用细砂纸把两销轻轻修到 Φ3.4 / 3.0，不要去修显示窗。
   2. LCD 屏插 PCB 的 H1 排座；ESP32 系统板直焊在 PCB 上，天线端对准
      【上边侧壁让位窗】并穿出壳外（顶板完整盖住，不包住天线外露段）。
      LCD 不上 M3 螺丝/螺母，那 2 个安装孔空置。
@@ -529,8 +602,8 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev I —— 淘宝打样下单
   接线与安装时避免整块金属背板贴近天线端。
 
 【七、文件清单】
-  ESP32S3_LCD_全覆盖外壳_上盖_3D打印.stl        上盖（唯一版本，窗口 74.40x50.00）
-  ESP32S3_LCD_全覆盖外壳_底座_3D打印.stl         底座（含 4 定位销 + 4 连接台）
+  ESP32S3_LCD_全覆盖外壳_上盖_3D打印.stl        上盖（唯一版本，窗口 74.40x50.00 + 5 组顶面凸字）
+  ESP32S3_LCD_全覆盖外壳_底座_3D打印.stl         底座（4 支撑台 + 2 对角定位销 + 4 连接台）
   ESP32S3_LCD_全覆盖外壳_上盖_加工图.dxf        1:1 上盖俯视 + 四边侧壁展开
   ESP32S3_LCD_全覆盖外壳_底座_加工图.dxf        1:1 底座俯视
   ESP32S3_LCD_全覆盖外壳_装配工程图.dxf         尺寸/剖面/BOM/技术说明（可编辑）
@@ -541,7 +614,7 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev I —— 淘宝打样下单
   ESP32S3_LCD_全覆盖外壳_底座_可编辑.step        STEP 实体（同底座 STL）
   ESP32S3_LCD_全覆盖外壳_装配体_含PCB参考.step   3 件装配，PCB 为参考件不打印
   外壳实物报价.csv                              实物制作费用
-  params_v2.py / build_v2.py                     STL/DXF/PDF 参数化源
+  params_v2.py / build_v2.py / text_geom.py      STL/DXF/PDF 参数化源（含顶面凸字字形）
   build_step.py                                  STEP 参数化源
   build_fcstd.py                                 生成 .FCStd 的 FreeCADCmd 脚本
   ESP32S3_LCD_外壳工程.FCStd                     FreeCAD 工程文件（双击即开）
@@ -595,6 +668,21 @@ geom = dict(
                  [P.RIGHT_XH_Y0, P.RIGHT_XH_Y1]],
     POST_D=P.POST_D, SCREW_HOLE_D=P.SCREW_HOLE_D, SCREW_CS_D=P.SCREW_CS_D,
     BASE_BOSS_D=P.BASE_BOSS_D, LOCATOR_D=P.LOCATOR_D,
+    # 11-08 追加：A 方案 2 销定位 + 顶面接口凸字（轮廓供 PDF / DXF / 预览共用）
+    LOCATOR_POS=[list(v) for v in P.LOCATOR_POS],
+    LOCATOR_ROUND=list(P.LOCATOR_ROUND), LOCATOR_DIAMOND=list(P.LOCATOR_DIAMOND),
+    DIAMOND_W=P.DIAMOND_W,
+    DIAMOND_PTS=[[round(x, 3), round(y, 3)] for x, y in
+                 TG.diamond_pin_points(P.LOCATOR_DIAMOND, P.LOCATOR_ROUND)],
+    TEXT_SIZE=P.TEXT_SIZE, TEXT_RAISE=P.TEXT_RAISE, TEXT_EMBED=P.TEXT_EMBED,
+    TEXT_MARKS=[dict(text=t, cx=cx, cy=cy, rot=rot, bbox=list(b),
+                     polys=[dict(outer=[[round(x, 3), round(y, 3)]
+                                        for x, y in list(p.exterior.coords)[:-1]],
+                                 holes=[[[round(x, 3), round(y, 3)]
+                                         for x, y in list(h.coords)[:-1]]
+                                        for h in p.interiors])
+                            for p in polys])
+                for t, cx, cy, rot, polys, b in TG.all_marks()],
     GAP=P.GAP, SHIFT=P.SHIFT,
     PCB_HOLE_D=P.PCB_HOLE_D, POST_PILOT_D=P.POST_PILOT_D,
     SCREW_CS_DEPTH=P.SCREW_CS_DEPTH,

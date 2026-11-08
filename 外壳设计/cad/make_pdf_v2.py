@@ -68,6 +68,39 @@ def CIRCLE(x, y, r, color=INK, lw=0.35, dash=None, fill=None):
     if dash: c.setDash()
 
 
+def POLY(pts, xoff, yoff, sc, color=INK, lw=0.35, fill=None, dash=None):
+    """按点列画多边形（菱形定位销轮廓用）。"""
+    p = c.beginPath()
+    p.moveTo((xoff + pts[0][0] * sc) * mm, (yoff + pts[0][1] * sc) * mm)
+    for x, y in pts[1:]:
+        p.lineTo((xoff + x * sc) * mm, (yoff + y * sc) * mm)
+    p.close()
+    if dash: c.setDash(dash)
+    if fill:
+        c.setFillColor(fill)
+        c.drawPath(p, stroke=0, fill=1)
+    c.setStrokeColor(color); c.setLineWidth(lw)
+    c.drawPath(p, stroke=1, fill=0)
+    if dash: c.setDash()
+
+
+def MARKS(xoff, yoff, sc, color=HexColor("#243447")):
+    """顶板一体成型凸字：用 geom_v2.json 的字形轮廓，even-odd 填充挖空内孔。"""
+    c.setFillColor(color)
+    for item in G.get("TEXT_MARKS", []):
+        for poly in item["polys"]:
+            p = c.beginPath()
+            for ring in [poly["outer"]] + poly["holes"]:
+                if len(ring) < 3:
+                    continue
+                p.moveTo((xoff + ring[0][0] * sc) * mm,
+                         (yoff + ring[0][1] * sc) * mm)
+                for x, y in ring[1:]:
+                    p.lineTo((xoff + x * sc) * mm, (yoff + y * sc) * mm)
+                p.close()
+            c.drawPath(p, stroke=0, fill=1, fillMode=1)
+
+
 def DIMH(x1, x2, y, label, color=DIMC, size=7):
     LN(x1, y, x2, y, color, 0.3)
     LN(x1, y - 1.5, x1, y + 1.5, color, 0.25)
@@ -129,8 +162,11 @@ RECT(P(ax0, ay0)[0], P(ax0, ay0)[1], ax1 - ax0, ay1 - ay0,
 # 顶板复位键孔
 CIRCLE(*P(*G["RESET_POS"]), G["RESET_HOLE_D"] / 2, REDC, 0.6,
        fill=HexColor("#ffffff"))
-T("Φ4 复位孔", P(G["RESET_POS"][0] + 3, G["RESET_POS"][1] - 2.2)[0],
-  P(G["RESET_POS"][0] + 3, G["RESET_POS"][1] - 2.2)[1], 5.6, REDC)
+# 顶板外表面一体成型接口凸字（与 STL / STEP 同一字形轮廓）
+MARKS(OX, OY, SC)
+# 复位孔标注移到孔左侧，避免与凸字 "RST" 叠字
+T("Φ4 孔", P(G["RESET_POS"][0] - 22, G["RESET_POS"][1] - 1.5)[0],
+  P(G["RESET_POS"][0] - 22, G["RESET_POS"][1] - 1.5)[1], 5.6, REDC)
 # 4 个四角连接柱（PCB 板框之外）
 for x, y in SCREW_POS:
     CIRCLE(*P(x, y), G["POST_D"] / 2, BLUE, 0.4, dash=(1.5, 1))
@@ -203,7 +239,7 @@ specs = [
     "顶板完整无镂空：仅显示窗 + Φ4 复位孔；四边开口统一 Z 4.00~14.20",
     "插线余量：窗口按带壳插头 + 线材 Φ3~5 留，不按母座贴边",
     "4×Φ6 连接柱在 PCB 板框外；M3 不穿板、φ4 孔空置",
-    "PCB 由底座 Φ3.8 定位销定位；壳体内缘距 PCB 4.00",
+    "PCB 由 2 个对角定位销（圆销 + 菱形销）定位；内缘距 PCB 4.00",
 ]
 for i, s in enumerate(specs):
     # 9 行：行距压到 5.9，末行 y=35.8，与 y=30 的「图例」标题留足间距
@@ -213,7 +249,9 @@ T("图例", IX, 30, 8, BLUE)
 CIRCLE(IX + 3, 24, 2, BLUE, 0.4, dash=(1.5, 1)); T("四角 Φ6 连接柱（板框外）", IX + 8, 22.5, 6.4, INK)
 RECT(IX, 16, 6, 3, GREEN, 0.4, fill=HexColor("#e4f3ea")); T("I2C 侧壁开窗", IX + 8, 17, 6.4, INK)
 RECT(IX + 55, 16, 6, 3, BLUE, 0.4, fill=HexColor("#e6eff9")); T("侧壁让位窗", IX + 63, 17, 6.4, INK)
-FOOTER("注：Rev I 四角连接柱移出 PCB 板框，M3 不再穿板；窗口 74.40×50.00 按实测 A.A 放大让位。")
+T(f"顶板凸字：USB / COM / Power / 5P / RST，字高 {G['TEXT_SIZE']:.2f}、凸出 {G['TEXT_RAISE']:.2f}",
+  IX, 11, 6.2, INK)
+FOOTER("注：Rev I 四角连接柱移出 PCB 板框，M3 不穿板；窗口按 A.A 放大让位；顶板 5 组凸字一体成型，勿打磨掉。")
 
 
 # ================= 页 2：底座 + 剖面 =================
@@ -229,17 +267,24 @@ for x, y in SCREW_POS:
     CIRCLE(BX + x, BY + y, G["POST_D"] / 2, GRAY, 0.3, dash=(1, 1))
     LN(BX + x - 5, BY + y, BX + x + 5, BY + y, GRAY, 0.2)
     LN(BX + x, BY + y - 5, BX + x, BY + y + 5, GRAY, 0.2)
-# PCB 四角孔位：Φ3.8 定位销（不是螺丝孔）
+# PCB 四角孔位：4 个 Φ7 支撑台 + A 方案 2 个对角定位销（圆销 / 菱形销）
 for x, y in HOLES:
-    CIRCLE(BX + x, BY + y, G["LOCATOR_D"] / 2, GREEN, 0.5)
     CIRCLE(BX + x, BY + y, G["BASE_BOSS_D"] / 2, GRAY, 0.3, dash=(1, 1))
+CIRCLE(BX + G["LOCATOR_ROUND"][0], BY + G["LOCATOR_ROUND"][1],
+       G["LOCATOR_D"] / 2, GREEN, 0.5)
+POLY(G["DIAMOND_PTS"], BX, BY, 1.0, GREEN, 0.5, fill=HexColor("#e4f3ea"))
+T("圆销 Φ3.8", BX + G["LOCATOR_ROUND"][0] + 4.5,
+  BY + G["LOCATOR_ROUND"][1] - 1.2, 5.4, GREEN)
+T("菱形销 3.20", BX + G["LOCATOR_DIAMOND"][0] - 20,
+  BY + G["LOCATOR_DIAMOND"][1] + 4.5, 5.4, GREEN)
 DIMH(BX, BX + W, BY - 8, f"{W:.2f}")
 DIMV(BY, BY + H, BX - 9, f"{H:.2f}")
 DIMH(BX + SCREW_POS[0][0], BX + SCREW_POS[2][0], BY - 15, "104.20 柱距")
 DIMV(BY + SCREW_POS[0][1], BY + SCREW_POS[1][1], BX - 22,
      "66.00 柱距", label_dy=-12)
 T("底座俯视 1:1", BX, BY - 22, 9, INK)
-T("四角：红 Φ3.4 通孔 / 蓝 Φ6.5 沉孔；PCB 孔位：绿 Φ3.8 定位销 / 灰 Φ7 台",
+T(f"四角：红 Φ3.4 通孔 / 蓝 Φ6.5 沉孔；PCB 孔位：绿 1 圆销 Φ{G['LOCATOR_D']:.1f}"
+  f" + 1 菱形销 {G['DIAMOND_W']:.2f} / 灰 4x Φ7 台（另 2 孔空置）",
   BX, BY - 28, 6.3, GRAY)
 
 # 右侧 BOM
@@ -260,7 +305,9 @@ T("紧固件路径（自下而上）", IX, 128, 8.5, BLUE)
 T("底面 Φ6.5 沉孔 → Φ3.4 通孔 → 四角连接柱", IX, 121, 6.6, INK)
 T("→ 上盖 Φ6 柱内 Φ2.6 自攻底孔（盲孔 Z=13.8）", IX, 115, 6.6, INK)
 T("M3×12 沉头螺丝【不穿 PCB / LCD】，勿过紧", IX, 109, 6.6, INK)
-T("PCB 靠 4 个 Φ3.8 定位销定位；φ4 孔空置", IX, 100, 6.6, GREEN)
+T("PCB 靠 2 个对角定位销定位（圆销主定位 + 菱形销沿对角削扁）；另 2 个 φ4 孔空置",
+  IX, 100, 6.3, GREEN)
+T("菱形销连线向留 0.40 单边间隙，吸收 SLA 收缩约 0.31 mm，避免顶销", IX, 94, 6.3, GREEN)
 
 # A-A 剖面 2:1
 SX, SZ, SCL = 30.0, 20.0, 1.5
@@ -305,10 +352,10 @@ DIMV(SZ, SZ + G["H_TOTAL"] * SCL, SX - 8, f"{G['H_TOTAL']:.2f} 总高", label_on
 DIMV(SZ + G["Z_TOP_IN"] * SCL, SZ + G["H_TOTAL"] * SCL, SX + W * SCL + 5,
      f"{G['T_TOP']:.2f} 顶板")
 DIMH(SX, SX + W * SCL, SZ - 7, f"{W:.2f}")
-T("红色虚线 = PCB 四角孔位 / 定位销中心；剖面仅示意外壳本体", 195, 24, 6.2, INK)
-T(f"底板 Z 0~{G['T_BASE']:.1f} / 侧壁 {G['T_BASE']:.1f}~{G['Z_TOP_IN']:.1f} / 顶板 {G['Z_TOP_IN']:.1f}~{G['H_TOTAL']:.1f}",
-  195, 18, 6.2, GRAY)
-FOOTER("注：Rev I 四角 Φ6 连接柱在 PCB 板框之外；4 颗 M3 只连接上盖与底座、不穿 PCB / LCD；PCB 由底座 Φ3.8 定位销定位。")
+T("红色虚线 = PCB 孔位 / 定位销中心（仅 2 个对角有销）", 208, 30, 6.2, INK)
+T(f"底板 Z 0~{G['T_BASE']:.1f} / 侧壁 {G['T_BASE']:.1f}~{G['Z_TOP_IN']:.1f} / 顶板 {G['Z_TOP_IN']:.1f}~{G['H_TOTAL']:.1f}（凸字顶 16.40）",
+  208, 23, 6.2, GRAY)
+FOOTER("注：Rev I 四角 Φ6 柱在 PCB 板框外，M3 不穿 PCB / LCD；PCB 由 2 个对角定位销（圆 + 菱形）定位；顶板凸字勿打磨。")
 
 
 # ================= 页 3：侧壁展开 + 说明 =================
@@ -369,7 +416,7 @@ T("顶板完整；天线端经侧壁让位窗伸出壳外", IX, 137, 6.4, REDC)
 
 T("装配顺序", IX, 123, 9, BLUE)
 steps = [
-    "1. 底座朝上，PCB 四角 φ4 孔对准 4 个 Φ3.8 定位销（底面 Z=3.4）",
+    "1. 底座朝上，2 个对角 φ4 孔对准圆销 Φ3.8 / 菱形销 3.20（底面 Z=3.4）",
     "2. LCD 插 PCB 排座；ESP32 核心板直焊，天线端朝上边让位窗",
     "3. 扣上盖：四边开窗对准接口；顶板压住屏幕黑边",
     "4. 从底部 4 沉孔拧入 M3×12，直接拧进四角连接柱（不穿 PCB / LCD）",
@@ -383,7 +430,7 @@ tips = [
     "· 禁止金属打印 / 碳纤维 / 导电料 / 金属漆 / 电镀",
     "· 顶板朝上平放打印；层高 ≤0.2mm，窗口与柱精度优先",
     "· 顶板完整无镂空；四边窗口平齐且已留线材余量，勿缩小",
-    "· 按 STL 原尺寸 1:1 打印，不要缩放、窗口内不加支撑",
+    "· 顶板 5 组凸字勿打磨/喷砂；按 STL 1:1 打印，窗口内不加支撑",
     "· 装好 LCD/ESP32 实测最高点：距 PCB 顶面 >9.2mm 需加高壳体",
 ]
 for i, s in enumerate(tips):
@@ -394,7 +441,7 @@ T("依据：ESP32S3_LCD 工程 + PCB_PCB1_1_2026-11-07.pdf 装配层", IX, 29, 6
 T("板框 61.80×100.00 R2；4×φ4 孔距 91.34×48.70（CIRCLE 半径 2mm×2）", IX, 23.5, 6.1, GRAY)
 T("ESP32-S3-Metric.pdf：系统板 63.39×27.94 直焊 U1/U2；开口带 Z 4.00~14.20", IX, 18, 6.1, GRAY)
 T("ATK-MD0350 图3.1：模块板 56.41×97.92、仅一端 2 孔距 48.64；板覆盖 PCB 四角孔", IX, 12.5, 6.1, GRAY)
-FOOTER("注：Rev I 四角连接柱在 PCB 板框外、M3 不穿板；四边开口 Z 4.00~14.20 平齐；顶板完整无镂空。")
+FOOTER("注：Rev I 四角柱在板框外、M3 不穿板；四边开口 Z 4.00~14.20 平齐；顶板完整且带 5 组凸字；PCB 由 2 个对角销定位。")
 
 c.save()
 print("PDF:", PDF)

@@ -59,17 +59,30 @@ def top_view():
         ax.add_patch(Circle((x, y), P.POST_D / 2, fill=False,
                             ec="#5a6d7d", ls="--", lw=1.0))
 
+    # 顶板外表面一体成型接口凸字（与 STL / STEP 同一字形轮廓）
+    import text_geom as TG
+    from matplotlib.patches import Polygon as MplPolygon
+    for _, _, _, _, polys, _ in TG.all_marks():
+        for poly in polys:
+            ax.add_patch(MplPolygon(list(poly.exterior.coords), closed=True,
+                                    fc="#2b3a4a", ec="none", zorder=7))
+            for hole in poly.interiors:
+                ax.add_patch(MplPolygon(list(hole.coords), closed=True,
+                                        fc="#dde6ef", ec="none", zorder=8))
+
     # 外壳中心线 vs 窗口中心线
     ax.plot([P.W / 2, P.W / 2], [-4, P.H + 4], color="#8a97a3",
             ls=":", lw=1.2)
     ax.plot([P.WIN_CX, P.WIN_CX], [wy - 1.5, wy + wh + 1],
             color="#c0392b", ls="--", lw=1.2)
-    y0 = wy - 2.0
+    # 偏心量标注移进窗口下缘并加白底：下边框带现在被 USB / COM 凸字占用
+    y0 = wy + 5.0
     ax.annotate("", xy=(P.W / 2, y0), xytext=(P.WIN_CX, y0),
                 arrowprops=dict(arrowstyle="<->", color="#c0392b", lw=1.6))
-    ax.text((P.W / 2 + P.WIN_CX) / 2, y0 - 3.4,
+    ax.text((P.W / 2 + P.WIN_CX) / 2, y0 - 3.6,
             f"左移 {-P.WIN_OFFSET_X:.2f} mm", color="#c0392b",
-            ha="center", fontsize=10)
+            ha="center", fontsize=10,
+            bbox=dict(facecolor="white", alpha=0.85, edgecolor="none", pad=2))
 
     ax.text(P.W / 2, -10.5, f"外壳中心 X={P.W/2:.2f}",
             ha="center", color="#5a6d7d", fontsize=10)
@@ -81,7 +94,8 @@ def top_view():
             ha="center", va="center", color="#1b2a3a", fontsize=11,
             bbox=dict(facecolor="white", alpha=0.72, edgecolor="none", pad=3))
     ax.text(0, P.H + 8,
-            f"Rev I 上盖俯视 · 四角连接柱在 PCB 板框外 · 窗口按 A.A 放大让位 · 单位 mm",
+            "Rev I 上盖俯视 · 四角连接柱在 PCB 板框外 · 窗口按 A.A 放大让位 "
+            "· 顶板凸字 USB/COM/Power/5P/RST · 单位 mm",
             fontsize=12, color="#1b2a3a")
     ax.set_xlim(-8, P.W + 8)
     ax.set_ylim(-17, P.H + 12)
@@ -107,7 +121,7 @@ def iso_view():
     ax.set_box_aspect((P.W, P.H, P.H_TOTAL * 1.5))
     ax.view_init(elev=28, azim=-62)
     ax.set_axis_off()
-    ax.set_title("Rev I 上盖等距视图 · 窗口按 A.A 放大让位 · 顶板完整",
+    ax.set_title("Rev I 上盖等距视图 · 窗口按 A.A 放大让位 · 顶板完整 + 接口凸字",
                  fontsize=12, color="#1b2a3a", pad=-6)
     p = os.path.join(OUT, "上盖_顶板完整_等距预览.png")
     fig.savefig(p, dpi=130, bbox_inches="tight", facecolor="white")
