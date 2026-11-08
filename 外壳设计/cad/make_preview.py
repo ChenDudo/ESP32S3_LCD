@@ -95,7 +95,7 @@ def top_view():
             bbox=dict(facecolor="white", alpha=0.72, edgecolor="none", pad=3))
     ax.text(0, P.H + 8,
             "Rev I 上盖俯视 · 四角连接柱在 PCB 板框外 · 窗口按 A.A 放大让位 "
-            "· 顶板凸字 USB/COM/Power/5P/RST · 单位 mm",
+            "· 顶板 9 组凸字（含 I2C1~4，右侧竖排）· 单位 mm",
             fontsize=12, color="#1b2a3a")
     ax.set_xlim(-8, P.W + 8)
     ax.set_ylim(-17, P.H + 12)

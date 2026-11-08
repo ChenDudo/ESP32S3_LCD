@@ -85,7 +85,15 @@ def POLY(pts, xoff, yoff, sc, color=INK, lw=0.35, fill=None, dash=None):
 
 
 def MARKS(xoff, yoff, sc, color=HexColor("#243447")):
-    """顶板一体成型凸字：用 geom_v2.json 的字形轮廓，even-odd 填充挖空内孔。"""
+    """顶板一体成型凸字：用 geom_v2.json 的字形轮廓，even-odd 填充挖空内孔。
+    先铺与顶板同色的底衬，遮住穿过字的 PCB 参考虚线 / 器件参考点（制图文字避让）。"""
+    for item in G.get("TEXT_MARKS", []):
+        bx0, by0, bx1, by1 = item["bbox"]
+        c.setFillColor(HexColor("#ffffff"))
+        c.rect((xoff + (bx0 - 0.15) * sc) * mm,
+               (yoff + (by0 - 0.15) * sc) * mm,
+               (bx1 - bx0 + 0.30) * sc * mm,
+               (by1 - by0 + 0.30) * sc * mm, stroke=0, fill=1)
     c.setFillColor(color)
     for item in G.get("TEXT_MARKS", []):
         for poly in item["polys"]:
@@ -164,9 +172,9 @@ CIRCLE(*P(*G["RESET_POS"]), G["RESET_HOLE_D"] / 2, REDC, 0.6,
        fill=HexColor("#ffffff"))
 # 顶板外表面一体成型接口凸字（与 STL / STEP 同一字形轮廓）
 MARKS(OX, OY, SC)
-# 复位孔标注移到孔左侧，避免与凸字 "RST" 叠字
-T("Φ4 孔", P(G["RESET_POS"][0] - 22, G["RESET_POS"][1] - 1.5)[0],
-  P(G["RESET_POS"][0] - 22, G["RESET_POS"][1] - 1.5)[1], 5.6, REDC)
+# 复位孔标注移到孔左上方空白带，避开上边 I2C1~I2C4 / RST 凸字与侧壁开窗投影
+T("Φ4 孔", P(G["RESET_POS"][0] - 9, G["RESET_POS"][1] + 3.8)[0],
+  P(G["RESET_POS"][0] - 9, G["RESET_POS"][1] + 3.8)[1], 4.8, REDC)
 # 4 个四角连接柱（PCB 板框之外）
 for x, y in SCREW_POS:
     CIRCLE(*P(x, y), G["POST_D"] / 2, BLUE, 0.4, dash=(1.5, 1))
@@ -249,9 +257,9 @@ T("图例", IX, 30, 8, BLUE)
 CIRCLE(IX + 3, 24, 2, BLUE, 0.4, dash=(1.5, 1)); T("四角 Φ6 连接柱（板框外）", IX + 8, 22.5, 6.4, INK)
 RECT(IX, 16, 6, 3, GREEN, 0.4, fill=HexColor("#e4f3ea")); T("I2C 侧壁开窗", IX + 8, 17, 6.4, INK)
 RECT(IX + 55, 16, 6, 3, BLUE, 0.4, fill=HexColor("#e6eff9")); T("侧壁让位窗", IX + 63, 17, 6.4, INK)
-T(f"顶板凸字：USB / COM / Power / 5P / RST，字高 {G['TEXT_SIZE']:.2f}、凸出 {G['TEXT_RAISE']:.2f}",
+T(f"顶板 9 组凸字：USB/COM/Power/UART/RST + I2C1~4（右侧两字竖排），字高 {G['TEXT_SIZE']:.2f}",
   IX, 11, 6.2, INK)
-FOOTER("注：Rev I 四角连接柱移出 PCB 板框，M3 不穿板；窗口按 A.A 放大让位；顶板 5 组凸字一体成型，勿打磨掉。")
+FOOTER("注：Rev I 四角连接柱移出 PCB 板框，M3 不穿板；窗口按 A.A 放大让位；顶板 9 组凸字一体成型，勿打磨掉。")
 
 
 # ================= 页 2：底座 + 剖面 =================
@@ -430,7 +438,7 @@ tips = [
     "· 禁止金属打印 / 碳纤维 / 导电料 / 金属漆 / 电镀",
     "· 顶板朝上平放打印；层高 ≤0.2mm，窗口与柱精度优先",
     "· 顶板完整无镂空；四边窗口平齐且已留线材余量，勿缩小",
-    "· 顶板 5 组凸字勿打磨/喷砂；按 STL 1:1 打印，窗口内不加支撑",
+    "· 顶板 9 组凸字勿打磨/喷砂；按 STL 1:1 打印，窗口内不加支撑",
     "· 装好 LCD/ESP32 实测最高点：距 PCB 顶面 >9.2mm 需加高壳体",
 ]
 for i, s in enumerate(tips):
@@ -441,7 +449,7 @@ T("依据：ESP32S3_LCD 工程 + PCB_PCB1_1_2026-11-07.pdf 装配层", IX, 29, 6
 T("板框 61.80×100.00 R2；4×φ4 孔距 91.34×48.70（CIRCLE 半径 2mm×2）", IX, 23.5, 6.1, GRAY)
 T("ESP32-S3-Metric.pdf：系统板 63.39×27.94 直焊 U1/U2；开口带 Z 4.00~14.20", IX, 18, 6.1, GRAY)
 T("ATK-MD0350 图3.1：模块板 56.41×97.92、仅一端 2 孔距 48.64；板覆盖 PCB 四角孔", IX, 12.5, 6.1, GRAY)
-FOOTER("注：Rev I 四角柱在板框外、M3 不穿板；四边开口 Z 4.00~14.20 平齐；顶板完整且带 5 组凸字；PCB 由 2 个对角销定位。")
+FOOTER("注：Rev I 四角柱在板框外、M3 不穿板；四边开口 Z 4.00~14.20 平齐；顶板完整且带 9 组凸字；PCB 由 2 个对角销定位。")
 
 c.save()
 print("PDF:", PDF)

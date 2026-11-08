@@ -109,7 +109,15 @@ def CIRCLE(x, y, r, color=INK, lw=0.35, fill=None, dash=None):
 
 
 def MARKS(xoff, yoff, sc, color=INK):
-    """顶板一体成型凸字（geom_v2.json 字形轮廓，even-odd 填充挖空内孔）。"""
+    """顶板一体成型凸字（geom_v2.json 字形轮廓，even-odd 填充挖空内孔）。
+    先铺白色底衬，遮住穿过字的 PCB 参考虚线 / 器件参考点（制图文字避让）。"""
+    for item in G.get("TEXT_MARKS", []):
+        bx0, by0, bx1, by1 = item["bbox"]
+        c.setFillColor(HexColor("#ffffff"))
+        c.rect((xoff + (bx0 - 0.15) * sc) * mm,
+               (yoff + (by0 - 0.15) * sc) * mm,
+               (bx1 - bx0 + 0.30) * sc * mm,
+               (by1 - by0 + 0.30) * sc * mm, stroke=0, fill=1)
     c.setFillColor(color)
     for item in G.get("TEXT_MARKS", []):
         for poly in item["polys"]:
@@ -196,8 +204,8 @@ for a, b in G["I2C_GROUPS"]:
 CIRCLE(FX + RST[0] * S, FY + RST[1] * S, RSTD / 2 * S,
        REDC, 0.6, fill=WINF)
 MARKS(FX, FY, S)
-# 孔标注移到左侧，避免与凸字 "RST" 叠字
-T("Φ4 孔", FX + (RST[0] - 14) * S, FY + (RST[1] - 1.5) * S - 2, 5.6, REDC)
+# 孔标注移到孔左上方空白带，避开上边 I2C1~I2C4 / RST 凸字
+T("Φ4 孔", FX + (RST[0] - 9) * S, FY + (RST[1] + 3.6) * S, 5.2, REDC)
 # 4 个四角连接柱（隐藏线）
 for x, y in SCREW_POS:
     CIRCLE(FX + x * S, FY + y * S, G["POST_D"] / 2 * S, BLUE, 0.4, dash=(1.5, 1))
@@ -326,7 +334,7 @@ specs = [
     (f"四角 Φ{G['POST_D']:.1f} 连接柱在 PCB 板框外；M3 不穿板", REDC),
     (f"PCB 由 2 个对角销定位（圆 Φ{G['LOCATOR_D']:.1f} + 菱形 {G['DIAMOND_W']:.2f}）", INK),
     ("另 2 个 φ4 孔空置；菱形销沿对角削扁吸收 0.31 mm 收缩", INK),
-    (f"顶板凸字：USB / COM / Power / 5P / RST，高 {G['TEXT_SIZE']:.2f} 凸 {G['TEXT_RAISE']:.2f}", GREEN),
+    ("顶板 9 组凸字：USB/COM/Power/UART/RST + I2C1~4（右侧两字竖排）", GREEN),
     ("凸字在显示窗外边框带，勿打磨/喷砂；不影响天线", INK),
     ("材料：PETG / 韧性树脂，绝缘非金属", INK),
 ]
@@ -338,7 +346,7 @@ for i, (s, col) in enumerate(specs):
 JX, JY = 225.0, 132.0
 T("三视图读图说明", JX, JY, 9, BLUE)
 notes = [
-    "① 正视图 = 屏幕正面：只见显示窗 + Φ4 复位孔，顶板完整不透明；",
+    "① 正视图 = 屏幕正面：显示窗 + Φ4 复位孔 + 9 组接口凸字，顶板完整不透明；",
     "   窗口按实测 A.A 四周放大 0.5，宁露极窄黑边也不切亮区；已左移 2.75。",
     "② 上视图 = 从天线侧看：顶板整段连续；天线让位窗与 2 段",
     "   I2C 合并宽窗上下沿完全平齐（统一 Z 4.00~14.20）。",

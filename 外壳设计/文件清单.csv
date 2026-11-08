@@ -1,7 +1,7 @@
 ﻿分类,相对路径,大小(字节),格式,用途说明,MD5
 EDA 工程源,ref/esp32s3_lcd/ESP32S3_LCD.epru,5011811,epru,立创 EDA 工程源：板框/孔位/元件坐标/装配层,b8733386a0ea661f0e835ca642b59e36
 EDA 工程源,ref/esp32s3_lcd/project2.json,150,json,EDA 工程元数据,f5247c623d62fe775836809fc2826f15
-中间数据 / 需求记录,cad/geom_v2.json,46300,json,供 PDF/三视图读取的几何参数中间产物（含凸字字形轮廓 / 菱形销点列）,e9a7ef78fe964ba68b71b0b9e9732eb1
+中间数据 / 需求记录,cad/geom_v2.json,79119,json,供 PDF/三视图读取的几何参数中间产物（含 9 组凸字字形轮廓，2 组竖排 / 菱形销点列）,15196995e98aa0fc89372919bc2cf940
 中间数据 / 需求记录,cad/request.json,4966,json,最初原始需求记录,be2e1a56290d7cf6c0cccaa3c99687cf
 仓库配置,.gitattributes,356,-,锁定 CAD 交换文件行尾，禁止 LF/CRLF 自动转换,ae25bd1fdd3db2fbfab1c1a632fd9bdf
 仓库配置,.gitignore,134,-,局部忽略规则,a69372c423ff3db4bc5964d4641565c6
@@ -11,29 +11,29 @@ EDA 工程源,ref/esp32s3_lcd/project2.json,150,json,EDA 工程元数据,f5247c6
 关键设计依据,ref/输入资料/资料图_ATK-MD0350_模块尺寸_图3.1.png,297888,png,★ Rev I 定案：模块板 56.41×97.92,17ab9e07167b6769306d42354297867d
 关键设计依据,ref/输入资料/资料图_ATK-MD0350_模块尺寸_安装孔端放大.png,554574,png,★ 仅一端 2 孔、孔距 48.64,f872fd59091ee122e4778904d01ccb5a
 参数化源码,cad/build_fcstd.py,3666,py,FreeCADCmd 生成 .FCStd 工程,038c6ebe95071c3723f9795bf1fd0fb6
-参数化源码,cad/build_step.py,7690,py,生成 3 个 STEP 解析实体（含凸字与菱形销）,e9db8d2bfed6ddd13342fc035bb58c58
-参数化源码,cad/build_v2.py,41590,py,生成 STL、DXF、报价、下单说明、geom_v2.json（含凸字与 2 销定位）,839b005fb9398bc849f8c908082f0a22
-参数化源码,cad/make_pdf_v2.py,21297,py,生成 3 页 A4 工程图,14281e0a4afe9f8a6946adbb84302691
-参数化源码,cad/make_preview.py,5747,py,生成俯视/等距预览 PNG,0c30510145a1285c6a20d227ede4514c
-参数化源码,cad/make_views.py,21945,py,生成 A3 三视图 PDF/DXF,263b3a2f1feb2d811f08d7cf01e072ec
-参数化源码,cad/params_v2.py,12508,py,★ 唯一参数源：外形/开窗/柱位/2 定位销/偏心量/A.A 让位/顶板凸字,19dcca391a424a31640d61ad589af366
-参数化源码,cad/text_geom.py,4400,py,★ 顶面凸字字形 + 菱形销截面（STL/STEP/DXF/PDF 共用）,d0d4539d6643b5b72f993b09a9e5e1a9
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_三视图.dxf,74636,dxf,1:1 二维加工图（DXF R2010 / mm，含 MARK 凸字层）,6d08740e8f35ff9a85b328f41e7af7e9
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_三视图.pdf,60785,pdf,A3 三视图 + 辅助下视图（含顶面凸字）,59ec13dbc8936842a0edc976dcac0b2d
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_上盖_3D打印.stl,221484,stl,★ 3D 打印交付（发给商家）：窗口 74.40x50.00 + 5 组顶面凸字,4a22b5ea7151172edf382afa06eb3f4a
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_上盖_加工图.dxf,83959,dxf,1:1 二维加工图（DXF R2010 / mm，含 MARK 凸字层）,92d597c0ccdca8cb0f28c8f2373f0fcb
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_上盖_可编辑.step,2267755,step,STEP AP214 解析实体，CAD 内可改特征,3bb23c4a42ff5b76ea2a8b6f28ab61a6
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_工程图.pdf,79683,pdf,3 页 A4 工程图（含顶面凸字 / 2 销定位）,0f60175ec42c9f074ff120467f04969b
+参数化源码,cad/build_step.py,7690,py,生成 3 个 STEP 解析实体（含 9 组凸字与菱形销）,e9db8d2bfed6ddd13342fc035bb58c58
+参数化源码,cad/build_v2.py,41996,py,生成 STL、DXF、报价、下单说明、geom_v2.json（含 9 组凸字与 2 销定位）,ee725979ffd4fd61c6c2836c40807529
+参数化源码,cad/make_pdf_v2.py,21786,py,生成 3 页 A4 工程图,20d1e6d249bba21204d044bf21ba8b10
+参数化源码,cad/make_preview.py,5762,py,生成俯视/等距预览 PNG,f5ec0b83d9129907829cab0ca0665d93
+参数化源码,cad/make_views.py,22392,py,生成 A3 三视图 PDF/DXF,a84557b5b464bc14587e2537eb135355
+参数化源码,cad/params_v2.py,12966,py,★ 唯一参数源：外形/开窗/柱位/2 定位销/偏心量/A.A 让位/9 组顶板凸字（含 rot 竖排）,06072bba87bf099128b227151962ffca
+参数化源码,cad/text_geom.py,4400,py,★ 9 组顶面凸字字形（支持 rot 竖排）+ 菱形销截面（STL/STEP/DXF/PDF 共用）,d0d4539d6643b5b72f993b09a9e5e1a9
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_三视图.dxf,87036,dxf,1:1 二维加工图（DXF R2010 / mm，含 9 组 MARK 凸字轮廓）,faaa8ccb182c5b852036248152f71a71
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_三视图.pdf,64556,pdf,A3 三视图 + 辅助下视图（含 9 组顶面凸字）,1795233a64afe8077c6252c0b3fa800d
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_上盖_3D打印.stl,301284,stl,★ 3D 打印交付（发给商家）：窗口 74.40x50.00 + 9 组顶面凸字（UART / I2C1~4 / 右侧竖排）,e5ce03c94400a3ddec486ca8d23708ba
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_上盖_加工图.dxf,96555,dxf,1:1 二维加工图（DXF R2010 / mm，含 9 组 MARK 凸字轮廓）,867c5db2c3edb55ec53125ede92cfdda
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_上盖_可编辑.step,3956741,step,STEP AP214 解析实体，CAD 内可改特征,8701c4c3d846ed2f4f1e38ca4fd44757
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_工程图.pdf,83200,pdf,3 页 A4 工程图（含 9 组顶面凸字 / 2 销定位）,e52df2cf6092e59f75c8f5bcea544fde
 最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_底座_3D打印.stl,143784,stl,★ 3D 打印交付（发给商家）：4 支撑台 + 2 对角定位销,8c0dfc927ef94c3c9a6a23f4ae47622d
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_底座_加工图.dxf,59547,dxf,1:1 二维加工图（DXF R2010 / mm）,de529ff4ab7511c32c0e04b0d32273ef
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_底座_可编辑.step,347285,step,STEP AP214 解析实体，CAD 内可改特征,ee81ee8767ff55ffea30e0daa55fc27b
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_装配体_含PCB参考.step,2688649,step,3 件装配 STEP，PCB 为参考件不打印,1ee434e015b990dd1672c53f79ecae8f
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_装配工程图.dxf,83594,dxf,1:1 二维加工图（DXF R2010 / mm，含 MARK 凸字层）,8ab8ba4a9aefb14adf30283443a56345
-最终交付,cad/deliverables/ESP32S3_LCD_外壳工程.FCStd,141744,fcstd,FreeCAD 工程文件（双击即开）,22b0fe31dddf69d548ed9e46dd153aad
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_底座_加工图.dxf,59547,dxf,1:1 二维加工图（DXF R2010 / mm）,05ba234e39117ea6040d334ff1032519
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_底座_可编辑.step,347285,step,STEP AP214 解析实体，CAD 内可改特征,5c832780123cc4ccd944ff971267a4f0
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_装配体_含PCB参考.step,4377635,step,3 件装配 STEP，PCB 为参考件不打印,49d9f2bc433ef19f51234a04eb915513
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_装配工程图.dxf,96008,dxf,1:1 二维加工图（DXF R2010 / mm，含 9 组 MARK 凸字轮廓）,ede7fcf0a98f943c7c6e239d29a5927e
+最终交付,cad/deliverables/ESP32S3_LCD_外壳工程.FCStd,219546,fcstd,FreeCAD 工程文件（双击即开）,18219efd9b22fc558a2f2770b27ac502
 最终交付,cad/deliverables/FreeCAD_一键生成工程.FCMacro,3680,fcmacro,FreeCAD 一键宏（可选着色版）,a65eed26dc133b6f278235f39bdeea04
-最终交付,cad/deliverables/上盖_顶板完整_俯视预览.png,110451,png,绿虚线 A.A / 红实线显示窗让位对比 + 顶板 5 组凸字,116c2c02780336537734d4afe1b22f96
-最终交付,cad/deliverables/上盖_顶板完整_等距预览.png,156963,png,上盖 3D 等距预览,060eb9a0bbde85ec483794721a80c66e
-最终交付,cad/deliverables/外壳实物报价.csv,1019,csv,外壳实物报价（不含 PCB/LCD/核心板）,fee1b707eace0d34575d69115ddb893a
-最终交付,cad/deliverables/给商家的下单说明.txt,14742,txt,给商家的下单说明与装配顺序（含凸字 / 2 销定位 / 打磨禁忌）,623c90d55f872f4f91dccbc6077bf6c2
-说明文档,README.md,20356,md,本目录总说明：精简策略、导航、参数、版本演进、重跑、报价,1a9187438afdedd3c88faac3a2beefd8
+最终交付,cad/deliverables/上盖_顶板完整_俯视预览.png,117343,png,绿虚线 A.A / 红实线显示窗让位对比 + 顶板 9 组凸字,a93e13e5229976abea3eba93b8d95e23
+最终交付,cad/deliverables/上盖_顶板完整_等距预览.png,159169,png,上盖 3D 等距预览,b0ad399c296ce12c6bda192ea4cc5eca
+最终交付,cad/deliverables/外壳实物报价.csv,1019,csv,外壳实物报价（不含 PCB/LCD/核心板）,e384188351ba64b39bb44ed2956146cc
+最终交付,cad/deliverables/给商家的下单说明.txt,15035,txt,给商家的下单说明与装配顺序（含 9 组凸字 / UART / 竖排 / 2 销定位 / 打磨禁忌）,cbfedf0c6e269abd0850766ec3ea4654
+说明文档,README.md,22246,md,本目录总说明：精简策略、导航、参数（含 9 组凸字 / UART / I2C1~4 / 右侧竖排）、版本演进、重跑、报价,3050344cc5054351529f3ed3fe6aa1e6
 说明文档,文件清单.csv,-,csv,关键文件索引（本文件）,-
