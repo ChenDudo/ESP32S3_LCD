@@ -1,17 +1,0 @@
-FreeCAD: 1 1
-GuiUp: 0
-saved: C:\Users\14210\WorkBuddy\2026-11-07-21-40-20\cad\deliverables\ESP32S3_LCD_Õ‚ø«π§≥Ã.FCStd
-  TopCover | solids=1 valid=True vol=10.92 cm3 | X 0.00~105.20 Y 0.00~67.00 Z 2.40~16.00
-  Base | solids=1 valid=True vol=16.75 cm3 | X 0.00~105.20 Y 0.00~67.00 Z 0.00~3.40
-  PCB_Reference | solids=1 valid=True vol=9.80 cm3 | X 2.60~102.60 Y 2.60~64.40 Z 3.40~5.00
-REOPEN: 3 objects
-REOPEN CHECK: PASS
-DONE PASS
-FreeCAD 1.1.4, Libs: 1.1.4R20260928 (Git shallow)
-(C) 2001-2026 FreeCAD contributors
-FreeCAD is free and open-source software licensed under the terms of LGPL2+ license.
-
-Recompute......
-						(33 %)							(66 %)							(100 %)									Importing project files......
-						(33 %)							(66 %)							(100 %)									Postprocessing......
-						(100 %)									

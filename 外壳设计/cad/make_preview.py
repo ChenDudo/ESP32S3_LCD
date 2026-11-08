@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Rev H 预览图：上盖俯视（实测 A.A 虚线 + 放大让位窗口实线）+ 等距 3D。
+"""Rev I 预览图：上盖俯视（实测 A.A 虚线 + 放大让位窗口实线）+ 等距 3D。
 
 灰色虚线 = 实测 LCD A.A 73.44×48.96；红色实线 = 唯一显示窗 74.40×50.00，
 四周各放大 0.48/0.52 mm 让位。窗口中心左移 2.75 对准偏心屏。
@@ -55,7 +55,7 @@ def top_view():
         fill=False, ec="#2f7d55", ls=(0, (5, 3)), lw=2.0, zorder=6))
     ax.add_patch(Circle(P.RESET_POS, P.RESET_HOLE_D / 2,
                         fc="white", ec="#243447", lw=1.2))
-    for x, y in P.HOLES:
+    for x, y in P.SCREW_POS:
         ax.add_patch(Circle((x, y), P.POST_D / 2, fill=False,
                             ec="#5a6d7d", ls="--", lw=1.0))
 
@@ -81,7 +81,7 @@ def top_view():
             ha="center", va="center", color="#1b2a3a", fontsize=11,
             bbox=dict(facecolor="white", alpha=0.72, edgecolor="none", pad=3))
     ax.text(0, P.H + 8,
-            f"Rev H 上盖俯视 · 单版本窗口按实测 A.A 放大让位 · 顶板完整无镂空 · 单位 mm",
+            f"Rev I 上盖俯视 · 四角连接柱在 PCB 板框外 · 窗口按 A.A 放大让位 · 单位 mm",
             fontsize=12, color="#1b2a3a")
     ax.set_xlim(-8, P.W + 8)
     ax.set_ylim(-17, P.H + 12)
@@ -107,7 +107,7 @@ def iso_view():
     ax.set_box_aspect((P.W, P.H, P.H_TOTAL * 1.5))
     ax.view_init(elev=28, azim=-62)
     ax.set_axis_off()
-    ax.set_title("Rev H 上盖等距视图 · 窗口按 A.A 放大让位 · 顶板完整",
+    ax.set_title("Rev I 上盖等距视图 · 窗口按 A.A 放大让位 · 顶板完整",
                  fontsize=12, color="#1b2a3a", pad=-6)
     p = os.path.join(OUT, "上盖_顶板完整_等距预览.png")
     fig.savefig(p, dpi=130, bbox_inches="tight", facecolor="white")

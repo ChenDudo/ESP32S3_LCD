@@ -74,8 +74,8 @@ def main():
         if not os.path.isfile(p):
             raise RuntimeError("找不到文件：%s\n请检查 BASE 路径。" % p)
 
-    doc = App.newDocument("ESP32S3_LCD_Enclosure_RevH")
-    doc.Label = "ESP32S3_LCD 全覆盖外壳 Rev H"
+    doc = App.newDocument("ESP32S3_LCD_Enclosure_RevI")
+    doc.Label = "ESP32S3_LCD 全覆盖外壳 Rev I"
 
     add_part(doc, "TopCover", "上盖（打印件）",
              first_solid(read_shape(os.path.join(BASE, TOP_FILE))), GREY)

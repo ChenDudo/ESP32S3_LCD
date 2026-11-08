@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""ESP32S3_LCD 全覆盖外壳 Rev H —— 导出可编辑的 STEP (AP214 BREP) 实体
+"""ESP32S3_LCD 全覆盖外壳 Rev I —— 导出可编辑的 STEP (AP214 BREP) 实体
 
 与 build_v2.py 的 STL 用同一套 params_v2.py 参数，但用 OpenCascade 解析几何
 重新建模：圆角是真正的圆柱面，螺丝孔是真正的圆柱面，窗口是平面多边形，
@@ -60,7 +60,7 @@ def build_top(win_w, win_h):
     shell = outer.cut(*cuts)
 
     posts = []
-    for x, y in P.HOLES:
+    for x, y in P.SCREW_POS:
         post = cylinder(P.POST_D / 2, P.POST_Z0, P.POST_Z1, x, y)
         pilot = cylinder(P.POST_PILOT_D / 2, P.POST_Z0 - 0.2,
                          P.POST_PILOT_Z1, x, y)
@@ -70,11 +70,15 @@ def build_top(win_w, win_h):
 
 def build_base():
     body = rr_prism(P.W, P.H, P.R_OUT, P.W / 2, P.H / 2, 0, P.T_BASE)
-    bosses = [cylinder(P.POST_D / 2, P.T_BASE - 0.1, P.Z_PCB_BOT, x, y)
-              for x, y in P.HOLES]
-    solid = body.fuse(*bosses)
+    screw_boss = [cylinder(P.POST_D / 2, P.T_BASE - 0.1, P.Z_PCB_BOT, x, y)
+                  for x, y in P.SCREW_POS]
+    pcb_boss = [cylinder(P.BASE_BOSS_D / 2, P.T_BASE - 0.1, P.Z_PCB_BOT, x, y)
+                for x, y in P.HOLES]
+    pins = [cylinder(P.LOCATOR_D / 2, P.Z_PCB_BOT - 0.1, P.LOCATOR_Z1, x, y)
+            for x, y in P.HOLES]
+    solid = body.fuse(*(screw_boss + pcb_boss + pins))
     cuts = []
-    for x, y in P.HOLES:
+    for x, y in P.SCREW_POS:
         cuts.append(cylinder(P.SCREW_HOLE_D / 2, -0.5, P.Z_PCB_BOT + 0.2, x, y))
         cuts.append(cylinder(P.SCREW_CS_D / 2, -0.5, P.SCREW_CS_DEPTH, x, y))
     return solid.cut(*cuts)

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Rev H —— A3 横向三视图（正视图 / 上视图 / 右视图 + 辅助下视图）
+"""Rev I —— A3 横向三视图（正视图 / 上视图 / 右视图 + 辅助下视图）
 
 输出：
   deliverables/ESP32S3_LCD_全覆盖外壳_三视图.pdf   A3 420x297，1 页
@@ -40,6 +40,7 @@ AZ0, AZ1 = G["ANT_SLOT_Z0"], G["ANT_SLOT_Z1"]
 RST = G["RESET_POS"]
 RSTD = G["RESET_HOLE_D"]
 HOLES = [tuple(h) for h in G["HOLES"]]
+SCREW_POS = [tuple(p) for p in G["SCREW_POS"]]
 SLOTS = G["SLOTS"]
 TOP_SLOTS = [(b[0], b[2], z0, z1, n) for n, b, z0, z1, d in SLOTS
              if b[1] >= H - G["T_WALL"] - 0.5]
@@ -51,7 +52,7 @@ S = 1.6  # 图示放大比例（尺寸数字均为实际 mm）
 PW, PH = 420.0, 297.0
 PDF = os.path.join(OUT, "ESP32S3_LCD_全覆盖外壳_三视图.pdf")
 c = canvas.Canvas(PDF, pagesize=(PW * mm, PH * mm))
-c.setTitle("ESP32S3_LCD 全覆盖外壳 三视图 Rev H")
+c.setTitle("ESP32S3_LCD 全覆盖外壳 三视图 Rev I")
 c.setAuthor("WorkBuddy")
 
 
@@ -133,7 +134,7 @@ def DIMV(y1, y2, x, label, color=DIMC, size=6.2, left=True):
 RECT(6, 6, PW - 12, PH - 12, GRAY, 0.4)
 LN(6, 274, PW - 6, 274, BLUE, 0.7)
 T("ESP32-S3 LCD 全覆盖显示屏外壳  ·  三视图", 12, 282, 15, BLUE)
-TR("Rev H   /   A3 横向   /   单位 mm   /   图示比例 1.6 : 1   /   2026-11-08",
+TR("Rev I   /   A3 横向   /   单位 mm   /   图示比例 1.6 : 1   /   2026-11-08",
    PW - 12, 283, 8, GRAY)
 T("顶板完整封闭、不透明，无 U 形镂空；天线让位仅在上边侧壁。尺寸数字为实物 mm，与图示比例无关。",
    12, 266, 7.4, INK)
@@ -143,8 +144,8 @@ LN(6, 20, PW - 6, 20, INK, 0.5)
 for xx in (170, 250, 320, 375):
     LN(xx, 6, xx, 20, GRAY, 0.3)
 T("图名：全覆盖外壳 三视图（正 / 上 / 右 + 辅助下视图）", 10, 12.5, 7.5, INK)
-T("图号：ESP32S3-LCD-EN-H-VIEW", 174, 12.5, 7, INK)
-T("版本：Rev H", 254, 12.5, 7, INK)
+T("图号：ESP32S3-LCD-EN-I-VIEW", 174, 12.5, 7, INK)
+T("版本：Rev I", 254, 12.5, 7, INK)
 T("材料：绝缘非金属", 324, 12.5, 7, INK)
 T("第 1 / 1 页", 379, 12.5, 7, GRAY)
 
@@ -178,8 +179,8 @@ for a, b in G["I2C_GROUPS"]:
 CIRCLE(FX + RST[0] * S, FY + RST[1] * S, RSTD / 2 * S,
        REDC, 0.6, fill=WINF)
 T("Φ4 复位孔", FX + RST[0] * S + 4, FY + RST[1] * S - 3.5, 6, REDC)
-# 4 螺丝柱（隐藏线）
-for x, y in HOLES:
+# 4 个四角连接柱（隐藏线）
+for x, y in SCREW_POS:
     CIRCLE(FX + x * S, FY + y * S, G["POST_D"] / 2 * S, BLUE, 0.4, dash=(1.5, 1))
     CIRCLE(FX + x * S, FY + y * S, 1.3 * S, BLUE, 0.4)
     px, py = FX + x * S, FY + y * S
@@ -195,8 +196,8 @@ DIMH(FX, FX + FW, FY - 10, f"{W:.2f}")
 DIMV(FY, FY + FH, FX - 11, f"{H:.2f}")
 # 窗口尺寸 69.00 × 47.60 已标在窗内，避免与主视图标题挤在同一行
 DIMV(FY + wy * S, FY + (wy + wh) * S, FX + FW + 9, f"{wh:.2f}", left=False)
-# 91.34 × 48.70 孔距见右侧关键尺寸表，避免与上视图标题挤在同一行
-DIMV(FY + HOLES[0][1] * S, FY + HOLES[2][1] * S, FX - 19, "48.70")
+# 四角柱距 104.20 × 66.00 见右侧关键尺寸表；此处不再画竖向标注，
+# 右对齐的中文标签会越出 A3 左边界被裁切（与外形 73.00 标注也会挤在同一行）。
 # 虚线含义见右下「图例」，此处不重复（会被后绘制的上视图盖住）
 
 
@@ -227,7 +228,7 @@ T(f"统一开口带 Z {AZ0:.2f}~{AZ1:.2f}", TX + AX0 * S + 1,
   TY + AZ1 * S - 4.5, 5.5, BLUE)
 T("2 段 I2C 合并宽窗（4 座）", TX + 13, TY + TB * S + 2, 5.8, GREEN)
 # 尺寸
-# 外形 105.20 已在正视图标注，此处不重复
+# 外形 111.20 已在正视图标注，此处不重复
 DIMV(TY, TY + TH, TX - 11, f"{HT:.2f} 总高")
 # 27.00 已标在让位窗内与右侧关键尺寸表，避免与上视图标题同行
 DIMV(TY + ZTI * S, TY + HT * S, TX + FW + 8, f"{TTI:.2f} 顶板", left=False)
@@ -300,8 +301,11 @@ specs = [
     (f"统一开口带 Z {AZ0:.2f}~{AZ1:.2f}（四边平齐）", BLUE),
     (f"上边：天线 {AX1-AX0:.2f} + I2C 合并宽窗 25.10/24.90", BLUE),
     (f"下边双 Type-C {G['DUAL_USBC'][1]-G['DUAL_USBC'][0]:.2f}；右边 18.00/23.00", GREEN),
-    (f"4×φ{G['PCB_HOLE_D']:.1f} 孔距 91.34 × 48.70；M3×12 ×4", INK),
-    (f"上盖 Φ{G['POST_D']:.1f} 柱 / Φ{G['POST_PILOT_D']:.1f} 自攻底孔", INK),
+    (f"PCB 四角 φ{G['PCB_HOLE_D']:.1f} 孔距 91.34 × 48.70（定位销位）", INK),
+    (f"四角柱距 {G['SCREW_POS'][2][0]-G['SCREW_POS'][0][0]:.2f} × "
+     f"{G['SCREW_POS'][1][1]-G['SCREW_POS'][0][1]:.2f}；M3×12 ×4 不穿板", INK),
+    (f"四角 Φ{G['POST_D']:.1f} 连接柱在 PCB 板框外；M3 不穿板", REDC),
+    (f"PCB 由底座 Φ{G['LOCATOR_D']:.1f} 定位销定位；φ4 孔空置", INK),
     ("材料：PETG / 韧性树脂，绝缘非金属", INK),
 ]
 for i, (s, col) in enumerate(specs):
@@ -329,7 +333,7 @@ T("· 核心板直焊，天线铜层约 Z 8~9，顶板内表面 Z 14.2，塑料�
 T("  约 5 mm，介电加载更弱；装好后对比悬空 / 吸铁板 RSSI。", JX, 62, 6.3, REDC)
 T("· 若 RSSI 掉 >3 dB：把天线端再多伸出 5~10 mm，或把顶板", JX, 56, 6.3, INK)
 T("  天线区内表面减薄 0.8 mm（外表面仍平整、无洞）。", JX, 50, 6.3, INK)
-T("· 4 螺丝柱距天线中心 >45 mm；近场 20 mm 内禁金属/覆铜。", JX, 44, 6.3, INK)
+T("· 4 连接柱距天线中心 >45 mm；近场 20 mm 内禁金属/覆铜。", JX, 44, 6.3, INK)
 
 T("图例", JX, 35, 8.5, BLUE)
 RECT(JX, 27, 7, 3.5, REDC, 0.4, fill=WINF); T("显示窗 / 复位孔", JX + 10, 28, 6.2, INK)
@@ -400,13 +404,13 @@ rr_dxf(G["OX"], G["OY"], G["PCB_PY"], G["PCB_PX"], G["PCB_R"], "PCB_REF")
 rr_dxf(wx, wy, ww, wh, G["WIN_R"], "WINDOW")
 dr(AX0, AY0, AX1, AY1, "ANT")
 dc(RST[0], RST[1], RSTD / 2, "HOLE")
-for x, y in HOLES:
+for x, y in SCREW_POS:
     dc(x, y, G["POST_D"] / 2, "CENTER")
     dl((x - 4.5, y), (x + 4.5, y), "CENTER"); dl((x, y - 4.5), (x, y + 4.5), "CENTER")
 for a, b in G["I2C_GROUPS"]:
     dr(a, H - 1.6, b, H, "SLOT")
 dh(0, W, 0, f"{W:.2f}", -10); dv(0, H, 0, f"{H:.2f}", -10)
-dh(wx, wx + ww, H, f"{ww:.2f}", 8); dh(HOLES[0][0], HOLES[1][0], 0, "91.34", -19)
+dh(wx, wx + ww, H, f"{ww:.2f}", 8); dh(SCREW_POS[0][0], SCREW_POS[2][0], 0, "104.20 柱距", -19)
 dt("① 正视图（屏幕正面 / +Z）  1:1   顶板完整无镂空", 0, H + 18, 3.4)
 dt("蓝色 = 侧壁让位窗投影（顶板不开）；红色 = 显示窗；Φ4 复位孔", 0, -27, 2.8)
 
@@ -446,7 +450,7 @@ for y0, y1, z0, z1, n in RGT_SLOTS:
 dh(RX0, RX0 + H, 0, f"{H:.2f}", -9); dv(0, HT, RX0, f"{HT:.2f}", -10)
 dt("④ 右视图（+Xo）  1:1   横轴 Yo：左=下边，右=上边（天线侧）", RX0, HT + 18, 3.4)
 
-dt("ESP32S3-LCD-EN-H-VIEW  Rev H  |  单位 mm  1:1  |  四边开口平齐 / 显示窗按 A.A 放大让位",
+dt("ESP32S3-LCD-EN-I-VIEW  Rev I  |  单位 mm  1:1  |  四角连接柱在板框外 / M3 不穿板",
    0, -112, 3.6)
 DXF = os.path.join(OUT, "ESP32S3_LCD_全覆盖外壳_三视图.dxf")
 d.saveas(DXF)

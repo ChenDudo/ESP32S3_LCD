@@ -67,8 +67,8 @@ def main():
     print("FreeCAD:", App.Version()[0], App.Version()[1])
     print("GuiUp:", App.GuiUp)
 
-    doc = App.newDocument("ESP32S3_LCD_Enclosure_RevH")
-    doc.Label = "ESP32S3_LCD Enclosure Rev H"
+    doc = App.newDocument("ESP32S3_LCD_Enclosure_RevI")
+    doc.Label = "ESP32S3_LCD Enclosure Rev I"
 
     add(doc, "TopCover", "上盖（打印件）",
         single_solid(read_shape(os.path.join(OUT_DIR, TOP_FILE)), "top"))

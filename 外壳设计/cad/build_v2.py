@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-"""ESP32S3_LCD 全覆盖不透明外壳 Rev H —— 生成 STL / DXF / 报价 / 下单说明
+"""ESP32S3_LCD 全覆盖不透明外壳 Rev I —— 生成 STL / DXF / 报价 / 下单说明
 
 结构：上盖（完整不透明顶板 + 四周侧壁 + 4 螺丝柱，仅开显示区窗口 + Φ4 复位孔）
-      底座（平板 + 4 支撑台 + 4 沉孔）
-      Rev H：四边所有对外开口统一开口带 Z 4.00~14.20，上下沿完全平齐；
+      底座（平板 + 4 定位销台 + 4 连接柱台 + 4 沉孔）
+      Rev I：4 个连接柱移到 PCB 板框之外的外壳四角，M3 不再穿过 PCB；
+      PCB 由底座 Φ3.8 定位销定位。四边所有对外开口统一开口带 Z 4.00~14.20，上下沿完全平齐；
       天线让位窗 27.00 与 I2C 合并宽窗同高；双 Type-C / 5V / XH-5P 均按
       带壳插头 + 线材外径留余量。顶板保持完整不镂空。
 """
@@ -85,7 +86,7 @@ def build_top(win_w, win_h):
     cavity = prism(INNER, P.T_BASE, P.Z_TOP_IN)               # 内腔 Z 2.4~14.2
     window = prism(rr_at(P.WIN_CX, P.WIN_CY, win_w, win_h, P.WIN_R),
                    P.Z_TOP_IN - 0.2, P.H_TOTAL + 0.5)          # 显示窗切穿顶板
-    # Rev H：顶板完整无镂空；天线让位与所有接口窗统一 Z 开口带（止于顶板内表面）
+    # Rev I：顶板完整无镂空；天线让位与所有接口窗统一 Z 开口带（止于顶板内表面）
     ant_slot = prism(box(P.ANT_X0, P.ANT_Y0, P.ANT_X1, P.H + 2.0),
                      P.ANT_SLOT_Z0, P.ANT_SLOT_Z1)
     reset = cyl(P.RESET_HOLE_D / 2, P.Z_TOP_IN - 0.2, P.H_TOTAL + 0.5,
@@ -97,7 +98,7 @@ def build_top(win_w, win_h):
 
     # 4 个螺丝柱（带自攻底孔，柱顶嵌进顶板 0.2）
     posts = []
-    for x, y in P.HOLES:
+    for x, y in P.SCREW_POS:
         post = bdiff([cyl(P.POST_D / 2, P.POST_Z0, P.POST_Z1, x, y),
                       cyl(P.POST_PILOT_D / 2, P.POST_Z0 - 0.2, P.POST_PILOT_Z1, x, y)])
         posts.append(post)
@@ -108,10 +109,17 @@ def build_top(win_w, win_h):
 # ---------------- 底座 ----------------
 def build_base():
     body = prism(OUTER, 0, P.T_BASE)
-    bosses = [cyl(P.POST_D / 2, P.T_BASE - 0.1, P.Z_PCB_BOT, x, y) for x, y in P.HOLES]
-    solid = bunion([body] + bosses)
+    # 新四角连接柱台（带 M3 通孔 + 沉孔），位于 PCB 板框之外
+    screw_boss = [cyl(P.POST_D / 2, P.T_BASE - 0.1, P.Z_PCB_BOT, x, y)
+                  for x, y in P.SCREW_POS]
+    # PCB 孔位：Φ7 支撑台 + Φ3.8 定位销（穿过 PCB 四角 φ4 孔）
+    pcb_boss = [cyl(P.BASE_BOSS_D / 2, P.T_BASE - 0.1, P.Z_PCB_BOT, x, y)
+                for x, y in P.HOLES]
+    pins = [cyl(P.LOCATOR_D / 2, P.Z_PCB_BOT - 0.1, P.LOCATOR_Z1, x, y)
+            for x, y in P.HOLES]
+    solid = bunion([body] + screw_boss + pcb_boss + pins)
     cuts = []
-    for x, y in P.HOLES:
+    for x, y in P.SCREW_POS:
         cuts.append(cyl(P.SCREW_HOLE_D / 2, -1.0, P.Z_PCB_BOT + 0.2, x, y))
         cuts.append(cyl(P.SCREW_CS_D / 2, -1.0, P.SCREW_CS_DEPTH, x, y))
     return bdiff([solid] + cuts)
@@ -199,7 +207,7 @@ RECT(m, P.ANT_X0, P.ANT_Y0, P.ANT_X1, P.H, "ANT")
 # 顶板复位键孔
 m.add_circle(P.RESET_POS, P.RESET_HOLE_D / 2, dxfattribs={"layer": "HOLE"})
 T(m, "复位孔 Φ4.0", P.RESET_POS[0] + 3, P.RESET_POS[1] + 1, 1.8, "NOTE")
-for x, y in P.HOLES:
+for x, y in P.SCREW_POS:
     m.add_circle((x, y), P.POST_D / 2, dxfattribs={"layer": "CENTER", "linetype": "DASHED"})
     LN(m, (x - 4.5, y), (x + 4.5, y), "CENTER")
     LN(m, (x, y - 4.5), (x, y + 4.5), "CENTER")
@@ -213,14 +221,14 @@ DIMV(m, 0, P.H, 0, f"{P.H:.2f}", -11)
 DIMH(m, WIN[0], WIN[2], P.H, f"{P.WIN_W:.2f} 显示窗", 7)
 DIMV(m, WIN[1], WIN[3], P.W, f"{P.WIN_H:.2f}", 9)
 DIMH(m, P.ANT_X0, P.ANT_X1, P.H, f"{P.ANT_X1-P.ANT_X0:.2f} 侧壁让位窗(顶板不开)", 15)
-DIMH(m, P.HOLES[0][0], P.HOLES[1][0], 0, "91.34", -20)
-DIMV(m, P.HOLES[0][1], P.HOLES[2][1], 0, "48.70", -20)
+DIMH(m, P.SCREW_POS[0][0], P.SCREW_POS[2][0], 0, "104.20 柱距", -20)
+DIMV(m, P.SCREW_POS[0][1], P.SCREW_POS[1][1], 0, "66.00", -20)
 T(m, f"上盖俯视 1:1  (单位 mm)  显示窗 {P.WIN_W:.2f} x {P.WIN_H:.2f}（按实测 A.A 放大让位）", 0, -30, 3.6)
 T(m, f"实测 LCD A.A {P.LCD_AA_X:.2f} x {P.LCD_AA_Y:.2f}；窗口四周各让位 {P.WIN_CLEAR_X:.2f} / {P.WIN_CLEAR_Y:.2f}，请勿缩小", 0, -35, 2.8, "NOTE")
 T(m, "顶板完整封闭、无镂空；仅显示窗 + Φ4 复位孔", 0, P.H + 22, 3.0, "ANT")
 T(m, "四边统一开口带 Z 4.00~14.20：天线 27.00 与 I2C 宽窗平齐；双 Type-C 36.00；5V 18.00 / XH-5P 23.00",
   0, P.H + 27, 2.8, "ANT")
-T(m, f"Rev H 偏心屏：显示窗中心 X={P.WIN_CX:.2f} / Y={P.WIN_CY:.2f}"
+T(m, f"Rev I 偏心屏：显示窗中心 X={P.WIN_CX:.2f} / Y={P.WIN_CY:.2f}"
      f"（相对外壳中心左移 {-P.WIN_OFFSET_X:.2f}），窗口左缘 X={WIN[0]:.2f}；请勿居中",
   0, P.H + 32, 2.8, "ANT")
 T(m, f"单版本：窗口 {P.WIN_W:.2f} x {P.WIN_H:.2f} 比实测 A.A {P.LCD_AA_X:.2f} x {P.LCD_AA_Y:.2f} 四周各放大 {P.WIN_CLEAR_X:.2f} / {P.WIN_CLEAR_Y:.2f}",
@@ -256,19 +264,23 @@ m2 = d2.modelspace()
 m2.add_lwpolyline(OUTER_PTS, close=True, dxfattribs={"layer": "OUTLINE"})
 m2.add_lwpolyline(rr_pts(P.PCB_PY, P.PCB_PX, P.PCB_R, P.OX, P.OY), close=True,
                   dxfattribs={"layer": "PCB_REF", "linetype": "DASHED"})
-for x, y in P.HOLES:
+for x, y in P.SCREW_POS:
     m2.add_circle((x, y), P.SCREW_HOLE_D / 2, dxfattribs={"layer": "HOLE"})
-    m2.add_circle((x, y), P.POST_D / 2, dxfattribs={"layer": "CENTER", "linetype": "DASHED"})
+    m2.add_circle((x, y), P.SCREW_CS_D / 2, dxfattribs={"layer": "CENTER", "linetype": "DASHED"})
     LN(m2, (x - 5, y), (x + 5, y), "CENTER")
     LN(m2, (x, y - 5), (x, y + 5), "CENTER")
-DIMH(m2, 0, P.W, 0, "105.20", -11)
-DIMV(m2, 0, P.H, 0, "67.00", -11)
-DIMH(m2, P.HOLES[0][0], P.HOLES[1][0], 0, "91.34", -20)
-DIMV(m2, P.HOLES[0][1], P.HOLES[2][1], 0, "48.70", -20)
+# PCB 四角孔位：底座定位销（不是螺丝孔）
+for x, y in P.HOLES:
+    m2.add_circle((x, y), P.LOCATOR_D / 2, dxfattribs={"layer": "PCB_REF"})
+    m2.add_circle((x, y), P.BASE_BOSS_D / 2, dxfattribs={"layer": "PCB_REF", "linetype": "DASHED"})
+DIMH(m2, 0, P.W, 0, f"{P.W:.2f}", -11)
+DIMV(m2, 0, P.H, 0, f"{P.H:.2f}", -11)
+DIMH(m2, P.SCREW_POS[0][0], P.SCREW_POS[2][0], 0, "104.20 柱距", -20)
+DIMV(m2, P.SCREW_POS[0][1], P.SCREW_POS[1][1], 0, "66.00", -20)
 T(m2, "底座俯视 1:1 (单位 mm)", 0, -30, 3.6)
-T(m2, "4x Φ3.4 通孔 + 底面 Φ6.5 深 1.6 沉孔（M3 沉头螺丝）", 0, P.H + 8, 2.8)
-T(m2, "4x Φ7 支撑台 高 1.0（PCB 底面 Z=3.4）", 0, P.H + 13, 2.8)
-T(m2, "底板厚 2.40；总装配高 16.00", 0, P.H + 23, 2.8)
+T(m2, "四角 4x Φ3.4 通孔 + 底面 Φ6.5 深 1.6 沉孔（M3 沉头螺丝；不穿 PCB）", 0, P.H + 8, 2.8)
+T(m2, "PCB 孔位：4x Φ7 支撑台 + Φ3.8x1.6 定位销（PCB 底面 Z=3.4）", 0, P.H + 13, 2.8)
+T(m2, "四角 Φ6 连接柱在 PCB 板框之外；底板厚 2.40；总装配高 16.00", 0, P.H + 23, 2.8)
 d2.saveas(os.path.join(OUT, "ESP32S3_LCD_全覆盖外壳_底座_加工图.dxf"))
 
 # ---- 3. 装配工程图 DXF（剖面 + BOM + 技术说明 + 标题栏） ----
@@ -280,14 +292,14 @@ m3.add_lwpolyline(rr_pts(P.WIN_W, P.WIN_H, P.WIN_R, WIN[0], WIN[1]),
                   close=True, dxfattribs={"layer": "WINDOW"})
 RECT(m3, P.ANT_X0, P.ANT_Y0, P.ANT_X1, P.H, "ANT")
 m3.add_circle(P.RESET_POS, P.RESET_HOLE_D / 2, dxfattribs={"layer": "HOLE"})
-for x, y in P.HOLES:
+for x, y in P.SCREW_POS:
     m3.add_circle((x, y), P.POST_D / 2, dxfattribs={"layer": "HOLE"})
-DIMH(m3, 0, P.W, 0, "105.20", -11)
-DIMV(m3, 0, P.H, 0, "67.00", -11)
+DIMH(m3, 0, P.W, 0, f"{P.W:.2f}", -11)
+DIMV(m3, 0, P.H, 0, f"{P.H:.2f}", -11)
 T(m3, "上盖俯视 1:1", 0, -18, 3.4)
-LN(m3, (-5, 33.5), (0, 33.5), "SECTION")
-LN(m3, (P.W, 33.5), (P.W + 5, 33.5), "SECTION")
-T(m3, "A", -8, 35, 3.2, "SECTION"); T(m3, "A", P.W + 6, 35, 3.2, "SECTION")
+LN(m3, (-5, P.WIN_CY), (0, P.WIN_CY), "SECTION")
+LN(m3, (P.W, P.WIN_CY), (P.W + 5, P.WIN_CY), "SECTION")
+T(m3, "A", -8, P.WIN_CY + 1.5, 3.2, "SECTION"); T(m3, "A", P.W + 6, P.WIN_CY + 1.5, 3.2, "SECTION")
 
 # A-A 剖面 2:1
 SX0, SZ, SC = 150.0, 20.0, 2.0
@@ -344,11 +356,13 @@ notes = [
     "   打样前点亮屏幕实测：亮区左缘到模块左缘 L、右缘到模块右缘 R，(L-R)/2 即偏移量；",
     "   不符改 params_v2.py 的 WIN_OFFSET_X 一行并重跑全部脚本。",
     "3. 顶板完整封闭不镂空；四边开口统一 Z 4.00~14.20，天线让位窗与 I2C 窗上下沿平齐。",
-    "4. 天线投影 20mm 内禁止金属件、覆铜；4 个螺丝柱距天线中心均 >45mm。",
+    "4. 天线投影 20mm 内禁止金属件、覆铜；4 个连接柱距天线中心均 >45mm。",
     "5. 上边：2 段 I2C 合并宽窗（4 个 XH2.54-4P，座距 12.96）+ Φ4 复位孔 + 27.00 天线让位窗。",
     "   下边：ESP32 核心板（直焊）双 Type-C 共用 36.00 窗；右边：5V 18.00 + XH-5P 23.00。",
     "   所有窗口按带壳插头宽 14~16 / 线材 Φ3~5 留余量，非按母座贴边开孔。",
-    "6. 4x M3x12 自攻螺丝自底面沉孔穿入，经 PCB 4x φ4 孔拧入上盖 Φ7 柱（底孔 Φ2.6）。",
+    "6. Rev I：4x M3x12 自底面沉孔穿入，直接拧进外壳四角 Φ6 柱（底孔 Φ2.6）；",
+    "   不穿过 PCB。LCD 板 97.92 覆盖 PCB 四角 φ4 孔且左端无孔，旧穿板方案装不上。",
+    "   PCB 由底座 4 个 Φ3.8x1.6 定位销 + Φ7 支撑台定位，φ4 孔空置不用螺丝。",
     "7. 材料必须绝缘非金属；不喷金属漆、不镀层、不用碳纤维/导电料；建议 PETG 或韧性树脂。",
     "8. 未注公差按 3D 打印常规工艺；本图不作 GB/ISO 符合性声明。",
 ]
@@ -361,8 +375,8 @@ for xx in (TX, TX + 60, TX + 92, TX + 125):
 for yy in (TY, TY + 8, TY + 16, TY + 25):
     LN(m3, (TX, yy), (TX + 125, yy), "TABLE")
 T(m3, "ESP32S3_LCD 全覆盖显示屏外壳", TX + 2, TY + 18.5, 3.0)
-T(m3, "图号 ESP32S3-LCD-EN-D", TX + 2, TY + 10.5, 2.3)
-T(m3, "Rev H", TX + 94, TY + 10.5, 2.3)
+T(m3, "图号 ESP32S3-LCD-EN-I", TX + 2, TY + 10.5, 2.3)
+T(m3, "Rev I", TX + 94, TY + 10.5, 2.3)
 T(m3, "单位 mm  比例 1:1 / 2:1", TX + 2, TY + 2.5, 2.3)
 T(m3, "2026-11-07", TX + 94, TY + 2.5, 2.3)
 d3.saveas(os.path.join(OUT, "ESP32S3_LCD_全覆盖外壳_装配工程图.dxf"))
@@ -391,21 +405,39 @@ with open(os.path.join(OUT, "外壳实物报价.csv"), "w", newline="", encoding
     csv.writer(f).writerows(quote)
 
 # ---------------- 下单说明 ----------------
-note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev H —— 淘宝打样下单说明
+note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev I —— 淘宝打样下单说明
 ==========================================================
-  【零、Rev H 显示窗：单版本 + 按实测 A.A 放大让位】
+  【零、Rev I 结构修正：4 颗螺丝不再穿过 PCB】
+  ★ ATK-MD0350 用户手册图 3.1：模块 PCB 底板 56.41 x 97.92 mm，
+    两个安装孔只在 ALIENTEK 一端、孔距 48.64 mm；屏幕左侧没有过孔。
+    PCB 同侧两孔距 48.695，与 48.64 仅差 0.055 → LCD 两孔对准 PCB 一端两孔。
+    LCD 板 97.92 长 < PCB 100 长，故 LCD 板【完全覆盖 PCB 四角 φ4 孔】，
+    左端为实心板。旧版「底部 4 颗 M3 穿过 PCB 四角孔 → 拧进上盖柱」装不上：
+    螺杆在 Z 5.0~12.1 段被 LCD 板挡死，缩柱径 / 换 M2 / 不上 LCD 螺丝都无效。
+  ★ 本版修法：外形每边 +3.00 mm → {P.W:.2f} x {P.H:.2f} x {P.H_TOTAL:.2f} mm，
+    4 个连接柱移到外壳四角（PCB 板框之外，柱心 ({P.SCREW_C:.2f},{P.SCREW_C:.2f}) 等，Φ{P.POST_D:.1f}）。
+    因 LCD 板完全在 PCB 板框内，柱子与屏幕绝无干涉；柱心到 PCB 圆角实体
+    净距 3.80 mm > 柱半径 3.00，余量 0.80 mm。
+  ★ PCB 四角 φ4 孔【不再穿螺丝】，改由底座 4 个 Φ{P.LOCATOR_D:.1f}x1.6 定位销
+    （Z 3.40~5.00）水平定位，底座原 4 个 Φ{P.BASE_BOSS_D:.1f} 支撑台托住 PCB 底面。
+    4 颗 M3x12 只连接上盖与底座的四角柱，不再经过 PCB / LCD。
+  ★ 顶板内表面 Z=14.20 与 LCD 板顶（约 12.1）留约 2.1 mm；
+    若装配后觉得 PCB/LCD 有轻微晃动，在顶板内侧贴 1~2 mm 自粘泡棉垫即可，
+    不要擅自加高柱或缩小显示窗。
+  ★ 若不接受外形变大：可改「右侧 2 颗加长 M3 穿过 LCD 安装孔 + 左侧 2 个卡扣」，
+    外形可回到 105.20x67.00，但只剩 2 颗螺丝、卡扣对打印精度敏感。需整套重出。
+
+  【显示窗：单版本 + 按实测 A.A 放大让位】
   ★ 已实测确认 LCD A.A（发光显示区）= 73.44 x 48.96 mm，本版据此定窗。
-  ★ 删除原 A / B 双版本：原 A 版 69.00x47.60 依据 EDA 封装可视框，
-    比实测 A.A 窄 4.44 mm；原 B 版 72.00x47.60 仍窄 1.44 mm，
-    两者都会切掉亮区边缘像素，已全部作废。本目录只剩一个上盖 STL。
+  ★ 原 A / B 双版本窗口（69.00x47.60 / 72.00x47.60）都小于 A.A，会切掉亮区
+    边缘像素，已全部作废。本目录只剩一个上盖 STL。
   ★ 现窗口 {P.WIN_W:.2f} x {P.WIN_H:.2f} mm（四角 R{P.WIN_R:.1f}），
-    四周各比 A.A 放大 {P.WIN_CLEAR_X:.2f} / {P.WIN_CLEAR_Y:.2f} mm，
-    用于吸收 3D 打印公差、LCD 排针插装与 φ4 孔配 M3 的位置偏差、
-    以及偏心量推算误差。取舍：理想装配下四周会露出 <=0.5 mm 极窄黑边，
-    但绝不遮挡显示内容。请转告商家：不要按旧版习惯把窗口缩小或移回居中。
+    四周各比 A.A 放大 {P.WIN_CLEAR_X:.2f} / {P.WIN_CLEAR_Y:.2f} mm。
+    取舍：理想装配下四周会露出 <=0.5 mm 极窄黑边，但绝不遮挡显示内容。
+    请转告商家：不要按旧版习惯把窗口缩小或移回居中。
   ★ 偏心量仍待实测：显示区左缘到模块左缘 = L，右缘到模块右缘 = R。
-    当前 WIN_OFFSET_X = {P.WIN_OFFSET_X:.2f}（窗口中心 X={P.WIN_CX:.2f}，
-    外壳中心 52.60），由规格书尺寸链 2.77 mm 与实物图像素 2.52 mm 推算，未实测。
+    当前 WIN_OFFSET_X = {P.WIN_OFFSET_X:.2f}（窗口中心 X={P.WIN_CX:.2f} / Y={P.WIN_CY:.2f}，
+    外壳中心 X={P.W/2:.2f}），由规格书尺寸链 2.77 mm 与实物图像素 2.52 mm 推算，未实测。
     若实测 (L-R)/2 不同：改 params_v2.py 的 WIN_OFFSET_X 一行，
     重跑 build_v2.py / make_pdf_v2.py / make_views.py / build_step.py /
     make_preview.py / freecadcmd build_fcstd.py 即可同步全部交付物。
@@ -415,31 +447,15 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev H —— 淘宝打样下单
   （顶板内表面 Z=14.2，PCB 顶面 Z=5.0；核心板直焊顶面约 9.1、LCD 顶面约 12.1 为最高）。
   若实测 >9.2 mm，请改 params_v2.py 的 Z_TOP_IN / H_TOTAL 后重出图，否则会顶到顶板。
 
-  【孔径与螺丝已定案：φ4 孔 + M3 螺丝，不是 M4】
-  Rev C 写的「φ2 孔 + M2 螺丝」是错的，已纠正。三条证据：
-    1) 工程 .epru 里 4 个 FILL CIRCLE（Multi-Layer = NPTH 孔）第三个参数是【半径】
-       78.7402 mil = 2.000 mm，所以孔径 = 2×2.000 = φ4.000 mm。
-       之前把「半径 2mm」读成了「直径 2mm」；板框那个 2.0 是圆角 R2，不是孔。
-    2) PCB_PCB1_1_2026-11-07.pdf 底层铜皮四角白色无铜圆实测 4.48 mm
-       = φ4.0 孔 + 0.24 mm 隔离环；PDF 四角那个 2.000 mm 圆是板框圆角弧包围盒。
-    3) 你实测 M3 螺丝（光杆 φ3.0）能穿过并固定 LCD 屏 → 孔必然 ≥φ3，与 φ2 矛盾。
-  为什么不是 M4：φ4.0 恰好是 M4 螺杆的名义直径，塞进 φ4.0 孔几乎零间隙，
-    板厂钻孔公差 ±0.1 加四孔位累积公差至少有一颗会卡死（M4 需 φ4.5 过孔）；
-    M4 沉头 φ8 / 螺丝柱 Φ9 距板边只有 5.7 mm，塑料件还容易崩边。
-    φ4.0 实际是【M3 的加大过孔】（M3 标准过孔 φ3.2~3.4），你手上的 M3 正好能用。
-  本版配置：M3×12 沉头自攻 ×4；底座通孔 Φ3.4、底面沉孔 Φ6.5 深 1.6、
-    上盖 Φ7 螺丝柱、柱内 Φ2.6 自攻底孔（盲孔深至 Z=13.8）。
-  φ4 孔配 M3 有约 1 mm 径向松量：PCB 被底座 4 个 Φ7 支撑台与上盖柱夹紧，
-    装配时目视居中后拧紧即可；想更精准可加 4 片 φ4→φ3 尼龙衬套或 M3 大平垫（外径 Φ7）。
-  仍建议卡尺复量一次四角孔径；若实测确实是 φ2（与 M3 实测矛盾，可能性很低），
-    告诉我，我把螺丝改回 M2 或用 φ3.2 钻头轻扩四孔。
+  【孔径定案：PCB 四角 φ4 孔，不是 φ2】
+  工程 .epru 里 4 个 FILL CIRCLE 第三个参数是【半径】78.7402 mil = 2.000 mm，
+  孔径 = Φ4.000；用户导出的 PCB PDF 底层隔离圈实测 4.48 mm 也吻合。
+  φ4 是 M3 的加大过孔（M3 标准过孔 φ3.2~3.4），不是 M4（M4 需 φ4.5 过孔）。
+  本版 φ4 孔只用于底座定位销对准，不再过螺丝。
 
-  【LCD 屏固定：两种方案，本版按方案 A 出图】
-  方案 A（推荐，本版）：屏幕靠 H1 插座 + 顶板压住黑边定位，不另配螺丝；
-    外壳 4 颗 M3 螺丝独占 PCB 四角孔，装配最简单、顶板最完整。
-  方案 B（若你坚持用 M3 螺丝+螺母把 LCD 屏锁在 PCB 上）：那 2 颗螺丝会占用
-    PCB 四角孔中的 2 个，与上盖柱冲突。需我把那 2 处改成「长 M3 螺丝一穿到底 +
-    顶板开 Φ7 让位孔」，或改为 2 螺丝 + 2 卡扣。告诉我 LCD 屏安装孔对应哪两个角即可重出图。
+  【LCD 屏固定】按你确认：不用 M3 螺丝/螺母锁 LCD，屏幕靠 H1 插座插装、
+  底座定位销把 PCB 定位、顶板压住黑边限位；LCD 那 2 个安装孔空置不用。
+  4 颗 M3 全部用于上盖与底座的连接，互不干扰。
 
 【一、文件与工艺】
   1) 3D 打印（推荐，一次成型）
@@ -455,7 +471,7 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev H —— 淘宝打样下单
   3) CNC：发 STL + PDF，材料 POM/ABS，别用铝（会屏蔽天线）。
 
 【二、复制给商家的一段话】
-  两件 3D 打印外壳，外形 105.20 x 67.00 x 16.00 mm，整套约 {vol_all:.0f} cm3。
+  两件 3D 打印外壳，外形 {P.W:.2f} x {P.H:.2f} x {P.H_TOTAL:.2f} mm，整套约 {vol_all:.0f} cm3。
   上盖顶板厚 1.8、侧壁厚 1.6、总高 16.0；显示窗 {P.WIN_W:.2f} x {P.WIN_H:.2f} mm
   （四角 R1.5），窗口中心 X={P.WIN_CX:.2f} / Y={P.WIN_CY:.2f}（相对外壳中心左移
   {-P.WIN_OFFSET_X:.2f} mm，为对准偏心屏显示区），请勿擅自把窗口移回居中；
@@ -463,52 +479,59 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev H —— 淘宝打样下单
   Z 4.00~14.20（天线让位窗 27.00 与 I2C 合并宽窗平齐），窗口已按带壳插头与线材留余量，
   窗口四周已按实测 A.A 放大让位以吸收装配偏差，请勿擅自缩小或移回居中；
   顶板天线区不要开洞、不要加支撑。
+  外壳四角有 4 个 Φ{P.POST_D:.1f} 连接柱（在 PCB 板框之外，别误当成 PCB 安装孔）；
+  底座另有 4 个 Φ{P.BASE_BOSS_D:.1f} 支撑台和 Φ{P.LOCATOR_D:.1f} 定位销，用来定位 PCB。
   不透明绝缘非金属，不喷金属漆；请按 STL 原尺寸 1:1 打印，不要缩放、不要加支撑在窗口内。
   建议顶板朝上平放打印，层高 0.2 mm 以下，窗口与螺丝柱精度优先。
 
 【三、自己买的配件】
   M3x12 沉头自攻螺丝 x4     搜：M3*12 沉头 自攻螺丝 304
-  φ4→φ3 尼龙衬套 x4（可选）  搜：尼龙 衬套 M3 定位垫圈
   硅胶脚垫 Φ8 x4（可选）     搜：硅胶脚垫 圆形 自粘 8mm
+  1~2 mm 自粘泡棉垫（可选）  贴在顶板内侧，压住 LCD 板顶消除轻微晃动
 
 【四、装配顺序】
-  1. 底座朝上，PCB 放入：4 个 φ4 安装孔对准底座 4 个 Φ7 支撑台（PCB 底面 Z=3.4）。
-  2. LCD 屏插 PCB 排座；ESP32 系统板焊/插在 PCB 上，天线端对准【上边侧壁让位窗】
-     并穿出壳外（顶板完整盖住，不包住天线外露段）。
+  1. 底座朝上，PCB 放入：4 个 φ4 孔对准底座 4 个 Φ{P.BASE_BOSS_D:.1f} 支撑台上的
+     Φ{P.LOCATOR_D:.1f} 定位销（PCB 底面 Z=3.4）。四角连接柱位在 PCB 板框之外，
+     不要试图把螺丝穿进 PCB 孔。
+  2. LCD 屏插 PCB 的 H1 排座；ESP32 系统板直焊在 PCB 上，天线端对准
+     【上边侧壁让位窗】并穿出壳外（顶板完整盖住，不包住天线外露段）。
+     LCD 不上 M3 螺丝/螺母，那 2 个安装孔空置。
   3. 扣上上盖：四边接口开窗对准 USB1 / CN3 / 4x I2C / 双 Type-C；顶板压住屏幕黑边，
-     只露出显示区；4 个 Φ7 螺丝柱正好压在 PCB 4 个孔上。
-  4. 从底部 4 个沉孔拧入 M3x12 自攻螺丝，穿过 PCB φ4 孔，拧进上盖柱（底孔 Φ2.6）；
-     PCB 目视居中后拧紧，勿过度用力（φ4 孔比 M3 杆大约 1mm）。
-     不要过度拧紧，塑料柱吃力即可。
+     只露出显示区；上盖 4 个 Φ{P.POST_D:.1f} 柱正好对准底座四角的 Φ{P.POST_D:.1f} 台。
+  4. 从底部 4 个沉孔拧入 M3x12 自攻螺丝，经底座 Φ3.4 通孔直接拧进上盖柱
+     （底孔 Φ2.6）；螺丝【不穿过 PCB、不穿过 LCD】。塑料柱吃力即可，勿过度拧紧。
+  5. 若顶板与 LCD 板之间约 2.1 mm 间隙导致轻微晃动，贴 1~2 mm 泡棉垫再扣合。
 
 【五、接口开窗对应（PCB 左旋 90°、天线朝上的正视方位）】
   ★ 四边所有开口统一 Z 4.00~14.20（下沿留 1.60 实壁、上沿齐平顶板内表面），
     天线让位窗与 I2C 插座窗完全平齐；窗口按「带壳插头 + 线材外径 + 插拔空间」留余量。
-  上边：天线让位窗 27.00 宽（39.10~66.10）+ 2 段 I2C 合并宽窗
-        （12.00~37.10 / 68.10~93.00，各覆盖 2 个 XH2.54-4P，座中心距仅 12.96
-         故不再各开 12mm 小窗；段间各留 2.00 加强筋）+ 顶板 Φ4 复位键孔
+  ★ Rev I 外形每边 +3.00 mm，以下坐标全部相对旧版 +3.00，但相对 PCB 的位置不变。
+  上边：天线让位窗 27.00 宽（{P.ANT_X0:.2f}~{P.ANT_X1:.2f}）+ 2 段 I2C 合并宽窗
+        （{P.I2C_GROUPS[0][0]:.2f}~{P.I2C_GROUPS[0][1]:.2f} /
+         {P.I2C_GROUPS[1][0]:.2f}~{P.I2C_GROUPS[1][1]:.2f}，各覆盖 2 个 XH2.54-4P，
+         座中心距仅 12.96 故不再各开 12mm 小窗；段间各留 2.00 加强筋）+ 顶板 Φ4 复位键孔
   下边：ESP32 核心板（直接焊在 PCB 上）自带 2 个 Type-C（UART / USB）
-        共用 36.00 宽窗（34.00~70.00，原 26.00 太窄）
-  右边：5V Type-C 18.00 宽窗（11.00~29.00，原 10.00）
-        + XH2.54-5P 23.00 宽窗（32.00~55.00，原 16.50，兼容 H2 3P / H3 2P）
+        共用 36.00 宽窗（{P.DUAL_USBC_X0:.2f}~{P.DUAL_USBC_X1:.2f}）
+  右边：5V Type-C 18.00 宽窗（{P.RIGHT_5V_Y0:.2f}~{P.RIGHT_5V_Y1:.2f}）
+        + XH2.54-5P 23.00 宽窗（{P.RIGHT_XH_Y0:.2f}~{P.RIGHT_XH_Y1:.2f}）
   左边：封闭，无外部接口
-  底部：4 个 M3 螺丝沉孔
+  底部：4 个 M3 螺丝沉孔（外壳四角，PCB 板框之外）
   【余量依据】XH2.54 带扣插头约 13~15 宽、线束出口需 8~10 高；Type-C 线端注塑壳
   约 12~16 宽 x 6~8 厚、线材 Φ3~5，折弯另需 3~5。开口带 10.20 高、各窗宽度
   均含上述余量；打样前建议拿实际线材比一下，若仍紧可改 params_v2.py 加宽。
 
 【六、天线净空】
   顶板完整封闭、不镂空；天线及模组端部从上边侧壁让位窗穿出，外露段不被壳体包住。
-  壳体是绝缘塑料不屏蔽；4 个螺丝柱距天线中心均 >45 mm，远超 2.4GHz 近场 20 mm。
+  壳体是绝缘塑料不屏蔽；4 个连接柱在四角、距天线中心均 >45 mm，远超 2.4GHz 近场 20 mm。
   核心板为直接焊接（板间距约 2.5、板厚 1.6），天线铜层约 Z 8~9，顶板内表面
-  Z 14.2 与天线之间约 5mm 塑料间隙，介电加载比排母插装版本更弱；
+  Z 14.2 与天线之间约 5mm 塑料间隙，介电加载较弱；
   装好后对比悬空 / 吸铁板的 WiFi RSSI，若掉 >3dB 可把天线端再多伸出 5~10 mm，
   或把顶板天线区内表面减薄 0.8 mm（外表面仍平整无洞）。
-  接线与安装时避免整块金属背板贴近天线端，建议天线端朝外或悬出安装面边缘。
+  接线与安装时避免整块金属背板贴近天线端。
 
 【七、文件清单】
   ESP32S3_LCD_全覆盖外壳_上盖_3D打印.stl        上盖（唯一版本，窗口 74.40x50.00）
-  ESP32S3_LCD_全覆盖外壳_底座_3D打印.stl         底座
+  ESP32S3_LCD_全覆盖外壳_底座_3D打印.stl         底座（含 4 定位销 + 4 连接台）
   ESP32S3_LCD_全覆盖外壳_上盖_加工图.dxf        1:1 上盖俯视 + 四边侧壁展开
   ESP32S3_LCD_全覆盖外壳_底座_加工图.dxf        1:1 底座俯视
   ESP32S3_LCD_全覆盖外壳_装配工程图.dxf         尺寸/剖面/BOM/技术说明（可编辑）
@@ -526,9 +549,8 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev H —— 淘宝打样下单
   FreeCAD_一键生成工程.FCMacro                   可选：补颜色/视图的着色版宏
 
   【STEP 实体文件说明】3 个 .step 是 AP214 BREP 解析实体（圆角是真圆弧、
-    螺丝孔是真圆柱面；上盖仅 74 个面、底座仅 30 个面），可在 FreeCAD /
-    SolidWorks / 立创EDA / Fusion 里打开测量、改特征、做装配，不是 STL 那种
-    三角网格；发给商家打印仍以 .stl 为准。
+    螺丝孔是真圆柱面），可在 FreeCAD / SolidWorks / 立创EDA / Fusion 里打开测量、
+    改特征、做装配，不是 STL 那种三角网格；发给商家打印仍以 .stl 为准。
     装配体 STEP 内含 3 个独立实体：上盖 / 底座 / PCB 参考板，
     在 FreeCAD 里可用「Part → 拆分」逐件隐藏。PCB 参考板只是用来检查
     装配间隙的参考件，不是打印件，不要发给商家。
@@ -563,8 +585,8 @@ geom = dict(
     ANT=[P.ANT_X0, P.ANT_Y0, P.ANT_X1, P.H],
     ANT_SLOT_Z0=P.ANT_SLOT_Z0, ANT_SLOT_Z1=P.ANT_SLOT_Z1,
     RESET_POS=list(P.RESET_POS), RESET_HOLE_D=P.RESET_HOLE_D,
-    REV="H",
-    HOLES=P.HOLES, PARTS=P.PARTS,
+    REV="I",
+    HOLES=P.HOLES, SCREW_POS=P.SCREW_POS, PARTS=P.PARTS,
     SLOTS=[[n, list(b), z0, z1, d] for n, b, z0, z1, d in P.SLOTS],
     I2C_X=P.I2C_X, I2C_SLOT_W=P.I2C_SLOT_W,
     OPEN_Z0=P.OPEN_Z0, OPEN_Z1=P.OPEN_Z1, RIB_W=P.RIB_W,
@@ -573,6 +595,8 @@ geom = dict(
     RIGHT_SLOTS=[[P.RIGHT_5V_Y0, P.RIGHT_5V_Y1],
                  [P.RIGHT_XH_Y0, P.RIGHT_XH_Y1]],
     POST_D=P.POST_D, SCREW_HOLE_D=P.SCREW_HOLE_D, SCREW_CS_D=P.SCREW_CS_D,
+    BASE_BOSS_D=P.BASE_BOSS_D, LOCATOR_D=P.LOCATOR_D,
+    GAP=P.GAP, SHIFT=P.SHIFT,
     PCB_HOLE_D=P.PCB_HOLE_D, POST_PILOT_D=P.POST_PILOT_D,
     SCREW_CS_DEPTH=P.SCREW_CS_DEPTH,
     ANT_CENTER=list(P.ANT_CENTER),
