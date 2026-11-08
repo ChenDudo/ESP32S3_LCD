@@ -1,0 +1,107 @@
+# -*- coding: utf-8 -*-
+"""FreeCAD 外壳工程 (.FCStd) —— 可选的「着色版」生成宏
+
+现成的 ESP32S3_LCD_外壳工程.FCStd 已经生成好了，双击即可打开，
+内含上盖 A 版 / 底座 / PCB 参考板 3 个命名实体。
+
+本宏是可选的：FreeCADCmd 是纯控制台模式，生成的 .FCStd 不含
+GuiDocument（颜色 / 相机）。执行本宏会重新导入 STEP、设名称与颜色、
+把 PCB 参考板设为半透明、切到等轴测视图，并覆盖保存同名的 .FCStd，
+几何完全一致，只是补上外观属性。
+
+用法：FreeCAD 里 菜单「宏 → 宏...」→ 选中本文件 → 执行。
+想用 B 版上盖：把下面 TOP_FILE 改成 B 版文件名再执行一次即可。
+若整个 deliverables 文件夹被移动，只需改 BASE 这一个路径。
+"""
+import os
+import FreeCAD as App
+import FreeCADGui as Gui
+import Part
+
+BASE = r"C:\Users\14210\WorkBuddy\2026-11-07-21-40-20\cad\deliverables"
+
+TOP_FILE = "ESP32S3_LCD_全覆盖外壳_上盖_A版_可编辑.step"
+# TOP_FILE = "ESP32S3_LCD_全覆盖外壳_上盖_B版_可编辑.step"
+BASE_FILE = "ESP32S3_LCD_全覆盖外壳_底座_可编辑.step"
+ASSY_FILE = "ESP32S3_LCD_全覆盖外壳_装配体_含PCB参考.step"
+OUT_FILE = "ESP32S3_LCD_外壳工程.FCStd"
+
+GREY = (0.80, 0.82, 0.86)
+GREEN = (0.10, 0.55, 0.30)
+
+
+def read_shape(path):
+    """读 STEP。优先 Part.read，失败则回退到 Part.insert 临时文档。"""
+    try:
+        return Part.read(path)
+    except Exception:
+        tmp = App.newDocument("_step_import_tmp")
+        Part.insert(path, tmp.Name)
+        shapes = [o.Shape for o in tmp.Objects if hasattr(o, "Shape")]
+        result = Part.makeCompound(shapes)
+        App.closeDocument(tmp.Name)
+        return result
+
+
+def add_part(doc, name, label, shape, color):
+    obj = doc.addObject("Part::Feature", name)
+    obj.Label = label
+    obj.Shape = shape
+    if obj.ViewObject is not None:
+        obj.ViewObject.ShapeColor = color
+        obj.ViewObject.LineColor = (0.20, 0.22, 0.25)
+        obj.ViewObject.DisplayMode = "Flat Lines"
+    return obj
+
+
+def first_solid(shape):
+    solids = shape.Solids
+    if len(solids) != 1:
+        raise RuntimeError("期望 1 个实体，实际 %d 个" % len(solids))
+    return solids[0]
+
+
+def find_pcb(assy):
+    """装配体里 PCB 参考板的 Z 范围是 3.4~5.0，据此挑出它。"""
+    for s in assy.Solids:
+        bb = s.BoundBox
+        if abs(bb.ZMin - 3.4) < 0.05 and abs(bb.ZMax - 5.0) < 0.05:
+            return s
+    return None
+
+
+def main():
+    for f in (TOP_FILE, BASE_FILE, ASSY_FILE):
+        p = os.path.join(BASE, f)
+        if not os.path.isfile(p):
+            raise RuntimeError("找不到文件：%s\n请检查 BASE 路径。" % p)
+
+    doc = App.newDocument("ESP32S3_LCD_Enclosure_RevG")
+    doc.Label = "ESP32S3_LCD 全覆盖外壳 Rev G"
+
+    add_part(doc, "TopCover_A", "上盖（A 版，打印件）",
+             first_solid(read_shape(os.path.join(BASE, TOP_FILE))), GREY)
+    add_part(doc, "Base", "底座（打印件）",
+             first_solid(read_shape(os.path.join(BASE, BASE_FILE))), GREY)
+
+    pcb = find_pcb(read_shape(os.path.join(BASE, ASSY_FILE)))
+    if pcb is not None:
+        ref = add_part(doc, "PCB_Reference", "PCB 参考板（不打印，可隐藏）",
+                       pcb, GREEN)
+        ref.ViewObject.Transparency = 55
+    else:
+        App.Console.PrintWarning("装配体里未找到 PCB 参考板，已跳过。\n")
+
+    doc.recompute()
+    view = Gui.activeDocument().activeView()
+    view.viewAxonometric()
+    view.fitAll()
+
+    out = os.path.join(BASE, OUT_FILE)
+    doc.saveAs(out)
+    App.Console.PrintMessage("工程文件已保存：%s\n" % out)
+    App.Console.PrintMessage("共 %d 个对象；以后直接打开这个 .FCStd 即可。\n"
+                            % len(doc.Objects))
+
+
+main()

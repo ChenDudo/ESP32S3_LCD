@@ -1,0 +1,7 @@
+# 外壳设计目录局部忽略规则（不改动仓库根 .gitignore）
+__pycache__/
+*.py[cod]
+*.FCBak
+*.FCBak1
+.DS_Store
+Thumbs.db

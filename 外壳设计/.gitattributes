@@ -1,0 +1,14 @@
+# CAD 交换文件与工程源数据按字节保存，禁止 Git 的 LF/CRLF 自动转换
+# （仓库 core.autocrlf=true，STEP/DXF 等被当成文本时会被改写行尾）
+*.step   -text
+*.stp    -text
+*.dxf    -text
+*.stl    -text
+*.FCStd  -text
+*.FCMacro -text
+*.epru   -text
+*.pdf    -text
+*.png    -text
+*.jpg    -text
+*.jpeg   -text
+*.webp   -text
