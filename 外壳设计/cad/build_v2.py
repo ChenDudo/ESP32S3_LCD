@@ -13,8 +13,10 @@
 11-08 追加修订：
   A 方案 —— 原 4 个 Φ3.8 定位销过约束（单边间隙 0.10 mm < SLA 收缩 0.31 mm），
   改为 HOLES[0] 圆销 + HOLES[3] 菱形销（沿两销连线削扁到 3.20），另 2 孔只留支撑台。
-  顶面接口凸字 —— 字高 3.20、凸出 0.40、底面嵌入顶板 0.05，字形由 text_geom.py
+  顶面接口凸字 —— 字高 2.40、凸出 0.40、底面嵌入顶板 0.05，字形由 text_geom.py
   统一生成，STL / STEP / DXF / PDF / 预览完全一致。
+  11-08 第四次修订：显示窗增加 Y 偏心 WIN_OFFSET_Y=-0.90（窗口 Y 35.60），
+  凸字缩小并移近接口；右侧字头朝左（rot +90）、上边 I2C 字头朝下（rot 180）。
 """
 import os, json, csv, math
 import numpy as np
@@ -260,11 +262,13 @@ T(m, "顶板完整封闭、无镂空；仅显示窗 + Φ4 复位孔", 0, P.H + 2
 T(m, f"四边统一开口带 Z {P.OPEN_Z0:.2f}~{P.OPEN_Z1:.2f}（高 {P.OPEN_Z_H:.2f}）：天线 27.00 与 I2C 宽窗平齐；双 Type-C 36.00；5V 18.00 / XH-5P 23.00",
   0, P.H + 27, 2.8, "ANT")
 T(m, f"Rev I 偏心屏：显示窗中心 X={P.WIN_CX:.2f} / Y={P.WIN_CY:.2f}"
-     f"（相对外壳中心左移 {-P.WIN_OFFSET_X:.2f}），窗口左缘 X={WIN[0]:.2f}；请勿居中",
+     f"（相对外壳中心左移 {-P.WIN_OFFSET_X:.2f}、下移 {-P.WIN_OFFSET_Y:.2f}），"
+     f"窗口左缘 X={WIN[0]:.2f} / 下缘 Y={WIN[1]:.2f}；请勿移回居中",
   0, P.H + 32, 2.8, "ANT")
 T(m, f"单版本：窗口 {P.WIN_W:.2f} x {P.WIN_H:.2f} 比实测 A.A {P.LCD_AA_X:.2f} x {P.LCD_AA_Y:.2f} 四周各放大 {P.WIN_CLEAR_X:.2f} / {P.WIN_CLEAR_Y:.2f}",
   0, P.H + 37, 2.8, "ANT")
-T(m, f"顶板 9 组凸字：USB / COM / Power / UART / RST + 上边 I2C1~I2C4（右侧两字竖排）",
+T(m, "顶板 9 组凸字：USB / COM / Power / UART / RST + 上边 I2C1~I2C4；"
+     "右侧字头朝左、上边 I2C 字头朝下、RST 横排；全部贴近对应接口",
   0, P.H + 42, 2.8, "NOTE")
 T(m, f"字高 {P.TEXT_SIZE:.2f}、凸出 {P.TEXT_RAISE:.2f}；MARK 层 1:1 轮廓，一体打印，勿打磨掉",
   0, P.H + 46, 2.8, "NOTE")
@@ -357,7 +361,7 @@ sec = [PP(0, P.T_BASE), PP(P.W, P.T_BASE), PP(P.W, P.H_TOTAL),
        PP(P.T_WALL, P.Z_TOP_IN), PP(P.T_WALL, P.H_TOTAL),
        PP(0, P.H_TOTAL)]
 m3.add_lwpolyline(sec, close=True, dxfattribs={"layer": "SECTION"})
-# 顶板窗口断口（剖面在 y=33.5 穿过窗口）
+# 顶板窗口断口（剖面在窗口中心 y=WIN_CY 处穿过）
 wa, wb = WIN[0] * SC, WIN[2] * SC
 LN(m3, (SX0 + wa, SZ + P.Z_TOP_IN * SC), (SX0 + wa, SZ + P.H_TOTAL * SC), "SECTION")
 LN(m3, (SX0 + wb, SZ + P.Z_TOP_IN * SC), (SX0 + wb, SZ + P.H_TOTAL * SC), "SECTION")
@@ -397,12 +401,16 @@ notes = [
     "1. 上盖为不透明全覆盖件，仅开显示区窗口；屏幕黑边（右侧宽于左侧）被顶板压住。",
     "2. 显示窗 74.40x50.00，按实测 LCD A.A 73.44x48.96 四周各放大 0.48/0.52 让位；",
     "   原 A/B 双版窗口均小于 A.A（会切掉亮区像素），已作废，本版只剩一个上盖。",
-    "2b.【偏心屏对位】ATK-MD0350 显示区不居中：右侧黑边宽、左侧窄，上下对称。",
-    "   窗口中心 X 由 52.60 左移至 49.85（WIN_OFFSET_X=-2.75），Y 保持 33.50；",
+    "2b.【偏心屏对位 X】ATK-MD0350 显示区左右不居中：右黑边宽、左黑边窄。",
+    f"   窗口中心 X={P.WIN_CX:.2f}（WIN_OFFSET_X={P.WIN_OFFSET_X:.2f}，相对外壳中心左移 2.75）；",
     "   除 <=0.5mm 装配让位外，四周黑边由完整不透明顶板压住。依据规格书 OUTLINE 84.69x55.26",
     "   / LCD A.A 73.44x48.96 长边尺寸链偏心 2.77 mm，实物图逐像素 2.52 mm，取 2.75。",
-    "   打样前点亮屏幕实测：亮区左缘到模块左缘 L、右缘到模块右缘 R，(L-R)/2 即偏移量；",
-    "   不符改 params_v2.py 的 WIN_OFFSET_X 一行并重跑全部脚本。",
+    f"2c.【偏心屏对位 Y】用户 EDA 截图量到 PCB 短边两端余量 8.210 / 10.010 mm，",
+    "   相差 1.800 -> 显示区中心相对 PCB 中心偏 0.900 mm；截图左旋 90° 后 10.010 在上、",
+    f"   8.210 在下，故 WIN_OFFSET_Y={P.WIN_OFFSET_Y:.2f}（窗口 Y={P.WIN_CY:.2f}，原 36.50）。",
+    "   .epru 中 LCD 模块丝印外框 1.856~58.144（中心 30.000）对 PCB 中心 30.900 亦差 0.900。",
+    "   打样前点亮屏幕实测：亮区左/右缘到模块缘 L/R，(L-R)/2 即 X 偏移量；",
+    "   上/下缘余量 U/D，(D-U)/2 即 Y 偏移量；不符改 params_v2.py 两行并重跑全部脚本。",
     f"3. 顶板完整封闭不镂空；四边开口统一 Z {P.OPEN_Z0:.2f}~{P.OPEN_Z1:.2f}"
     f"（高 {P.OPEN_Z_H:.2f}，上沿留 {P.OPEN_Z_TOP_WALL:.2f} 实壁），天线让位窗与 I2C 窗上下沿平齐。",
     "4. 天线投影 20mm 内禁止金属件、覆铜；4 个连接柱距天线中心均 >45mm。",
@@ -413,8 +421,10 @@ notes = [
     "   不穿过 PCB。LCD 板 97.92 覆盖 PCB 四角 φ4 孔且左端无孔，旧穿板方案装不上。",
     "   PCB 由底座 2 个对角定位销（1 圆 Φ3.8 + 1 菱形 3.20）+ 4 个 Φ7 支撑台定位；",
     "   另 2 个 φ4 孔空置只托底。菱形销沿两销连线削扁，吸收 SLA 收缩约 0.31 mm。",
-    "6b. 顶板外表面一体成型 9 组凸字（MARK 层）：USB / COM（下边）、I2C1~I2C4（上边）、",
-    "    Power / UART（右边，竖排字头朝右）、RST（上边复位孔）；字高 3.20、凸出 0.40。",
+    "6b. 顶板外表面一体成型 9 组凸字（MARK 层）：USB / COM（下边，字头朝上）、",
+    f"    I2C1~I2C4（上边，字头朝下）、Power / UART（右边，竖排字头朝左）、",
+    f"    RST（上边复位孔旁，横排字头朝上）；字高 {P.TEXT_SIZE:.2f}、凸出 {P.TEXT_RAISE:.2f}。",
+    "    9 组字均贴近各自接口的侧壁开窗，站在该边看过去方向正读。",
     "7. 材料必须绝缘非金属；不喷金属漆、不镀层、不用碳纤维/导电料；建议 PETG 或韧性树脂。",
     "8. 未注公差按 3D 打印常规工艺；本图不作 GB/ISO 符合性声明。",
 ]
@@ -456,6 +466,17 @@ with open(os.path.join(OUT, "外壳实物报价.csv"), "w", newline="", encoding
     csv.writer(f).writerows(quote)
 
 # ---------------- 下单说明 ----------------
+# 凸字净空指标按当前字形实时计算，避免文档里的数字随改版过期
+_marks = [(t, unary_union(ps)) for t, _, _, _, ps, _ in TG.all_marks()]
+_wbox = box(*WIN)
+_rst_hole = Point(*P.RESET_POS).buffer(P.RESET_HOLE_D / 2)
+MK_D_WIN = min(u.distance(_wbox) for _, u in _marks)
+MK_D_EDGE = min(u.distance(OUTER.boundary) for _, u in _marks)
+MK_D_HOLE = min(u.distance(_rst_hole) for _, u in _marks)
+MK_D_PAIR = min(_marks[i][1].distance(_marks[j][1])
+                for i in range(len(_marks)) for j in range(i + 1, len(_marks)))
+MK_STROKE = round(0.50 * P.TEXT_SIZE / 3.20, 2)   # 3.20 字高时笔画约 0.50 mm
+
 note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev I —— 淘宝打样下单说明
 ==========================================================
   【零、Rev I 结构修正：4 颗螺丝不再穿过 PCB】
@@ -491,12 +512,18 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev I —— 淘宝打样下单
       下边双 Type-C：左 "USB"、右 "COM"
       右边 5V Type-C："Power"；右边 XH2.54-5P："UART"（原标注 5P 改名）
       上边 4 个 I2C 传感器口："I2C1" / "I2C2" / "I2C3" / "I2C4"（按座中心 X 对位）
-      上边 Φ4 复位孔右侧："RST"
-      右边 Power / UART 竖排（顺时针转 90 度、字头朝右），其余 7 组横排可读。
+      上边 Φ4 复位孔右侧："RST"（横排、字头朝上，按键标注按你要求保持正视可读）
+  ★ 字头朝向统一为「字母顶部朝向显示窗」，站在对应那一边看过去就是正读：
+      下边 USB / COM 字头朝上；右边 Power / UART 竖排、字头朝左；
+      上边 I2C1~I2C4 字头朝下；只有 RST 例外（字头朝上）。
+  ★ 9 组字全部移近各自接口的侧壁开窗：下边 Y≈3.30、上边 Y≈69.80、右边 X≈107.00，
+    比上一版更贴边；字高由 3.20 缩小到 {P.TEXT_SIZE:.2f} mm（用户反馈「字体太大」）。
   ★ 字高 {P.TEXT_SIZE:.2f} mm、凸出顶板 {P.TEXT_RAISE:.2f} mm（顶面 Z 16.00→16.40），
-    笔画最细约 0.5 mm，SLA / FDM 都能成型；底面嵌入顶板 {P.TEXT_EMBED:.2f} mm 防掉字。
-    9 组字都在显示窗外的顶板边框带内：距显示窗 >=2.87 mm、距外形边 >=4.17 mm，
-    字与字最小间距 2.86 mm；不压显示窗 / 复位孔 / 四角连接柱；树脂绝缘，不影响天线。
+    笔画最细约 {MK_STROKE:.2f} mm：SLA 光敏树脂可稳定成型，FDM 0.4 喷嘴可能断笔，
+    请优先选 SLA；底面嵌入顶板 {P.TEXT_EMBED:.2f} mm 防掉字。
+    9 组字都在显示窗外的顶板边框带内：距显示窗 >= {MK_D_WIN:.2f} mm、
+    距外形边 >= {MK_D_EDGE:.2f} mm、距复位孔 >= {MK_D_HOLE:.2f} mm、
+    字与字最小间距 {MK_D_PAIR:.2f} mm；不压显示窗 / 复位孔 / 四角连接柱；树脂绝缘，不影响天线。
   ★ 给商家：凸字与壳体一体打印，不额外收费；后处理请选「不需要打磨」，
     不要把字磨平，也不要喷漆盖住。想更清晰可用黑色模型漆 / 马克笔涂凸字表面
     （可选后处理，非必需）。字形由 text_geom.py 统一生成，STL / STEP / DXF / PDF 一致。
@@ -509,12 +536,22 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev I —— 淘宝打样下单
     四周各比 A.A 放大 {P.WIN_CLEAR_X:.2f} / {P.WIN_CLEAR_Y:.2f} mm。
     取舍：理想装配下四周会露出 <=0.5 mm 极窄黑边，但绝不遮挡显示内容。
     请转告商家：不要按旧版习惯把窗口缩小或移回居中。
-  ★ 偏心量仍待实测：显示区左缘到模块左缘 = L，右缘到模块右缘 = R。
-    当前 WIN_OFFSET_X = {P.WIN_OFFSET_X:.2f}（窗口中心 X={P.WIN_CX:.2f} / Y={P.WIN_CY:.2f}，
-    外壳中心 X={P.W/2:.2f}），由规格书尺寸链 2.77 mm 与实物图像素 2.52 mm 推算，未实测。
-    若实测 (L-R)/2 不同：改 params_v2.py 的 WIN_OFFSET_X 一行，
+  ★ X 偏心量仍待实测：显示区左缘到模块左缘 = L，右缘到模块右缘 = R。
+    当前 WIN_OFFSET_X = {P.WIN_OFFSET_X:.2f}（窗口中心 X={P.WIN_CX:.2f}，外壳中心 X={P.W/2:.2f}），
+    由规格书尺寸链 2.77 mm 与实物图像素 2.52 mm 推算，未实测。
+  ★ Y 偏心量（11-08 新增，依据你给的 EDA 截图，已按实测值定稿）：
+    截图量到 PCB 短边两端到 LCD 模块基准 = 8.210 / 10.010 mm，相差 1.800 mm，
+    即显示区中心相对 PCB 中心偏 (10.010-8.210)/2 = 0.900 mm。把截图向左旋转 90°
+    （= 屏幕正视、天线朝上）后，10.010 在上边 / 8.210 在下边，故显示区偏【下】。
+    当前 WIN_OFFSET_Y = {P.WIN_OFFSET_Y:.2f}，窗口中心 Y={P.WIN_CY:.2f}；
+    外壳几何中心 Y={P.H/2:.2f}，上一版窗口恰在 36.50 居中，本版下移 0.90。
+    独立佐证：工程 .epru 里 LCD 模块丝印外框在 PCB 短边为 1.856~58.144 mm
+    （中心 30.000），PCB 板框 61.80 中心 30.900，正好相差 0.900 mm。
+    若实测不同：改 params_v2.py 的 WIN_OFFSET_X / WIN_OFFSET_Y 两行，
     重跑 build_v2.py / make_pdf_v2.py / make_views.py / build_step.py /
     make_preview.py / freecadcmd build_fcstd.py 即可同步全部交付物。
+  ★ 请转告商家：窗口在 X 左移 2.75、Y 下移 0.90 都是刻意对位偏心屏，
+    绝非画歪，不要擅自把窗口移回几何居中或缩小。
 
   【打样前必测：整机高度】把 LCD 屏和 ESP32 系统板装到 PCB 上后，
   量「PCB 顶面到整机最高点」的距离。本设计内腔从 PCB 顶面算起留 9.20 mm
@@ -548,8 +585,9 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev I —— 淘宝打样下单
 【二、复制给商家的一段话】
   两件 3D 打印外壳，外形 {P.W:.2f} x {P.H:.2f} x {P.H_TOTAL:.2f} mm，整套约 {vol_all:.0f} cm3。
   上盖顶板厚 1.8、侧壁厚 1.6、总高 16.0；显示窗 {P.WIN_W:.2f} x {P.WIN_H:.2f} mm
-  （四角 R1.5），窗口中心 X={P.WIN_CX:.2f} / Y={P.WIN_CY:.2f}（相对外壳中心左移
-  {-P.WIN_OFFSET_X:.2f} mm，为对准偏心屏显示区），请勿擅自把窗口移回居中；
+  （四角 R1.5），窗口中心 X={P.WIN_CX:.2f} / Y={P.WIN_CY:.2f}（相对外壳中心
+  左移 {-P.WIN_OFFSET_X:.2f} mm、下移 {-P.WIN_OFFSET_Y:.2f} mm，为对准偏心屏显示区），
+  请勿擅自把窗口移回几何居中；
   顶板完整无镂空，仅显示窗 + Φ4 复位孔；四边侧壁统一开口带
   Z {P.OPEN_Z0:.2f}~{P.OPEN_Z1:.2f}（开口高 {P.OPEN_Z_H:.2f}，上沿留 {P.OPEN_Z_TOP_WALL:.2f} 实壁；
   天线让位窗 27.00 与 I2C 合并宽窗平齐），窗口已按带壳插头与线材留余量，
@@ -559,8 +597,9 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev I —— 淘宝打样下单
   底座有 4 个 Φ{P.BASE_BOSS_D:.1f} 支撑台和 2 个对角定位销（1 圆 Φ{P.LOCATOR_D:.1f}
   + 1 菱形 {P.DIAMOND_W:.2f}），用来定位 PCB；另 2 个 PCB 孔空置。
   顶板外表面有 9 组一体成型凸字标注 USB / COM / Power / UART / RST / I2C1~I2C4，
-  右侧 Power / UART 为竖排（字头朝右），字高 {P.TEXT_SIZE:.2f}、凸出 {P.TEXT_RAISE:.2f} mm，
-  请按 STL 原样保留，不要打磨掉、不要喷漆盖住。
+  右侧 Power / UART 竖排字头朝左、上边 I2C1~I2C4 字头朝下、RST 横排字头朝上，
+  字高 {P.TEXT_SIZE:.2f}、凸出 {P.TEXT_RAISE:.2f} mm、笔画最细约 {MK_STROKE:.2f} mm，
+  请按 STL 原样保留，不要打磨掉、不要喷漆盖住；字较细，务必选 SLA 光敏树脂打印。
   不透明绝缘非金属，不喷金属漆；请按 STL 原尺寸 1:1 打印，不要缩放、不要加支撑在窗口内。
   建议顶板朝上平放打印，层高 0.2 mm 以下，窗口与四角连接柱精度优先。
 
@@ -665,7 +704,8 @@ geom = dict(
     LCD_AA_W=P.LCD_AA_X, LCD_AA_H=P.LCD_AA_Y,
     WIN_CLEAR_X=P.WIN_CLEAR_X, WIN_CLEAR_Y=P.WIN_CLEAR_Y,
     WIN_R=P.WIN_R,
-    WIN_OFFSET_X=P.WIN_OFFSET_X, WIN_CX=P.WIN_CX, WIN_CY=P.WIN_CY,
+    WIN_OFFSET_X=P.WIN_OFFSET_X, WIN_OFFSET_Y=P.WIN_OFFSET_Y,
+    WIN_CX=P.WIN_CX, WIN_CY=P.WIN_CY,
     ANT=[P.ANT_X0, P.ANT_Y0, P.ANT_X1, P.H],
     ANT_SLOT_Z0=P.ANT_SLOT_Z0, ANT_SLOT_Z1=P.ANT_SLOT_Z1,
     RESET_POS=list(P.RESET_POS), RESET_HOLE_D=P.RESET_HOLE_D,

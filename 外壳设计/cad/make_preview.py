@@ -2,7 +2,8 @@
 """Rev I 预览图：上盖俯视（实测 A.A 虚线 + 放大让位窗口实线）+ 等距 3D。
 
 灰色虚线 = 实测 LCD A.A 73.44×48.96；红色实线 = 唯一显示窗 74.40×50.00，
-四周各放大 0.48/0.52 mm 让位。窗口中心左移 2.75 对准偏心屏。
+四周各放大 0.48/0.52 mm 让位。窗口中心 X 左移 2.75、Y 下移 0.90 对准偏心屏
+（Y 方向并非几何居中）。顶板 9 组凸字：右侧字头朝左、上边 I2C 字头朝下、RST 横排。
 """
 import os
 import numpy as np
@@ -83,20 +84,32 @@ def top_view():
             f"左移 {-P.WIN_OFFSET_X:.2f} mm", color="#c0392b",
             ha="center", fontsize=10,
             bbox=dict(facecolor="white", alpha=0.85, edgecolor="none", pad=2))
+    # 外壳 Y 中心线 vs 窗口 Y 中心线：突出显示「窗口不是 Y 轴居中」
+    ax.plot([-4, P.W + 4], [P.H / 2, P.H / 2], color="#8a97a3",
+            ls=":", lw=1.2)
+    ax.plot([wx - 1.5, wx + ww + 1.5], [P.WIN_CY, P.WIN_CY],
+            color="#c0392b", ls="--", lw=1.0, alpha=0.65)
+    x0 = wx - 4.5
+    ax.annotate("", xy=(x0, P.H / 2), xytext=(x0, P.WIN_CY),
+                arrowprops=dict(arrowstyle="<->", color="#c0392b", lw=1.6))
+    ax.text(x0 - 1.0, (P.H / 2 + P.WIN_CY) / 2,
+            f"下移 {-P.WIN_OFFSET_Y:.2f} mm", color="#c0392b",
+            ha="center", va="center", fontsize=9, rotation=90,
+            bbox=dict(facecolor="white", alpha=0.85, edgecolor="none", pad=2))
 
-    ax.text(P.W / 2, -10.5, f"外壳中心 X={P.W/2:.2f}",
+    ax.text(P.W / 2, -10.5, f"外壳中心 X={P.W/2:.2f} / Y={P.H/2:.2f}",
             ha="center", color="#5a6d7d", fontsize=10)
     ax.text(0, -14.5,
             "绿色虚线框 = 实测 LCD A.A 73.44×48.96；红色实线框 = 显示窗 74.40×50.00（四周各放大 0.48/0.52 让位）",
             color="#5a6d7d", fontsize=9.5)
     ax.text(wx + ww / 2, wy + wh / 2,
-            f"显示窗 {ww:.2f}×{wh:.2f}\n中心 X={P.WIN_CX:.2f}",
+            f"显示窗 {ww:.2f}×{wh:.2f}\n中心 X={P.WIN_CX:.2f} / Y={P.WIN_CY:.2f}",
             ha="center", va="center", color="#1b2a3a", fontsize=11,
             bbox=dict(facecolor="white", alpha=0.72, edgecolor="none", pad=3))
     ax.text(0, P.H + 8,
-            "Rev I 上盖俯视 · 四角连接柱在 PCB 板框外 · 窗口按 A.A 放大让位 "
-            "· 顶板 9 组凸字（含 I2C1~4，右侧竖排）· 单位 mm",
-            fontsize=12, color="#1b2a3a")
+            "Rev I 上盖俯视 · 窗口 X 左移 2.75 / Y 下移 0.90 对准偏心屏（非 Y 居中）"
+            f" · 顶板 9 组凸字（字高 {P.TEXT_SIZE:.2f}，右侧字头朝左、上边 I2C 字头朝下）· 单位 mm",
+            fontsize=11, color="#1b2a3a")
     ax.set_xlim(-8, P.W + 8)
     ax.set_ylim(-17, P.H + 12)
     ax.set_aspect("equal")

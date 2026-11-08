@@ -172,9 +172,12 @@ CIRCLE(*P(*G["RESET_POS"]), G["RESET_HOLE_D"] / 2, REDC, 0.6,
        fill=HexColor("#ffffff"))
 # 顶板外表面一体成型接口凸字（与 STL / STEP 同一字形轮廓）
 MARKS(OX, OY, SC)
-# 复位孔标注移到孔左上方空白带，避开上边 I2C1~I2C4 / RST 凸字与侧壁开窗投影
-T("Φ4 孔", P(G["RESET_POS"][0] - 9, G["RESET_POS"][1] + 3.8)[0],
-  P(G["RESET_POS"][0] - 9, G["RESET_POS"][1] + 3.8)[1], 4.8, REDC)
+# 复位孔标注：上边 I2C 凸字已上移到 Y≈69.80，故改放窗口上缘与 I2C 之间的空白带，
+# 并加一条短引线指向圆孔，避免与 I2C2 / RST 凸字重叠
+_hx, _hy = P(G["RESET_POS"][0], G["RESET_POS"][1])
+T("Φ4 孔", P(25.0, 61.7)[0], P(25.0, 61.7)[1], 4.8, REDC)
+LN(P(37.5, 63.0)[0], P(37.5, 63.0)[1],
+   _hx - G["RESET_HOLE_D"] / 2 - 0.6, _hy - 1.8, REDC, 0.3)
 # 4 个四角连接柱（PCB 板框之外）
 for x, y in SCREW_POS:
     CIRCLE(*P(x, y), G["POST_D"] / 2, BLUE, 0.4, dash=(1.5, 1))
@@ -190,11 +193,12 @@ for name, (x, y) in G["PARTS"].items():
 for i, cx in enumerate(G["I2C_X"], 1):
     RECT(P(cx - G["I2C_SLOT_W"] / 2, H - 1.6)[0], P(cx - G["I2C_SLOT_W"] / 2, H - 1.6)[1],
          G["I2C_SLOT_W"], 1.6, GREEN, 0.5, fill=HexColor("#e4f3ea"))
-# 剖切线
-LN(OX - 6, P(0, G["H"] / 2)[1], OX, P(0, G["H"] / 2)[1], BLUE, 0.5)
-LN(OX + W, P(0, G["H"] / 2)[1], OX + W + 6, P(0, G["H"] / 2)[1], BLUE, 0.5)
-T("A", OX - 8, P(0, G["H"] / 2)[1] + 1, 8, BLUE)
-T("A", OX + W + 6.5, P(0, G["H"] / 2)[1] + 1, 8, BLUE)
+# 剖切线（沿窗口中心，非外壳几何中心）
+_sy = P(0, G["WIN_CY"])[1]
+LN(OX - 6, _sy, OX, _sy, BLUE, 0.5)
+LN(OX + W, _sy, OX + W + 6, _sy, BLUE, 0.5)
+T("A", OX - 8, _sy + 1, 8, BLUE)
+T("A", OX + W + 6.5, _sy + 1, 8, BLUE)
 # 尺寸
 DIMH(OX, OX + W, OY - 8, f"{W:.2f}")
 DIMV(OY, OY + H, OX - 9, f"{H:.2f}")
@@ -222,7 +226,8 @@ for r, row in enumerate(rows):
     for j, v in enumerate(row):
         T(v, colx[j] + 1, y, 6.3 if r else 6.8, INK if r else BLUE)
 T("窗口比 A.A 大：宁露极窄黑边，不切亮区。", IX, 148, 6.6, REDC)
-T("偏心量 -2.75 仍为推算值，打样前实测。", IX, 142.5, 6.6, REDC)
+T(f"窗口 X 左移 {-G['WIN_OFFSET_X']:.2f}（推算待实测）、Y 下移 {-G.get('WIN_OFFSET_Y', 0):.2f}（EDA 实测）。",
+  IX, 142.5, 6.6, REDC)
 
 T("四边接口开窗（PCB 左旋 90°、天线朝上的正视图）", IX, 137, 8.5, BLUE)
 info = [
@@ -241,9 +246,9 @@ T("关键尺寸 / 结构", IX, 88, 8.5, BLUE)
 specs = [
     f"外形 {W:.2f} × {H:.2f} × {G['H_TOTAL']:.2f}，外圆角 R{G['R_OUT']:.1f}",
     f"顶板厚 {G['T_TOP']:.2f} / 侧壁厚 {G['T_WALL']:.2f} / 内腔净高 {G['H_CAVITY']:.2f}",
-    f"窗口 {G['WIN_W']:.2f}×{G['WIN_H']:.2f} R{G['WIN_R']:.1f}；中心 X={G['WIN_CX']:.2f}",
+    f"窗口 {G['WIN_W']:.2f}×{G['WIN_H']:.2f} R{G['WIN_R']:.1f}；中心 X={G['WIN_CX']:.2f} / Y={G['WIN_CY']:.2f}",
     f"实测 A.A {G['LCD_AA_W']:.2f}×{G['LCD_AA_H']:.2f}，四周让位 {G['WIN_CLEAR_X']:.2f}/{G['WIN_CLEAR_Y']:.2f}",
-    f"偏心屏：窗口左移 {-G['WIN_OFFSET_X']:.2f} 对准显示区，宁露黑边不切亮区",
+    f"偏心屏：X 左移 {-G['WIN_OFFSET_X']:.2f}、Y 下移 {-G.get('WIN_OFFSET_Y', 0):.2f} 对准显示区",
     f"顶板完整无镂空：仅显示窗 + Φ4 复位孔；四边开口统一 Z {G['OPEN_Z0']:.2f}~{G['OPEN_Z1']:.2f}",
     "插线余量：窗口按带壳插头 + 线材 Φ3~5 留，不按母座贴边",
     "4×Φ6 连接柱在 PCB 板框外；M3 不穿板、φ4 孔空置",
@@ -257,9 +262,9 @@ T("图例", IX, 30, 8, BLUE)
 CIRCLE(IX + 3, 24, 2, BLUE, 0.4, dash=(1.5, 1)); T("四角 Φ6 连接柱（板框外）", IX + 8, 22.5, 6.4, INK)
 RECT(IX, 16, 6, 3, GREEN, 0.4, fill=HexColor("#e4f3ea")); T("I2C 侧壁开窗", IX + 8, 17, 6.4, INK)
 RECT(IX + 55, 16, 6, 3, BLUE, 0.4, fill=HexColor("#e6eff9")); T("侧壁让位窗", IX + 63, 17, 6.4, INK)
-T(f"顶板 9 组凸字：USB/COM/Power/UART/RST + I2C1~4（右侧两字竖排），字高 {G['TEXT_SIZE']:.2f}",
-  IX, 11, 6.2, INK)
-FOOTER("注：Rev I 四角连接柱移出 PCB 板框，M3 不穿板；窗口按 A.A 放大让位；顶板 9 组凸字一体成型，勿打磨掉。")
+T(f"顶板 9 组凸字（字高 {G['TEXT_SIZE']:.2f}）：右侧字头朝左 / 上边 I2C 字头朝下 / RST 横排，均贴近接口",
+  IX, 11, 5.8, INK)
+FOOTER("注：Rev I 四角连接柱移出 PCB 板框，M3 不穿板；窗口 X 左移 2.75 / Y 下移 0.90 对准偏心屏；顶板 9 组凸字一体成型，勿打磨掉。")
 
 
 # ================= 页 2：底座 + 剖面 =================

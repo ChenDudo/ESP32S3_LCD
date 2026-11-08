@@ -5,3 +5,7 @@ __pycache__/
 *.FCBak1
 .DS_Store
 Thumbs.db
+
+# 目视校验渲染图与历史版本归档只留在本机完整工作区，不进仓库
+cad/_tmp_*.png
+cad/archive_*/

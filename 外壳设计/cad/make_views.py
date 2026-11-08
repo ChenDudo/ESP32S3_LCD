@@ -192,6 +192,8 @@ TC(f"{ww:.2f} × {wh:.2f}（A.A + 让位）", FX + (wx + ww / 2) * S,
    FY + (wy + wh / 2) * S - 3, 7, REDC)
 TC("四周各放大 0.5，不切亮区", FX + (wx + ww / 2) * S,
    FY + (wy + wh / 2) * S - 10, 6.5, GRAY)
+TC(f"窗口 X 左移 {-G['WIN_OFFSET_X']:.2f} / Y 下移 {-G.get('WIN_OFFSET_Y', 0):.2f}，对准偏心屏（非 Y 居中）",
+   FX + (wx + ww / 2) * S, FY + (wy + wh / 2) * S - 18, 6.5, REDC)
 # 侧壁让位窗投影（靠上边窄条）
 RECT(FX + AX0 * S, FY + AY0 * S, (AX1 - AX0) * S, (AY1 - AY0) * S,
      BLUE, 0.55, fill=ANTF, dash=(2, 1.2))
@@ -204,8 +206,11 @@ for a, b in G["I2C_GROUPS"]:
 CIRCLE(FX + RST[0] * S, FY + RST[1] * S, RSTD / 2 * S,
        REDC, 0.6, fill=WINF)
 MARKS(FX, FY, S)
-# 孔标注移到孔左上方空白带，避开上边 I2C1~I2C4 / RST 凸字
-T("Φ4 孔", FX + (RST[0] - 9) * S, FY + (RST[1] + 3.6) * S, 5.2, REDC)
+# 孔标注：上边 I2C 凸字已上移到 Y≈69.80，改放窗口上缘与 I2C 之间的空白带，
+# 并加短引线指向圆孔，避免与 I2C2 / RST 凸字重叠
+T("Φ4 孔", FX + 25.0 * S, FY + 61.7 * S, 5.2, REDC)
+LN(FX + 37.5 * S, FY + 63.0 * S,
+   FX + (RST[0] - RSTD / 2 - 0.6) * S, FY + (RST[1] - 1.8) * S, REDC, 0.3)
 # 4 个四角连接柱（隐藏线）
 for x, y in SCREW_POS:
     CIRCLE(FX + x * S, FY + y * S, G["POST_D"] / 2 * S, BLUE, 0.4, dash=(1.5, 1))
@@ -213,11 +218,11 @@ for x, y in SCREW_POS:
     px, py = FX + x * S, FY + y * S
     LN(px - 5, py, px + 5, py, GRAY, 0.2)
     LN(px, py - 5, px, py + 5, GRAY, 0.2)
-# 剖切标记 A-A
-LN(FX - 7, FY + H / 2 * S, FX, FY + H / 2 * S, BLUE, 0.5)
-LN(FX + FW, FY + H / 2 * S, FX + FW + 7, FY + H / 2 * S, BLUE, 0.5)
-T("A", FX - 10, FY + H / 2 * S + 1, 8, BLUE)
-T("A", FX + FW + 8, FY + H / 2 * S + 1, 8, BLUE)
+# 剖切标记 A-A（沿窗口中心，非外壳几何中心）
+LN(FX - 7, FY + G["WIN_CY"] * S, FX, FY + G["WIN_CY"] * S, BLUE, 0.5)
+LN(FX + FW, FY + G["WIN_CY"] * S, FX + FW + 7, FY + G["WIN_CY"] * S, BLUE, 0.5)
+T("A", FX - 10, FY + G["WIN_CY"] * S + 1, 8, BLUE)
+T("A", FX + FW + 8, FY + G["WIN_CY"] * S + 1, 8, BLUE)
 # 尺寸
 DIMH(FX, FX + FW, FY - 10, f"{W:.2f}")
 DIMV(FY, FY + FH, FX - 11, f"{H:.2f}")
@@ -323,7 +328,7 @@ specs = [
     (f"顶板 {TTI:.2f} / 侧壁 {G['T_WALL']:.2f} / 底板 {TB:.2f} / 内腔 {G['H_CAVITY']:.2f}", INK),
     (f"显示窗 {G['WIN_W']:.2f}×{G['WIN_H']:.2f} R{G['WIN_R']:.1f}（唯一版本）", REDC),
     (f"实测 A.A {G['LCD_AA_W']:.2f}×{G['LCD_AA_H']:.2f}，四周让位 {G['WIN_CLEAR_X']:.2f}/{G['WIN_CLEAR_Y']:.2f}", REDC),
-    (f"窗口中心 X={G['WIN_CX']:.2f}/Y={G['WIN_CY']:.2f}，偏心屏左移 {-G['WIN_OFFSET_X']:.2f}", REDC),
+    (f"窗口中心 X={G['WIN_CX']:.2f}/Y={G['WIN_CY']:.2f}；X 左移 {-G['WIN_OFFSET_X']:.2f}、Y 下移 {-G.get('WIN_OFFSET_Y', 0):.2f}", REDC),
     (f"顶板无镂空：仅显示窗 + Φ{RSTD:.1f} 复位孔；宁露黑边不切亮区", GREEN),
     (f"统一开口带 Z {AZ0:.2f}~{AZ1:.2f}（四边平齐）", BLUE),
     (f"上边：天线 {AX1-AX0:.2f} + I2C 合并宽窗 25.10/24.90", BLUE),
@@ -334,7 +339,7 @@ specs = [
     (f"四角 Φ{G['POST_D']:.1f} 连接柱在 PCB 板框外；M3 不穿板", REDC),
     (f"PCB 由 2 个对角销定位（圆 Φ{G['LOCATOR_D']:.1f} + 菱形 {G['DIAMOND_W']:.2f}）", INK),
     ("另 2 个 φ4 孔空置；菱形销沿对角削扁吸收 0.31 mm 收缩", INK),
-    ("顶板 9 组凸字：USB/COM/Power/UART/RST + I2C1~4（右侧两字竖排）", GREEN),
+    (f"顶板 9 组凸字（字高 {G['TEXT_SIZE']:.2f}）：右侧字头朝左 / 上边 I2C 字头朝下 / RST 横排", GREEN),
     ("凸字在显示窗外边框带，勿打磨/喷砂；不影响天线", INK),
     ("材料：PETG / 韧性树脂，绝缘非金属", INK),
 ]
@@ -347,7 +352,7 @@ JX, JY = 225.0, 132.0
 T("三视图读图说明", JX, JY, 9, BLUE)
 notes = [
     "① 正视图 = 屏幕正面：显示窗 + Φ4 复位孔 + 9 组接口凸字，顶板完整不透明；",
-    "   窗口按实测 A.A 四周放大 0.5，宁露极窄黑边也不切亮区；已左移 2.75。",
+    "   窗口按实测 A.A 四周放大 0.5；X 左移 2.75、Y 下移 0.90，不是 Y 轴居中。",
     "② 上视图 = 从天线侧看：顶板整段连续；天线让位窗与 2 段",
     f"   I2C 合并宽窗上下沿完全平齐（统一 Z {AZ0:.2f}~{AZ1:.2f}，高 {AZ1-AZ0:.2f}）。",
     "④ 右视图 = 从右侧看：5V Type-C（18.00）与 XH2.54-5P（23.00）；",
