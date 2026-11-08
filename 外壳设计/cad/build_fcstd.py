@@ -5,7 +5,7 @@
   "C:\\Program Files\\FreeCAD 1.1\\bin\\freecadcmd.exe" build_fcstd.py
 
 生成的文档含 3 个命名实体对象：
-  TopCover_A   上盖 A 版（打印件）
+  TopCover     上盖（打印件）
   Base         底座（打印件）
   PCB_Reference  PCB 参考板（不打印，用于检查间隙）
 
@@ -19,8 +19,7 @@ import Part
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT_DIR = os.path.join(HERE, "deliverables")
 
-TOP_FILE = "ESP32S3_LCD_全覆盖外壳_上盖_A版_可编辑.step"
-# TOP_FILE = "ESP32S3_LCD_全覆盖外壳_上盖_B版_可编辑.step"
+TOP_FILE = "ESP32S3_LCD_全覆盖外壳_上盖_可编辑.step"
 BASE_FILE = "ESP32S3_LCD_全覆盖外壳_底座_可编辑.step"
 ASSY_FILE = "ESP32S3_LCD_全覆盖外壳_装配体_含PCB参考.step"
 OUT_FILE = "ESP32S3_LCD_外壳工程.FCStd"
@@ -68,10 +67,10 @@ def main():
     print("FreeCAD:", App.Version()[0], App.Version()[1])
     print("GuiUp:", App.GuiUp)
 
-    doc = App.newDocument("ESP32S3_LCD_Enclosure_RevG")
-    doc.Label = "ESP32S3_LCD Enclosure Rev G"
+    doc = App.newDocument("ESP32S3_LCD_Enclosure_RevH")
+    doc.Label = "ESP32S3_LCD Enclosure Rev H"
 
-    add(doc, "TopCover_A", "上盖 A 版（打印件）",
+    add(doc, "TopCover", "上盖（打印件）",
         single_solid(read_shape(os.path.join(OUT_DIR, TOP_FILE)), "top"))
     add(doc, "Base", "底座（打印件）",
         single_solid(read_shape(os.path.join(OUT_DIR, BASE_FILE)), "base"))

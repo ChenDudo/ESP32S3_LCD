@@ -11,7 +11,7 @@ EDA工程源,ref/esp32s3_lcd/IMAGE/84d0d35432a797d8.webp,85934,webp,资料渲染
 EDA工程源,ref/esp32s3_lcd/IMAGE/9fa6abeec8a1c75a.webp,181428,webp,资料渲染 / 目视校验图,0aa4545e9e8fe377aa956695a6f5f315
 EDA工程源,ref/esp32s3_lcd/IMAGE/b7bacf6da4b6b237.webp,263962,webp,资料渲染 / 目视校验图,edc068a712989eac1cfb411ad943a76e
 EDA工程源,ref/esp32s3_lcd/project2.json,150,json,工程元数据,f5247c623d62fe775836809fc2826f15
-中间数据,cad/geom_v2.json,4090,json,供 PDF/三视图读取的几何参数中间产物,4dec4222a9da0650fea855451577286f
+中间数据,cad/geom_v2.json,3867,json,供 PDF/三视图读取的几何参数中间产物,1cd9e32244cf5d10020f68a25003dc32
 中间数据,cad/request.json,4966,json,最初原始需求记录,be2e1a56290d7cf6c0cccaa3c99687cf
 中间校验图,cad/preview/lcd_dim_17_ATK-MD.png,167009,png,资料渲染 / 目视校验图,5dc6d8970d7760804c9a93446934333d
 中间校验图,cad/preview/lcd_dim_1_3.5寸液晶.png,486305,png,资料渲染 / 目视校验图,7cf7f53d5df7453af0fcdfa5fe83201d
@@ -37,6 +37,10 @@ EDA工程源,ref/esp32s3_lcd/project2.json,150,json,工程元数据,f5247c623d62
 中间校验图,cad/preview_v2/revg/eng_p2.png,117222,png,资料渲染 / 目视校验图,a7f9edc698902f14046f70d91cf6973e
 中间校验图,cad/preview_v2/revg/eng_p3.png,163796,png,资料渲染 / 目视校验图,82e6af591fc90379f32ee4440c44e8ab
 中间校验图,cad/preview_v2/revg/views_p1.png,268770,png,资料渲染 / 目视校验图,a37aa4fb4c8ce6f7a73e9618069e3354
+中间校验图,cad/preview_v2/revh/eng_p1.png,152152,png,资料渲染 / 目视校验图,e4701ebe6ff8234811fdbc7c1e6d6087
+中间校验图,cad/preview_v2/revh/eng_p2.png,117037,png,资料渲染 / 目视校验图,04e5a8293eb43b3fc8fda19600233d9a
+中间校验图,cad/preview_v2/revh/eng_p3.png,163597,png,资料渲染 / 目视校验图,494cf2bf1f0f9bef93a3ff9c793df545
+中间校验图,cad/preview_v2/revh/views_p1.png,272128,png,资料渲染 / 目视校验图,c04b5c210cf9f9a49c8e56fb205a8e0d
 中间校验图,cad/preview_v2/top_E_iso.png,45422,png,资料渲染 / 目视校验图,ddb5f2383a9004906b2edb9067d93355
 中间校验图,cad/preview_v2/top_E_top.png,20916,png,资料渲染 / 目视校验图,679004a3fcf04fd13110e361b1fbdaef
 中间校验图,cad/preview_v2/top_F_iso.png,51281,png,资料渲染 / 目视校验图,34b127b2b70ed0225607175e12cbb3eb
@@ -86,7 +90,7 @@ EDA工程源,ref/esp32s3_lcd/project2.json,150,json,工程元数据,f5247c623d62
 中间校验图,ref/pcbpdf/p2.png,117609,png,资料渲染 / 目视校验图,3ebaeb79e3dba4d059d7bee19d53222d
 中间校验图,ref/pcbpdf/p4.png,37025,png,资料渲染 / 目视校验图,fda64705c90103868f64e83b0157fc38
 中间校验图,ref/pcbpdf/p5.png,15429,png,资料渲染 / 目视校验图,8d676ea00dfc035f554f1368f9438582
-仓库配置,.gitattributes,356,gitattributes,锁定 CAD 交换文件行尾，禁止 LF/CRLF 自动转换,ae25bd1fdd3db2fbfab1c1a632fd9bdf
+仓库配置,.gitattributes,356,-,锁定 CAD 交换文件行尾，禁止 LF/CRLF 自动转换,ae25bd1fdd3db2fbfab1c1a632fd9bdf
 仓库配置,.gitignore,134,-,局部忽略规则,a69372c423ff3db4bc5964d4641565c6
 历史版本,cad/archive_v1/ESP32S3_LCD_底座_3D打印.stl,241884,stl,★ 3D 打印交付（发给商家）,1f7361959e15825f072e22d02514fe3f
 历史版本,cad/archive_v1/ESP32S3_LCD_底座_加工轮廓.dxf,50553,dxf,1:1 二维加工图（DXF R2010 / mm）,93323000ecb7925516e260d552f0ad22
@@ -112,7 +116,7 @@ EDA工程源,ref/esp32s3_lcd/project2.json,150,json,工程元数据,f5247c623d62
 历史版本,cad/archive_v3/ESP32S3_LCD_全覆盖外壳_装配工程图.dxf,65723,dxf,1:1 二维加工图（DXF R2010 / mm）,714abb1c41ca7645c29531a02d770828
 历史版本,cad/archive_v3/build_v2.py,25225,py,生成 STL、DXF、报价、下单说明、geom_v2.json,5ae01ff01116e683b0cb098c4fb77e52
 历史版本,cad/archive_v3/make_pdf_v2.py,17470,py,生成 3 页 A4 工程图,a586e942565bd8e29d868a0b94f07f80
-历史版本,cad/archive_v3/params_v2.py,6512,py,★ 唯一参数源：尺寸/开窗/螺丝/偏心量,db09a2f3a1b6d3fe71ae9564071a33b6
+历史版本,cad/archive_v3/params_v2.py,6512,py,★ 唯一参数源：尺寸/开窗/A.A 让位/螺丝/偏心量,db09a2f3a1b6d3fe71ae9564071a33b6
 历史版本,cad/archive_v3/外壳实物报价.csv,965,csv,外壳实物报价（不含 PCB/LCD/核心板）,a29a543993916fba0b934ad584054ff7
 历史版本,cad/archive_v3/给商家的下单说明.txt,5992,txt,给商家的下单说明与装配顺序,5c4bb1d87d13b286737643a5f1a68aaa
 历史版本,cad/archive_v4/ESP32S3_LCD_全覆盖外壳_上盖_A版_3D打印.stl,133484,stl,★ 3D 打印交付（发给商家）,1aa18ce70750fb62ff0f1518591bdc44
@@ -124,7 +128,7 @@ EDA工程源,ref/esp32s3_lcd/project2.json,150,json,工程元数据,f5247c623d62
 历史版本,cad/archive_v4/ESP32S3_LCD_全覆盖外壳_装配工程图.dxf,65723,dxf,1:1 二维加工图（DXF R2010 / mm）,9e4d4fdcf984a6ecd4f333feb8db9194
 历史版本,cad/archive_v4/build_v2.py,26859,py,生成 STL、DXF、报价、下单说明、geom_v2.json,fc523c7ed337e42b90f6866b38f89f44
 历史版本,cad/archive_v4/make_pdf_v2.py,17763,py,生成 3 页 A4 工程图,4d39a85b735a87fa4984d62100f54c50
-历史版本,cad/archive_v4/params_v2.py,7826,py,★ 唯一参数源：尺寸/开窗/螺丝/偏心量,f1536086fe79ea37e75fe4e7c8f7528c
+历史版本,cad/archive_v4/params_v2.py,7826,py,★ 唯一参数源：尺寸/开窗/A.A 让位/螺丝/偏心量,f1536086fe79ea37e75fe4e7c8f7528c
 历史版本,cad/archive_v4/外壳实物报价.csv,1063,csv,外壳实物报价（不含 PCB/LCD/核心板）,05fc4924877a731337db5f12067c7569
 历史版本,cad/archive_v4/给商家的下单说明.txt,7407,txt,给商家的下单说明与装配顺序,b35e87411b0793b5153e34e3d4d44a63
 历史版本,cad/archive_v5/ESP32S3_LCD_全覆盖外壳_三视图.dxf,60612,dxf,1:1 二维加工图（DXF R2010 / mm）,109a26ca4f13a5024b78e44795c92a52
@@ -139,54 +143,59 @@ EDA工程源,ref/esp32s3_lcd/project2.json,150,json,工程元数据,f5247c623d62
 历史版本,cad/archive_v5/build_v2.py,28359,py,生成 STL、DXF、报价、下单说明、geom_v2.json,65f053bc373b824df2db9d3d97f34deb
 历史版本,cad/archive_v5/make_pdf_v2.py,18226,py,生成 3 页 A4 工程图,94dc7db29a4f26eb0670360e2774185f
 历史版本,cad/archive_v5/make_views.py,19884,py,生成 A3 三视图 PDF/DXF,4ddda1bca229b32e3d0002d205151444
-历史版本,cad/archive_v5/params_v2.py,8848,py,★ 唯一参数源：尺寸/开窗/螺丝/偏心量,b7f7796c7c3fab6c1fceb3f11bc553ba
-历史版本,cad/archive_v5/上盖_顶板完整_俯视预览.png,20916,png,资料渲染 / 目视校验图,679004a3fcf04fd13110e361b1fbdaef
+历史版本,cad/archive_v5/params_v2.py,8848,py,★ 唯一参数源：尺寸/开窗/A.A 让位/螺丝/偏心量,b7f7796c7c3fab6c1fceb3f11bc553ba
+历史版本,cad/archive_v5/上盖_顶板完整_俯视预览.png,20916,png,绿虚线 A.A / 红实线显示窗让位对比,679004a3fcf04fd13110e361b1fbdaef
 历史版本,cad/archive_v5/上盖_顶板完整_等距预览.png,45422,png,资料渲染 / 目视校验图,ddb5f2383a9004906b2edb9067d93355
 历史版本,cad/archive_v5/外壳实物报价.csv,1063,csv,外壳实物报价（不含 PCB/LCD/核心板）,d073025e40a7e768a7ed9354fe9495f6
 历史版本,cad/archive_v5/给商家的下单说明.txt,8228,txt,给商家的下单说明与装配顺序,d2b0858d377a2ae7b15ac7d4c9f56647
 日志,cad/build.log,701,log,构建 / 分析日志,a5c33ff4fa4ffad7a726b38ba55e36e8
 日志,cad/generate.log,10874,log,构建 / 分析日志,31c302a8b89417e8d40c9c615edc316f
-日志,cad/revg_1.log,358,log,构建 / 分析日志,68b27e41afbf66d531167bcf6a3a615c
-日志,cad/revg_2.log,110,log,构建 / 分析日志,de1821c68b7460a681cb0b3a2d48addf
-日志,cad/revg_3.log,220,log,构建 / 分析日志,0f09e3ab374b2255111a476fe5e5c251
-日志,cad/revg_4.log,775,log,构建 / 分析日志,7cef5a19fc70d38d7ea7eea9931c524f
-日志,cad/revg_5.log,807,log,构建 / 分析日志,01f459631664794ac3005b21d36b4b45
+日志,cad/revg_1.log,358,log,Rev G 构建 / 校验日志,68b27e41afbf66d531167bcf6a3a615c
+日志,cad/revg_2.log,110,log,Rev G 构建 / 校验日志,de1821c68b7460a681cb0b3a2d48addf
+日志,cad/revg_3.log,220,log,Rev G 构建 / 校验日志,0f09e3ab374b2255111a476fe5e5c251
+日志,cad/revg_4.log,775,log,Rev G 构建 / 校验日志,7cef5a19fc70d38d7ea7eea9931c524f
+日志,cad/revg_5.log,807,log,Rev G 构建 / 校验日志,01f459631664794ac3005b21d36b4b45
+日志,cad/revh_1.log,254,log,Rev H 构建 / 校验日志,b35dd7b1d7909fea55ad1b1ea4f1aa8e
+日志,cad/revh_2.log,110,log,Rev H 构建 / 校验日志,de1821c68b7460a681cb0b3a2d48addf
+日志,cad/revh_3.log,220,log,Rev H 构建 / 校验日志,0f09e3ab374b2255111a476fe5e5c251
+日志,cad/revh_4.log,610,log,Rev H 构建 / 校验日志,de084acd93197c545488df3ebfaee508
+日志,cad/revh_5.log,200,log,Rev H 构建 / 校验日志,b04e607188487064b78664e2d081f180
+日志,cad/revh_6.log,805,log,Rev H 构建 / 校验日志,0a07a8985771ed5ace2a78d2dd5550c3
 日志,ref/full_dump.log,29797,log,构建 / 分析日志,053c46ec5c1dc5c6a2950fe14f6c3b05
 日志,ref/holes_v3.log,20502,log,构建 / 分析日志,b6a86a02e9c89e11ab7962f80ba4f18d
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_三视图.dxf,59876,dxf,1:1 二维加工图（DXF R2010 / mm）,ff1f67900c3392d5207265f98c4cbedd
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_三视图.pdf,51951,pdf,A3 三视图 + 辅助下视图,037db7b7f2f33ed3c42765d8020549cf
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_上盖_A版_3D打印.stl,137884,stl,★ 3D 打印交付（发给商家）,a3fed96cd90b1640a091f030c8b2a035
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_上盖_A版_可编辑.step,252108,step,STEP AP214 解析实体，CAD 内可改特征,0d9aabbe81d207dcdc9ac1ccbb5b1048
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_上盖_B版_3D打印.stl,137884,stl,★ 3D 打印交付（发给商家）,a295fca08e168839f4e1c6a05785af5e
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_上盖_B版_可编辑.step,252108,step,STEP AP214 解析实体，CAD 内可改特征,cc1c67482b83ac56e39fbf4cbc353919
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_上盖_加工图.dxf,68823,dxf,1:1 二维加工图（DXF R2010 / mm）,26f25efd42ac8b8b66e1d700fc195e5f
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_工程图.pdf,71660,pdf,3 页 A4 工程图,173bb1421551ee116405758304173aef
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_三视图.dxf,60047,dxf,1:1 二维加工图（DXF R2010 / mm）,86b9f3f561fcf072263a3bdf1b0a53be
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_三视图.pdf,53189,pdf,A3 三视图 + 辅助下视图,d0fc86f93790f19ba20f31457aed5e1b
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_上盖_3D打印.stl,137784,stl,★ 3D 打印交付（发给商家）,49b2750e09d288eb18634164b0c379aa
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_上盖_加工图.dxf,69301,dxf,1:1 二维加工图（DXF R2010 / mm）,057e44786aa0fc95aacf7504cca04ebc
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_上盖_可编辑.step,252056,step,STEP AP214 解析实体，CAD 内可改特征,3061d8dbf3bff5dbcb0a8f24a02ecb2f
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_工程图.pdf,71917,pdf,3 页 A4 工程图,b3617ce4d348099550925a0e9be87b7f
 最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_底座_3D打印.stl,103884,stl,★ 3D 打印交付（发给商家）,fe7deb9c73947843a327728aa436c7ec
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_底座_加工图.dxf,55835,dxf,1:1 二维加工图（DXF R2010 / mm）,d795970ef8b8a766602a0d3432ba3959
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_底座_可编辑.step,87374,step,STEP AP214 解析实体，CAD 内可改特征,c8033dbfb5287c658d92586cc246d466
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_装配体_含PCB参考.step,395895,step,3 件装配 STEP，PCB 为参考件不打印,1701b8de2a273b137d6a49ab9bada1ce
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_装配工程图.dxf,67302,dxf,1:1 二维加工图（DXF R2010 / mm）,4deb6c974fbfe1c7d3d959749b5cb6c3
-最终交付,cad/deliverables/ESP32S3_LCD_外壳工程.FCStd,15241,fcstd,FreeCAD 工程文件（双击即开）,09cb75fd3e71d941aee1bb61f473ebc1
-最终交付,cad/deliverables/FreeCAD_一键生成工程.FCMacro,3857,fcmacro,FreeCAD 一键宏（可选着色版）,6cd6e5b25acdf219d3eb06b545d9ccf0
-最终交付,cad/deliverables/上盖_顶板完整_俯视预览.png,90906,png,资料渲染 / 目视校验图,1577b059f3117ce2e7724d9b18ab7dba
-最终交付,cad/deliverables/上盖_顶板完整_等距预览.png,148398,png,资料渲染 / 目视校验图,dfe6c701157d82492833d7aaf0d70c9a
-最终交付,cad/deliverables/外壳实物报价.csv,1063,csv,外壳实物报价（不含 PCB/LCD/核心板）,6af7284ff3a8ce41a5d51e4a80736c7e
-最终交付,cad/deliverables/给商家的下单说明.txt,12213,txt,给商家的下单说明与装配顺序,c44aa69d31cbabfd071e7d10cf1b0a04
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_底座_加工图.dxf,55835,dxf,1:1 二维加工图（DXF R2010 / mm）,652ba1ef9220d14053c1f688e7375c72
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_底座_可编辑.step,87374,step,STEP AP214 解析实体，CAD 内可改特征,8cccc0bfcf5a019a877052377ee24adc
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_装配体_含PCB参考.step,395843,step,3 件装配 STEP，PCB 为参考件不打印,f1ee25d4655e1ef690b3e30ab376c1ff
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_装配工程图.dxf,67629,dxf,1:1 二维加工图（DXF R2010 / mm）,78785a55970ffa37734472cb7ef2c570
+最终交付,cad/deliverables/ESP32S3_LCD_外壳工程.FCStd,15180,fcstd,FreeCAD 工程文件（双击即开）,2d3749a6d3d5cd58b34f83d68e8e1264
+最终交付,cad/deliverables/FreeCAD_一键生成工程.FCMacro,3785,fcmacro,FreeCAD 一键宏（可选着色版）,61ea7ab6e8a4f1832c29b1f0092369c2
+最终交付,cad/deliverables/上盖_顶板完整_俯视预览.png,96182,png,绿虚线 A.A / 红实线显示窗让位对比,4933ffb1f3c2352b5f6887a9ddaedd20
+最终交付,cad/deliverables/上盖_顶板完整_等距预览.png,151542,png,资料渲染 / 目视校验图,d23a40a2205b0c6f8f5324486dd3fb88
+最终交付,cad/deliverables/外壳实物报价.csv,1063,csv,外壳实物报价（不含 PCB/LCD/核心板）,265050b07268a6c64f5b59bfe0e35f18
+最终交付,cad/deliverables/给商家的下单说明.txt,12137,txt,给商家的下单说明与装配顺序,74e23d56bd1e6c114f1d902c7ad460f9
 脚本,cad/build.py,16622,py,解析或生成脚本,e81a58a255f3ad6515e40ce807bdd657
-脚本,cad/build_fcstd.py,3755,py,FreeCADCmd 生成 .FCStd 工程,412ad6433e2e4ca26e102cb5cb01648f
-脚本,cad/build_step.py,6548,py,生成 4 个 STEP 解析实体,d2e04b09fabede25bcb18fb4fe56f91c
-脚本,cad/build_v2.py,33774,py,生成 STL、DXF、报价、下单说明、geom_v2.json,211c10da6ad2d970ffe9ed0ab0e0f718
+脚本,cad/build_fcstd.py,3776,py,FreeCADCmd 生成 .FCStd 工程,5863d7cf5353ce9bfbd6578a149f2d2d
+脚本,cad/build_step.py,6441,py,生成 3 个 STEP 解析实体,1e27f01bee49e35bfe39eab0c42ffe85
+脚本,cad/build_v2.py,34046,py,生成 STL、DXF、报价、下单说明、geom_v2.json,d2294a1241f39bcce3f24802cb867b77
 脚本,cad/make_pdf.py,11901,py,解析或生成脚本,c76f17620137174c62bde5b9c5be62f5
-脚本,cad/make_pdf_v2.py,18652,py,生成 3 页 A4 工程图,a4cb1556afa8d1207ebe1c42bb6a51e4
-脚本,cad/make_preview.py,4656,py,生成俯视/等距预览 PNG,2de3324ba6ce30249f287c7a4788a13c
-脚本,cad/make_views.py,20295,py,生成 A3 三视图 PDF/DXF,e79166ec4d51346b906df400fbf518f7
-脚本,cad/params_v2.py,11709,py,★ 唯一参数源：尺寸/开窗/螺丝/偏心量,652ef84ba7aa4b1bbf6207cefec37000
-脚本,cad/patch_v3.py,4731,py,历次批量修订脚本（中间件）,13f58d67b58bc07cd7d42269a471d5c8
-脚本,cad/patch_v4.py,9555,py,历次批量修订脚本（中间件）,6ee1a6163aaddf7bd009b5b7c21cf1eb
-脚本,cad/patch_v5.py,14254,py,历次批量修订脚本（中间件）,ec6d73ea12808033202a9b6a5f660129
-脚本,cad/patch_v6.py,15963,py,历次批量修订脚本（中间件）,aa174dec8ec4ca7d9213ba599adafe34
-脚本,cad/patch_views.py,4584,py,历次批量修订脚本（中间件）,4f597bac508cd225072423dfbbc7ab3f
-脚本,cad/patch_views2.py,2099,py,历次批量修订脚本（中间件）,1efeb44b9761e67e3131ef4ad0f0987c
+脚本,cad/make_pdf_v2.py,18883,py,生成 3 页 A4 工程图,8b0bd35bf65663dfcc7b20af0c484c10
+脚本,cad/make_preview.py,5041,py,生成俯视/等距预览 PNG,a7010f15f8ae6331346961db2b21fca0
+脚本,cad/make_views.py,20452,py,生成 A3 三视图 PDF/DXF,ed230d29c6366368f185e4153a480688
+脚本,cad/params_v2.py,13048,py,★ 唯一参数源：尺寸/开窗/A.A 让位/螺丝/偏心量,79d0b84e9b66c7bd8c764aca92540397
+脚本,cad/patch_v3.py,4731,py,历次批量修订脚本（一次性中间件）,13f58d67b58bc07cd7d42269a471d5c8
+脚本,cad/patch_v4.py,9555,py,历次批量修订脚本（一次性中间件）,6ee1a6163aaddf7bd009b5b7c21cf1eb
+脚本,cad/patch_v5.py,14254,py,历次批量修订脚本（一次性中间件）,ec6d73ea12808033202a9b6a5f660129
+脚本,cad/patch_v6.py,15963,py,历次批量修订脚本（一次性中间件）,aa174dec8ec4ca7d9213ba599adafe34
+脚本,cad/patch_v7.py,28580,py,Rev G→H 一次性批量修订脚本（勿重复运行）,292803257602f19a71c10044d28c6c5d
+脚本,cad/patch_views.py,4584,py,历次批量修订脚本（一次性中间件）,4f597bac508cd225072423dfbbc7ab3f
+脚本,cad/patch_views2.py,2099,py,历次批量修订脚本（一次性中间件）,1efeb44b9761e67e3131ef4ad0f0987c
 脚本,ref/analyze_epru.py,1169,py,解析或生成脚本,62259d43f5068ebcba55ceebd54ed907
 脚本,ref/dump_epru.py,1299,py,解析或生成脚本,85de984ef0cf80a321e98581f964f337
 脚本,ref/full_dump.py,3648,py,解析或生成脚本,b23ca3138bcdf507b40ffa68c396bdc3
@@ -200,7 +209,7 @@ EDA工程源,ref/esp32s3_lcd/project2.json,150,json,工程元数据,f5247c623d62
 脚本,ref/pcb_parts.py,2498,py,解析或生成脚本,84924be82529b0e4f0c29b916420e00d
 脚本,ref/pcb_parts2.py,2295,py,解析或生成脚本,e635e06daeb0d3a5b591c4c6948cd146
 脚本,ref/pdf_circles.py,1690,py,解析或生成脚本,2c0c2155b5ad17e2652d8eabce172741
-说明文档,README.md,10275,md,本目录总说明：导航、参数、版本演进、重跑、打样与报价,d6dfc335a752ace6d3eeb57562d897a4
+说明文档,README.md,12350,md,本目录总说明：导航、参数、版本演进、重跑、打样与报价,2dcc77c06c738034fa65c523becb87a4
 说明文档,文件清单.csv,-,csv,全量文件索引（本文件）,-
 输入资料,ref/输入资料/PCB_PCB1_1_2026-11-07_用户导出.pdf,2013091,pdf,用户导出的 PCB PDF，用于核对孔径与装配层,bbebeb03d1b6abe76c2bb44e94b5be66
 输入资料,ref/输入资料/用户截图_LCD实物_偏心黑边.png,280091,png,用户提供的实物/图层截图（偏心屏判断依据）,bcc5ebac01b7dff88289f7e91a157ead

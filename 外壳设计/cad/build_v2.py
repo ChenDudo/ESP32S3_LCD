@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""ESP32S3_LCD 全覆盖不透明外壳 Rev G —— 生成 STL / DXF / 报价 / 下单说明
+"""ESP32S3_LCD 全覆盖不透明外壳 Rev H —— 生成 STL / DXF / 报价 / 下单说明
 
 结构：上盖（完整不透明顶板 + 四周侧壁 + 4 螺丝柱，仅开显示区窗口 + Φ4 复位孔）
       底座（平板 + 4 支撑台 + 4 沉孔）
-      Rev G：四边所有对外开口统一开口带 Z 4.00~14.20，上下沿完全平齐；
+      Rev H：四边所有对外开口统一开口带 Z 4.00~14.20，上下沿完全平齐；
       天线让位窗 27.00 与 I2C 合并宽窗同高；双 Type-C / 5V / XH-5P 均按
       带壳插头 + 线材外径留余量。顶板保持完整不镂空。
 """
@@ -85,7 +85,7 @@ def build_top(win_w, win_h):
     cavity = prism(INNER, P.T_BASE, P.Z_TOP_IN)               # 内腔 Z 2.4~14.2
     window = prism(rr_at(P.WIN_CX, P.WIN_CY, win_w, win_h, P.WIN_R),
                    P.Z_TOP_IN - 0.2, P.H_TOTAL + 0.5)          # 显示窗切穿顶板
-    # Rev G：顶板完整无镂空；天线让位与所有接口窗统一 Z 开口带（止于顶板内表面）
+    # Rev H：顶板完整无镂空；天线让位与所有接口窗统一 Z 开口带（止于顶板内表面）
     ant_slot = prism(box(P.ANT_X0, P.ANT_Y0, P.ANT_X1, P.H + 2.0),
                      P.ANT_SLOT_Z0, P.ANT_SLOT_Z1)
     reset = cyl(P.RESET_HOLE_D / 2, P.Z_TOP_IN - 0.2, P.H_TOTAL + 0.5,
@@ -117,13 +117,11 @@ def build_base():
     return bdiff([solid] + cuts)
 
 
-top_a = build_top(P.WIN_A_W, P.WIN_A_H)
-top_b = build_top(P.WIN_B_W, P.WIN_B_H)
+top = build_top(P.WIN_W, P.WIN_H)
 base = build_base()
 
 files = {}
-for name, mesh in [("ESP32S3_LCD_全覆盖外壳_上盖_A版_3D打印.stl", top_a),
-                   ("ESP32S3_LCD_全覆盖外壳_上盖_B版_3D打印.stl", top_b),
+for name, mesh in [("ESP32S3_LCD_全覆盖外壳_上盖_3D打印.stl", top),
                    ("ESP32S3_LCD_全覆盖外壳_底座_3D打印.stl", base)]:
     p = os.path.join(OUT, name)
     mesh.export(p)
@@ -183,14 +181,16 @@ LAYERS = [("OUTLINE", 7), ("WINDOW", 1), ("CUT", 1), ("HOLE", 1),
           ("PCB_REF", 8), ("DIM", 4), ("CENTER", 8), ("TEXT", 7),
           ("TABLE", 7), ("ANT", 2), ("SECTION", 5), ("NOTE", 6), ("SLOT", 3)]
 
-WIN_A = (P.WIN_CX - P.WIN_A_W / 2, P.WIN_CY - P.WIN_A_H / 2,
-         P.WIN_CX + P.WIN_A_W / 2, P.WIN_CY + P.WIN_A_H / 2)
+WIN = (P.WIN_CX - P.WIN_W / 2, P.WIN_CY - P.WIN_H / 2,
+       P.WIN_CX + P.WIN_W / 2, P.WIN_CY + P.WIN_H / 2)
+LCD_AA = (P.WIN_CX - P.LCD_AA_X / 2, P.WIN_CY - P.LCD_AA_Y / 2,
+          P.WIN_CX + P.LCD_AA_X / 2, P.WIN_CY + P.LCD_AA_Y / 2)
 
 # ---- 1. 上盖 1:1 加工图（俯视 + 四边展开） ----
 d = new_doc(LAYERS)
 m = d.modelspace()
 m.add_lwpolyline(OUTER_PTS, close=True, dxfattribs={"layer": "OUTLINE"})
-m.add_lwpolyline(rr_pts(P.WIN_A_W, P.WIN_A_H, P.WIN_R, WIN_A[0], WIN_A[1]),
+m.add_lwpolyline(rr_pts(P.WIN_W, P.WIN_H, P.WIN_R, WIN[0], WIN[1]),
                  close=True, dxfattribs={"layer": "WINDOW"})
 m.add_lwpolyline(rr_pts(P.PCB_PY, P.PCB_PX, P.PCB_R, P.OX, P.OY), close=True,
                  dxfattribs={"layer": "PCB_REF", "linetype": "DASHED"})
@@ -210,19 +210,21 @@ for name, (x, y) in P.PARTS.items():
 # 尺寸
 DIMH(m, 0, P.W, 0, f"{P.W:.2f}", -11)
 DIMV(m, 0, P.H, 0, f"{P.H:.2f}", -11)
-DIMH(m, WIN_A[0], WIN_A[2], P.H, f"{P.WIN_A_W:.2f} (A版)", 7)
-DIMV(m, WIN_A[1], WIN_A[3], P.W, f"{P.WIN_A_H:.2f}", 9)
+DIMH(m, WIN[0], WIN[2], P.H, f"{P.WIN_W:.2f} 显示窗", 7)
+DIMV(m, WIN[1], WIN[3], P.W, f"{P.WIN_H:.2f}", 9)
 DIMH(m, P.ANT_X0, P.ANT_X1, P.H, f"{P.ANT_X1-P.ANT_X0:.2f} 侧壁让位窗(顶板不开)", 15)
 DIMH(m, P.HOLES[0][0], P.HOLES[1][0], 0, "91.34", -20)
 DIMV(m, P.HOLES[0][1], P.HOLES[2][1], 0, "48.70", -20)
-T(m, f"上盖俯视 1:1  (单位 mm)  窗口按 A 版 {P.WIN_A_W:.2f} x {P.WIN_A_H:.2f}", 0, -30, 3.6)
-T(m, f"B 版窗口 {P.WIN_B_W:.2f} x {P.WIN_B_H:.2f}（其余相同），见 B 版 STL", 0, -35, 2.8, "NOTE")
+T(m, f"上盖俯视 1:1  (单位 mm)  显示窗 {P.WIN_W:.2f} x {P.WIN_H:.2f}（按实测 A.A 放大让位）", 0, -30, 3.6)
+T(m, f"实测 LCD A.A {P.LCD_AA_X:.2f} x {P.LCD_AA_Y:.2f}；窗口四周各让位 {P.WIN_CLEAR_X:.2f} / {P.WIN_CLEAR_Y:.2f}，请勿缩小", 0, -35, 2.8, "NOTE")
 T(m, "顶板完整封闭、无镂空；仅显示窗 + Φ4 复位孔", 0, P.H + 22, 3.0, "ANT")
 T(m, "四边统一开口带 Z 4.00~14.20：天线 27.00 与 I2C 宽窗平齐；双 Type-C 36.00；5V 18.00 / XH-5P 23.00",
   0, P.H + 27, 2.8, "ANT")
-T(m, f"Rev G 偏心屏：显示窗中心 X={P.WIN_CX:.2f} / Y={P.WIN_CY:.2f}"
-     f"（相对外壳中心左移 {-P.WIN_OFFSET_X:.2f}），窗口左缘 X={WIN_A[0]:.2f}；请勿居中",
+T(m, f"Rev H 偏心屏：显示窗中心 X={P.WIN_CX:.2f} / Y={P.WIN_CY:.2f}"
+     f"（相对外壳中心左移 {-P.WIN_OFFSET_X:.2f}），窗口左缘 X={WIN[0]:.2f}；请勿居中",
   0, P.H + 32, 2.8, "ANT")
+T(m, f"单版本：窗口 {P.WIN_W:.2f} x {P.WIN_H:.2f} 比实测 A.A {P.LCD_AA_X:.2f} x {P.LCD_AA_Y:.2f} 四周各放大 {P.WIN_CLEAR_X:.2f} / {P.WIN_CLEAR_Y:.2f}",
+  0, P.H + 37, 2.8, "ANT")
 # 四边侧壁展开图（放在右侧 x=125 起）
 SX, SY = 125.0, 0.0
 def side_view(title, length, segments, y):
@@ -274,7 +276,7 @@ d3 = new_doc(LAYERS)
 m3 = d3.modelspace()
 # 上盖俯视（缩略，1:1）
 m3.add_lwpolyline(OUTER_PTS, close=True, dxfattribs={"layer": "OUTLINE"})
-m3.add_lwpolyline(rr_pts(P.WIN_A_W, P.WIN_A_H, P.WIN_R, WIN_A[0], WIN_A[1]),
+m3.add_lwpolyline(rr_pts(P.WIN_W, P.WIN_H, P.WIN_R, WIN[0], WIN[1]),
                   close=True, dxfattribs={"layer": "WINDOW"})
 RECT(m3, P.ANT_X0, P.ANT_Y0, P.ANT_X1, P.H, "ANT")
 m3.add_circle(P.RESET_POS, P.RESET_HOLE_D / 2, dxfattribs={"layer": "HOLE"})
@@ -296,7 +298,7 @@ sec = [PP(0, P.T_BASE), PP(P.W, P.T_BASE), PP(P.W, P.H_TOTAL),
        PP(0, P.H_TOTAL)]
 m3.add_lwpolyline(sec, close=True, dxfattribs={"layer": "SECTION"})
 # 顶板窗口断口（剖面在 y=33.5 穿过窗口）
-wa, wb = WIN_A[0] * SC, WIN_A[2] * SC
+wa, wb = WIN[0] * SC, WIN[2] * SC
 LN(m3, (SX0 + wa, SZ + P.Z_TOP_IN * SC), (SX0 + wa, SZ + P.H_TOTAL * SC), "SECTION")
 LN(m3, (SX0 + wb, SZ + P.Z_TOP_IN * SC), (SX0 + wb, SZ + P.H_TOTAL * SC), "SECTION")
 # 底座
@@ -333,10 +335,11 @@ T(m3, "明细表 BOM", BX, BY + 11, 3.2)
 notes = [
     "技术说明 / Technical Notes",
     "1. 上盖为不透明全覆盖件，仅开显示区窗口；屏幕黑边（右侧宽于左侧）被顶板压住。",
-    "2. 窗口 A 版 69.00x47.60（保守压边）；B 版 72.00x47.60（贴 AA 73.44x48.96）。",
-    "2b.【Rev G 偏心屏对位】ATK-MD0350 显示区不居中：右侧黑边宽、左侧窄，上下对称。",
+    "2. 显示窗 74.40x50.00，按实测 LCD A.A 73.44x48.96 四周各放大 0.48/0.52 让位；",
+    "   原 A/B 双版窗口均小于 A.A（会切掉亮区像素），已作废，本版只剩一个上盖。",
+    "2b.【偏心屏对位】ATK-MD0350 显示区不居中：右侧黑边宽、左侧窄，上下对称。",
     "   窗口中心 X 由 52.60 左移至 49.85（WIN_OFFSET_X=-2.75），Y 保持 33.50；",
-    "   只露显示区，四周黑边由完整不透明顶板压住。依据 LCM 规格书 OUTLINE 84.69x55.26",
+    "   除 <=0.5mm 装配让位外，四周黑边由完整不透明顶板压住。依据规格书 OUTLINE 84.69x55.26",
     "   / LCD A.A 73.44x48.96 长边尺寸链偏心 2.77 mm，实物图逐像素 2.52 mm，取 2.75。",
     "   打样前点亮屏幕实测：亮区左缘到模块左缘 L、右缘到模块右缘 R，(L-R)/2 即偏移量；",
     "   不符改 params_v2.py 的 WIN_OFFSET_X 一行并重跑全部脚本。",
@@ -359,14 +362,14 @@ for yy in (TY, TY + 8, TY + 16, TY + 25):
     LN(m3, (TX, yy), (TX + 125, yy), "TABLE")
 T(m3, "ESP32S3_LCD 全覆盖显示屏外壳", TX + 2, TY + 18.5, 3.0)
 T(m3, "图号 ESP32S3-LCD-EN-D", TX + 2, TY + 10.5, 2.3)
-T(m3, "Rev G", TX + 94, TY + 10.5, 2.3)
+T(m3, "Rev H", TX + 94, TY + 10.5, 2.3)
 T(m3, "单位 mm  比例 1:1 / 2:1", TX + 2, TY + 2.5, 2.3)
 T(m3, "2026-11-07", TX + 94, TY + 2.5, 2.3)
 d3.saveas(os.path.join(OUT, "ESP32S3_LCD_全覆盖外壳_装配工程图.dxf"))
 print("DXF x3 done")
 
 # ---------------- 报价 CSV ----------------
-vol_top = top_a.volume / 1000
+vol_top = top.volume / 1000
 vol_base = base.volume / 1000
 vol_all = vol_top + vol_base
 quote = [
@@ -388,24 +391,26 @@ with open(os.path.join(OUT, "外壳实物报价.csv"), "w", newline="", encoding
     csv.writer(f).writerows(quote)
 
 # ---------------- 下单说明 ----------------
-note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev G —— 淘宝打样下单说明
+note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev H —— 淘宝打样下单说明
 ==========================================================
-  【零、打样前必测两项：亮区尺寸 + 偏心量】
-  1) 点亮屏幕，用游标卡尺量「发光显示区」的宽 x 高：
-    - 约 70.46 x 49.07 mm 或更小 → 发【上盖_A版】STL（窗口 69.00 x 47.60，黑边全包住）
-    - 约 73.44 x 48.96 mm        → 发【上盖_B版】STL（窗口 72.00 x 47.60）
-  2) 量偏心：显示区左缘到模块左缘 = L，显示区右缘到模块右缘 = R。
-     ★ Rev G 已按 (L-R)/2 = -2.75 mm（显示区偏左、右侧黑边宽）把窗口中心
-       从外壳中心 X=52.60 左移到 X=49.85，Y=33.50 不变；上下黑边对称故不调 Y。
-       依据：LCM 规格书 OUTLINE 84.69x55.26 / LCD A.A 73.44x48.96 长边尺寸链
-       偏心 2.77 mm；你发的实物商品图逐像素换算 2.52 mm，取 2.75。
-       窗口仍只露显示区，四周黑边由完整不透明顶板压住（已确认）。
-     若实测偏移不同：改 params_v2.py 的 WIN_OFFSET_X 一行，
-     重跑 build_v2.py / make_pdf_v2.py / make_views.py / build_step.py /
-     make_preview.py / freecadcmd build_fcstd.py 即可同步全部交付物。
-  两版只有窗口长度不同，其余完全一致。底座两版通用。
+  【零、Rev H 显示窗：单版本 + 按实测 A.A 放大让位】
+  ★ 已实测确认 LCD A.A（发光显示区）= 73.44 x 48.96 mm，本版据此定窗。
+  ★ 删除原 A / B 双版本：原 A 版 69.00x47.60 依据 EDA 封装可视框，
+    比实测 A.A 窄 4.44 mm；原 B 版 72.00x47.60 仍窄 1.44 mm，
+    两者都会切掉亮区边缘像素，已全部作废。本目录只剩一个上盖 STL。
+  ★ 现窗口 {P.WIN_W:.2f} x {P.WIN_H:.2f} mm（四角 R{P.WIN_R:.1f}），
+    四周各比 A.A 放大 {P.WIN_CLEAR_X:.2f} / {P.WIN_CLEAR_Y:.2f} mm，
+    用于吸收 3D 打印公差、LCD 排针插装与 φ4 孔配 M3 的位置偏差、
+    以及偏心量推算误差。取舍：理想装配下四周会露出 <=0.5 mm 极窄黑边，
+    但绝不遮挡显示内容。请转告商家：不要按旧版习惯把窗口缩小或移回居中。
+  ★ 偏心量仍待实测：显示区左缘到模块左缘 = L，右缘到模块右缘 = R。
+    当前 WIN_OFFSET_X = {P.WIN_OFFSET_X:.2f}（窗口中心 X={P.WIN_CX:.2f}，
+    外壳中心 52.60），由规格书尺寸链 2.77 mm 与实物图像素 2.52 mm 推算，未实测。
+    若实测 (L-R)/2 不同：改 params_v2.py 的 WIN_OFFSET_X 一行，
+    重跑 build_v2.py / make_pdf_v2.py / make_views.py / build_step.py /
+    make_preview.py / freecadcmd build_fcstd.py 即可同步全部交付物。
 
-  【必测第二项：高度】把 LCD 屏和 ESP32 系统板装到 PCB 上后，
+  【打样前必测：整机高度】把 LCD 屏和 ESP32 系统板装到 PCB 上后，
   量「PCB 顶面到整机最高点」的距离。本设计内腔从 PCB 顶面算起留 9.20 mm
   （顶板内表面 Z=14.2，PCB 顶面 Z=5.0；核心板直焊顶面约 9.1、LCD 顶面约 12.1 为最高）。
   若实测 >9.2 mm，请改 params_v2.py 的 Z_TOP_IN / H_TOTAL 后重出图，否则会顶到顶板。
@@ -429,7 +434,7 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev G —— 淘宝打样下单
   仍建议卡尺复量一次四角孔径；若实测确实是 φ2（与 M3 实测矛盾，可能性很低），
     告诉我，我把螺丝改回 M2 或用 φ3.2 钻头轻扩四孔。
 
-  【LCD 屏固定：两种方案，本版按 A 出图】
+  【LCD 屏固定：两种方案，本版按方案 A 出图】
   方案 A（推荐，本版）：屏幕靠 H1 插座 + 顶板压住黑边定位，不另配螺丝；
     外壳 4 颗 M3 螺丝独占 PCB 四角孔，装配最简单、顶板最完整。
   方案 B（若你坚持用 M3 螺丝+螺母把 LCD 屏锁在 PCB 上）：那 2 颗螺丝会占用
@@ -440,7 +445,7 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev G —— 淘宝打样下单
   1) 3D 打印（推荐，一次成型）
      搜索：3D打印服务 代打 / 3D打印 光敏树脂 打样 / FDM 3D打印 PETG 定制 / 嘉立创3D打印
      发给商家（2 个 STL，一次下单）：
-       ESP32S3_LCD_全覆盖外壳_上盖_A版_3D打印.stl   （或 B 版，二选一）
+       ESP32S3_LCD_全覆盖外壳_上盖_3D打印.stl
        ESP32S3_LCD_全覆盖外壳_底座_3D打印.stl
        + ESP32S3_LCD_全覆盖外壳_工程图.pdf（给尺寸与要求）
      材料：不透明 PLA / PETG（便宜、绝缘）；要更精细选 SLA 光敏树脂/韧性树脂
@@ -451,12 +456,13 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev G —— 淘宝打样下单
 
 【二、复制给商家的一段话】
   两件 3D 打印外壳，外形 105.20 x 67.00 x 16.00 mm，整套约 {vol_all:.0f} cm3。
-  上盖顶板厚 1.8、侧壁厚 1.6、总高 16.0；显示窗 {P.WIN_A_W:.2f} x {P.WIN_A_H:.2f} mm
+  上盖顶板厚 1.8、侧壁厚 1.6、总高 16.0；显示窗 {P.WIN_W:.2f} x {P.WIN_H:.2f} mm
   （四角 R1.5），窗口中心 X={P.WIN_CX:.2f} / Y={P.WIN_CY:.2f}（相对外壳中心左移
   {-P.WIN_OFFSET_X:.2f} mm，为对准偏心屏显示区），请勿擅自把窗口移回居中；
   顶板完整无镂空，仅显示窗 + Φ4 复位孔；四边侧壁统一开口带
   Z 4.00~14.20（天线让位窗 27.00 与 I2C 合并宽窗平齐），窗口已按带壳插头与线材留余量，
-  请勿擅自缩小窗口；顶板天线区不要开洞、不要加支撑。
+  窗口四周已按实测 A.A 放大让位以吸收装配偏差，请勿擅自缩小或移回居中；
+  顶板天线区不要开洞、不要加支撑。
   不透明绝缘非金属，不喷金属漆；请按 STL 原尺寸 1:1 打印，不要缩放、不要加支撑在窗口内。
   建议顶板朝上平放打印，层高 0.2 mm 以下，窗口与螺丝柱精度优先。
 
@@ -501,17 +507,15 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev G —— 淘宝打样下单
   接线与安装时避免整块金属背板贴近天线端，建议天线端朝外或悬出安装面边缘。
 
 【七、文件清单】
-  ESP32S3_LCD_全覆盖外壳_上盖_A版_3D打印.stl   A 版上盖（保守窗口）
-  ESP32S3_LCD_全覆盖外壳_上盖_B版_3D打印.stl   B 版上盖（标准 AA 窗口）
-  ESP32S3_LCD_全覆盖外壳_底座_3D打印.stl       底座（两版通用）
+  ESP32S3_LCD_全覆盖外壳_上盖_3D打印.stl        上盖（唯一版本，窗口 74.40x50.00）
+  ESP32S3_LCD_全覆盖外壳_底座_3D打印.stl         底座
   ESP32S3_LCD_全覆盖外壳_上盖_加工图.dxf        1:1 上盖俯视 + 四边侧壁展开
   ESP32S3_LCD_全覆盖外壳_底座_加工图.dxf        1:1 底座俯视
   ESP32S3_LCD_全覆盖外壳_装配工程图.dxf         尺寸/剖面/BOM/技术说明（可编辑）
   ESP32S3_LCD_全覆盖外壳_工程图.pdf             3 页 A4，可直接发给商家
   ESP32S3_LCD_全覆盖外壳_三视图.pdf             A3 三视图 + 辅助下视图（重点看这页）
   ESP32S3_LCD_全覆盖外壳_三视图.dxf             1:1 可编辑三视图
-  ESP32S3_LCD_全覆盖外壳_上盖_A版_可编辑.step    STEP 实体（同 A 版 STL）
-  ESP32S3_LCD_全覆盖外壳_上盖_B版_可编辑.step    STEP 实体（同 B 版 STL）
+  ESP32S3_LCD_全覆盖外壳_上盖_可编辑.step          STEP 实体（同上盖 STL）
   ESP32S3_LCD_全覆盖外壳_底座_可编辑.step        STEP 实体（同底座 STL）
   ESP32S3_LCD_全覆盖外壳_装配体_含PCB参考.step   3 件装配，PCB 为参考件不打印
   外壳实物报价.csv                              实物制作费用
@@ -521,11 +525,11 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev G —— 淘宝打样下单
   ESP32S3_LCD_外壳工程.FCStd                     FreeCAD 工程文件（双击即开）
   FreeCAD_一键生成工程.FCMacro                   可选：补颜色/视图的着色版宏
 
-  【STEP 实体文件说明】4 个 .step 是 AP214 BREP 解析实体（圆角是真圆弧、
+  【STEP 实体文件说明】3 个 .step 是 AP214 BREP 解析实体（圆角是真圆弧、
     螺丝孔是真圆柱面；上盖仅 74 个面、底座仅 30 个面），可在 FreeCAD /
     SolidWorks / 立创EDA / Fusion 里打开测量、改特征、做装配，不是 STL 那种
     三角网格；发给商家打印仍以 .stl 为准。
-    装配体 STEP 内含 3 个独立实体：上盖 A 版 / 底座 / PCB 参考板，
+    装配体 STEP 内含 3 个独立实体：上盖 / 底座 / PCB 参考板，
     在 FreeCAD 里可用「Part → 拆分」逐件隐藏。PCB 参考板只是用来检查
     装配间隙的参考件，不是打印件，不要发给商家。
     改尺寸后按【零】里的脚本清单全部重跑一遍，
@@ -533,12 +537,12 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev G —— 淘宝打样下单
 
   【FreeCAD 工程文件】STEP 是中性交换格式，不是 FreeCAD 工程；原生工程是
     .FCStd（一个文档里装多个命名对象）。本目录已附现成的
-    ESP32S3_LCD_外壳工程.FCStd，双击即可打开，内含上盖 A 版 / 底座 /
+    ESP32S3_LCD_外壳工程.FCStd，双击即可打开，内含上盖 / 底座 /
     PCB 参考板 3 个命名实体（本机 FreeCAD 1.1.4 命令行内核生成并回读验证）。
     只看整体也可打开「装配体_含PCB参考.step」一个文件（内含 3 个实体）。
     命令行内核不带 GuiDocument（颜色 / 相机）；想要着色 + 等轴测视图，
     在 FreeCAD 里执行 FreeCAD_一键生成工程.FCMacro（宏 → 宏... → 执行），
-    会覆盖同名 .FCStd 补上外观，几何不变；改宏里 TOP_FILE 一行可换 B 版。
+    会覆盖同名 .FCStd 补上外观，几何不变。
     重新生成： "C:/Program Files/FreeCAD 1.1/bin/freecadcmd.exe" build_fcstd.py
 """
 with open(os.path.join(OUT, "给商家的下单说明.txt"), "w", encoding="utf-8") as f:
@@ -550,15 +554,16 @@ geom = dict(
     H_TOTAL=P.H_TOTAL, H_CAVITY=P.H_CAVITY, Z_PCB_BOT=P.Z_PCB_BOT,
     Z_PCB_TOP=P.Z_PCB_TOP, Z_TOP_IN=P.Z_TOP_IN, T_TOP=P.T_TOP,
     OX=P.OX, OY=P.OY, PCB_PX=P.PCB_PX, PCB_PY=P.PCB_PY, PCB_R=P.PCB_R,
-    WIN_A=list(WIN_A), WIN_B=[P.WIN_CX - P.WIN_B_W/2, P.WIN_CY - P.WIN_B_H/2,
-                              P.WIN_CX + P.WIN_B_W/2, P.WIN_CY + P.WIN_B_H/2],
-    WIN_A_W=P.WIN_A_W, WIN_A_H=P.WIN_A_H, WIN_B_W=P.WIN_B_W, WIN_B_H=P.WIN_B_H,
+    WIN=list(WIN), LCD_AA=list(LCD_AA),
+    WIN_W=P.WIN_W, WIN_H=P.WIN_H,
+    LCD_AA_W=P.LCD_AA_X, LCD_AA_H=P.LCD_AA_Y,
+    WIN_CLEAR_X=P.WIN_CLEAR_X, WIN_CLEAR_Y=P.WIN_CLEAR_Y,
     WIN_R=P.WIN_R,
     WIN_OFFSET_X=P.WIN_OFFSET_X, WIN_CX=P.WIN_CX, WIN_CY=P.WIN_CY,
     ANT=[P.ANT_X0, P.ANT_Y0, P.ANT_X1, P.H],
     ANT_SLOT_Z0=P.ANT_SLOT_Z0, ANT_SLOT_Z1=P.ANT_SLOT_Z1,
     RESET_POS=list(P.RESET_POS), RESET_HOLE_D=P.RESET_HOLE_D,
-    REV="G",
+    REV="H",
     HOLES=P.HOLES, PARTS=P.PARTS,
     SLOTS=[[n, list(b), z0, z1, d] for n, b, z0, z1, d in P.SLOTS],
     I2C_X=P.I2C_X, I2C_SLOT_W=P.I2C_SLOT_W,

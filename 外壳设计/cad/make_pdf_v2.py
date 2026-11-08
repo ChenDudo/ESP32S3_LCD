@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""ESP32S3_LCD 全覆盖外壳 Rev G —— 3 页 A4 横向工程图 PDF"""
+"""ESP32S3_LCD 全覆盖外壳 Rev H —— 3 页 A4 横向工程图 PDF"""
 import os, json, math
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import mm
@@ -22,7 +22,7 @@ GREEN = HexColor("#2e7d52")
 PALE = HexColor("#f7fafc")
 
 c = canvas.Canvas(PDF, pagesize=(297 * mm, 210 * mm))
-c.setTitle("ESP32S3_LCD 全覆盖显示屏外壳 工程图 Rev G")
+c.setTitle("ESP32S3_LCD 全覆盖显示屏外壳 工程图 Rev H")
 c.setAuthor("WorkBuddy")
 
 
@@ -89,17 +89,17 @@ def DIMV(y1, y2, x, label, color=DIMC, size=7, label_on="right"):
 def HEADER(title, page):
     c.setFillColor(BLUE); c.rect(0, 196 * mm, 297 * mm, 14 * mm, stroke=0, fill=1)
     T(title, 8, 200.5, 11, HexColor("#ffffff"))
-    TR(f"Rev G   {page}/3   2026-11-08   单位 mm", 289, 200.5, 8, HexColor("#dce8f5"))
+    TR(f"Rev H   {page}/3   2026-11-08   单位 mm", 289, 200.5, 8, HexColor("#dce8f5"))
 
 
 def FOOTER(note):
     LN(8, 8.5, 289, 8.5, GRAY, 0.3)
     T(note, 8, 4.5, 6.5, GRAY)
-    TR("图号 ESP32S3-LCD-EN-G", 289, 4.5, 6.5, GRAY)
+    TR("图号 ESP32S3-LCD-EN-H", 289, 4.5, 6.5, GRAY)
 
 
 W, H = G["W"], G["H"]
-WIN = G["WIN_A"]
+WIN = G["WIN"]
 ANT = G["ANT"]
 HOLES = [tuple(h) for h in G["HOLES"]]
 
@@ -115,10 +115,10 @@ RR(OX, OY, W, H, G["R_OUT"], INK, 0.6, fill=PALE)
 RR(P(G["OX"], G["OY"])[0], P(G["OX"], G["OY"])[1], G["PCB_PY"], G["PCB_PX"],
    G["PCB_R"], GRAY, 0.3, dash=(2, 1.5))
 # 显示窗
-wx, wy, ww, wh = WIN[0], WIN[1], G["WIN_A_W"], G["WIN_A_H"]
+wx, wy, ww, wh = WIN[0], WIN[1], G["WIN_W"], G["WIN_H"]
 RR(P(wx, wy)[0], P(wx, wy)[1], ww, wh, G["WIN_R"], REDC, 0.7, fill=HexColor("#ffffff"))
-T("显示区窗口 AA", P(wx + 3, wy + wh / 2)[0], P(wx + 3, wy + wh / 2)[1], 7, REDC)
-T("屏幕黑边被顶板压住", P(wx + 3, wy + wh / 2 - 5)[0],
+T("显示窗 = A.A + 让位", P(wx + 3, wy + wh / 2)[0], P(wx + 3, wy + wh / 2)[1], 7, REDC)
+T("四周各放大 0.5，不切亮区", P(wx + 3, wy + wh / 2 - 5)[0],
   P(wx + 3, wy + wh / 2 - 5)[1], 6, GRAY)
 # 侧壁天线让位窗（俯视投影为靠上边窄条；顶板完整不开洞）
 ax0, ay0, ax1, ay1 = ANT
@@ -153,29 +153,30 @@ T("A", OX + W + 6.5, P(0, G["H"] / 2)[1] + 1, 8, BLUE)
 # 尺寸
 DIMH(OX, OX + W, OY - 8, f"{W:.2f}")
 DIMV(OY, OY + H, OX - 9, f"{H:.2f}")
-DIMH(P(wx, 0)[0], P(wx + ww, 0)[0], OY + H + 6, f"{G['WIN_A_W']:.2f} (A版窗口)")
-DIMV(P(0, wy)[1], P(0, wy + wh)[1], OX + W + 8, f"{G['WIN_A_H']:.2f}")
+DIMH(P(wx, 0)[0], P(wx + ww, 0)[0], OY + H + 6, f"{G['WIN_W']:.2f} 显示窗")
+DIMV(P(0, wy)[1], P(0, wy + wh)[1], OX + W + 8, f"{G['WIN_H']:.2f}")
 DIMH(P(ax0, 0)[0], P(ax1, 0)[0], OY + H + 14,
      f"{ax1-ax0:.2f} 侧壁让位窗（顶板不开）", BLUE)
 DIMH(P(HOLES[0][0], 0)[0], P(HOLES[1][0], 0)[0], OY - 15, "91.34 孔距")
 DIMV(P(0, HOLES[0][1])[1], P(0, HOLES[2][1])[1], OX - 16, "48.70")
-T("上盖俯视 1:1（窗口按 A 版）", OX, OY - 22, 9, INK)
+T("上盖俯视 1:1（单版本显示窗 · A.A 放大让位）", OX, OY - 22, 9, INK)
 T("虚线 = PCB 参考轮廓 61.80×100.00 R2 / 蓝色虚线圆 = Φ7 螺丝柱位", OX, 10.5, 6.5, GRAY)
 
 # 右侧信息区
 IX = 158.0
-T("A / B 版窗口对照", IX, 184, 9, BLUE)
-rows = [["版本", "窗口尺寸", "依据", "适用"],
-        ["A", "69.00 × 47.60", "EDA封装可视框 70.46×49.07", "≤70.46"],
-        ["B", "72.00 × 47.60", "通用 AA 73.44×48.96", "≈73.44"]]
-colx = [IX, IX + 14, IX + 42, IX + 110]
+T("显示窗 vs 实测 LCD A.A", IX, 184, 9, BLUE)
+rows = [["项目", "宽 X", "高 Y", "说明"],
+        ["A.A", "73.44", "48.96", "实测发光区"],
+        ["窗口", "74.40", "50.00", "四周 +0.5"],
+        ["让位", "0.48", "0.52", "不切亮区"]]
+colx = [IX, IX + 34, IX + 68, IX + 100]
 for r, row in enumerate(rows):
-    y = 176 - r * 7
-    RECT(IX, y - 2, 132, 7, GRAY, 0.25, fill=(LIGHT if r == 0 else None))
+    y = 176 - r * 6
+    RECT(IX, y - 2, 132, 6, GRAY, 0.25, fill=(LIGHT if r == 0 else None))
     for j, v in enumerate(row):
         T(v, colx[j] + 1, y, 6.3 if r else 6.8, INK if r else BLUE)
-T("打样前点亮屏幕：量发光区宽高选 A/B，并量左右偏心。", IX, 152, 6.8, REDC)
-T("其余几何两版完全相同；底座通用。", IX, 146.5, 6.8, INK)
+T("窗口比 A.A 大：宁露极窄黑边，不切亮区。", IX, 148, 6.6, REDC)
+T("偏心量 -2.75 仍为推算值，打样前实测。", IX, 142.5, 6.6, REDC)
 
 T("四边接口开窗（PCB 左旋 90°、天线朝上的正视图）", IX, 137, 8.5, BLUE)
 info = [
@@ -194,21 +195,23 @@ T("关键尺寸 / 结构", IX, 88, 8.5, BLUE)
 specs = [
     f"外形 {W:.2f} × {H:.2f} × {G['H_TOTAL']:.2f}，外圆角 R{G['R_OUT']:.1f}",
     f"顶板厚 {G['T_TOP']:.2f} / 侧壁厚 {G['T_WALL']:.2f} / 内腔净高 {G['H_CAVITY']:.2f}",
-    f"窗口 {G['WIN_A_W']:.2f}×{G['WIN_A_H']:.2f} R{G['WIN_R']:.1f}；中心 X={G['WIN_CX']:.2f}",
-    f"偏心屏：窗口左移 {-G['WIN_OFFSET_X']:.2f} 对准显示区，黑边全部压住",
+    f"窗口 {G['WIN_W']:.2f}×{G['WIN_H']:.2f} R{G['WIN_R']:.1f}；中心 X={G['WIN_CX']:.2f}",
+    f"实测 A.A {G['LCD_AA_W']:.2f}×{G['LCD_AA_H']:.2f}，四周让位 {G['WIN_CLEAR_X']:.2f}/{G['WIN_CLEAR_Y']:.2f}",
+    f"偏心屏：窗口左移 {-G['WIN_OFFSET_X']:.2f} 对准显示区，宁露黑边不切亮区",
     "顶板完整无镂空：仅显示窗 + Φ4 复位孔；四边开口统一 Z 4.00~14.20",
     "插线余量：窗口按带壳插头 + 线材 Φ3~5 留，不按母座贴边",
     "PCB 4× φ4 安装孔距 91.34 × 48.70，与柱同轴",
     "壳体内缘距 PCB 1.00 间隙；材料绝缘非金属",
 ]
 for i, s in enumerate(specs):
-    T("· " + s, IX, 81 - i * 6.6, 6.6, INK)
+    # 9 行：行距压到 5.9，末行 y=35.8，与 y=30 的「图例」标题留足间距
+    T("· " + s, IX, 83 - i * 5.9, 6.4, INK)
 
 T("图例", IX, 30, 8, BLUE)
 CIRCLE(IX + 3, 24, 2, BLUE, 0.4, dash=(1.5, 1)); T("螺丝柱位 Φ7", IX + 8, 22.5, 6.4, INK)
 RECT(IX, 16, 6, 3, GREEN, 0.4, fill=HexColor("#e4f3ea")); T("I2C 侧壁开窗", IX + 8, 17, 6.4, INK)
 RECT(IX + 55, 16, 6, 3, BLUE, 0.4, fill=HexColor("#e6eff9")); T("侧壁让位窗", IX + 63, 17, 6.4, INK)
-FOOTER("注：窗口按 A 版绘制；B 版仅长度 72.00 不同。Rev G 窗口已左移 2.75 对准偏心屏，打样前请实测。")
+FOOTER("注：Rev H 已删除 A/B 双版本；唯一窗口 74.40×50.00 按实测 A.A 放大让位，左移 2.75 对准偏心屏。")
 
 
 # ================= 页 2：底座 + 剖面 =================
@@ -384,7 +387,7 @@ T("依据：ESP32S3_LCD 工程 + PCB_PCB1_1_2026-11-07.pdf 装配层", IX, 29, 6
 T("板框 61.80×100.00 R2；4×φ4 孔距 91.34×48.70（CIRCLE 半径 2mm×2）", IX, 23.5, 6.1, GRAY)
 T("ESP32-S3-Metric.pdf：系统板 63.39×27.94 直焊 U1/U2；开口带 Z 4.00~14.20", IX, 18, 6.1, GRAY)
 T("ATK-MD0350：LCD 经 H1 插入仅 2 安装孔；φ4 是 M3 加大过孔，不用 M4", IX, 12.5, 6.1, GRAY)
-FOOTER("注：Rev G 四边开口统一 Z 4.00~14.20 平齐且含插线余量；顶板完整无镂空、显示窗左移 2.75 对准偏心屏。")
+FOOTER("注：Rev H 四边开口统一 Z 4.00~14.20 平齐且含插线余量；顶板完整无镂空；显示窗按实测 A.A 放大让位。")
 
 c.save()
 print("PDF:", PDF)

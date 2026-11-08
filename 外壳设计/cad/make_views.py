@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Rev G —— A3 横向三视图（正视图 / 上视图 / 右视图 + 辅助下视图）
+"""Rev H —— A3 横向三视图（正视图 / 上视图 / 右视图 + 辅助下视图）
 
 输出：
   deliverables/ESP32S3_LCD_全覆盖外壳_三视图.pdf   A3 420x297，1 页
@@ -34,7 +34,7 @@ GRNF = HexColor("#e4f3ea")
 W, H = G["W"], G["H"]
 HT = G["H_TOTAL"]
 TB, TTI, ZTI = G["T_BASE"], G["T_TOP"], G["Z_TOP_IN"]
-WIN = G["WIN_A"]
+WIN = G["WIN"]
 AX0, AY0, AX1, AY1 = G["ANT"]
 AZ0, AZ1 = G["ANT_SLOT_Z0"], G["ANT_SLOT_Z1"]
 RST = G["RESET_POS"]
@@ -51,7 +51,7 @@ S = 1.6  # 图示放大比例（尺寸数字均为实际 mm）
 PW, PH = 420.0, 297.0
 PDF = os.path.join(OUT, "ESP32S3_LCD_全覆盖外壳_三视图.pdf")
 c = canvas.Canvas(PDF, pagesize=(PW * mm, PH * mm))
-c.setTitle("ESP32S3_LCD 全覆盖外壳 三视图 Rev G")
+c.setTitle("ESP32S3_LCD 全覆盖外壳 三视图 Rev H")
 c.setAuthor("WorkBuddy")
 
 
@@ -133,7 +133,7 @@ def DIMV(y1, y2, x, label, color=DIMC, size=6.2, left=True):
 RECT(6, 6, PW - 12, PH - 12, GRAY, 0.4)
 LN(6, 274, PW - 6, 274, BLUE, 0.7)
 T("ESP32-S3 LCD 全覆盖显示屏外壳  ·  三视图", 12, 282, 15, BLUE)
-TR("Rev G   /   A3 横向   /   单位 mm   /   图示比例 1.6 : 1   /   2026-11-08",
+TR("Rev H   /   A3 横向   /   单位 mm   /   图示比例 1.6 : 1   /   2026-11-08",
    PW - 12, 283, 8, GRAY)
 T("顶板完整封闭、不透明，无 U 形镂空；天线让位仅在上边侧壁。尺寸数字为实物 mm，与图示比例无关。",
    12, 266, 7.4, INK)
@@ -143,8 +143,8 @@ LN(6, 20, PW - 6, 20, INK, 0.5)
 for xx in (170, 250, 320, 375):
     LN(xx, 6, xx, 20, GRAY, 0.3)
 T("图名：全覆盖外壳 三视图（正 / 上 / 右 + 辅助下视图）", 10, 12.5, 7.5, INK)
-T("图号：ESP32S3-LCD-EN-G-VIEW", 174, 12.5, 7, INK)
-T("版本：Rev G", 254, 12.5, 7, INK)
+T("图号：ESP32S3-LCD-EN-H-VIEW", 174, 12.5, 7, INK)
+T("版本：Rev H", 254, 12.5, 7, INK)
 T("材料：绝缘非金属", 324, 12.5, 7, INK)
 T("第 1 / 1 页", 379, 12.5, 7, GRAY)
 
@@ -158,13 +158,13 @@ RR(FX, FY, FW, FH, G["R_OUT"] * S, INK, 0.65, fill=PALE)
 RR(FX + G["OX"] * S, FY + G["OY"] * S, G["PCB_PY"] * S, G["PCB_PX"] * S,
    G["PCB_R"] * S, GRAY, 0.3, dash=(2, 1.5))
 # 显示窗
-wx, wy, ww, wh = WIN[0], WIN[1], G["WIN_A_W"], G["WIN_A_H"]
+wx, wy, ww, wh = WIN[0], WIN[1], G["WIN_W"], G["WIN_H"]
 RR(FX + wx * S, FY + wy * S, ww * S, wh * S, G["WIN_R"] * S,
    REDC, 0.75, fill=WINF)
 TC("显示区窗口 AA", FX + (wx + ww / 2) * S, FY + (wy + wh / 2) * S + 3, 8, REDC)
-TC(f"{ww:.2f} × {wh:.2f} (A 版)", FX + (wx + ww / 2) * S,
+TC(f"{ww:.2f} × {wh:.2f}（A.A + 让位）", FX + (wx + ww / 2) * S,
    FY + (wy + wh / 2) * S - 3, 7, REDC)
-TC("屏幕黑边被顶板压住", FX + (wx + ww / 2) * S,
+TC("四周各放大 0.5，不切亮区", FX + (wx + ww / 2) * S,
    FY + (wy + wh / 2) * S - 10, 6.5, GRAY)
 # 侧壁让位窗投影（靠上边窄条）
 RECT(FX + AX0 * S, FY + AY0 * S, (AX1 - AX0) * S, (AY1 - AY0) * S,
@@ -293,9 +293,10 @@ T("关键尺寸 / 结构", IX2, 262, 9, BLUE)
 specs = [
     (f"外形  {W:.2f} × {H:.2f} × {HT:.2f}   R{G['R_OUT']:.1f}", INK),
     (f"顶板 {TTI:.2f} / 侧壁 {G['T_WALL']:.2f} / 底板 {TB:.2f} / 内腔 {G['H_CAVITY']:.2f}", INK),
-    (f"显示窗 {G['WIN_A_W']:.2f}×{G['WIN_A_H']:.2f} R{G['WIN_R']:.1f}（A 版）", REDC),
+    (f"显示窗 {G['WIN_W']:.2f}×{G['WIN_H']:.2f} R{G['WIN_R']:.1f}（唯一版本）", REDC),
+    (f"实测 A.A {G['LCD_AA_W']:.2f}×{G['LCD_AA_H']:.2f}，四周让位 {G['WIN_CLEAR_X']:.2f}/{G['WIN_CLEAR_Y']:.2f}", REDC),
     (f"窗口中心 X={G['WIN_CX']:.2f}/Y={G['WIN_CY']:.2f}，偏心屏左移 {-G['WIN_OFFSET_X']:.2f}", REDC),
-    (f"顶板无镂空：仅显示窗 + Φ{RSTD:.1f} 复位孔；黑边全压住", GREEN),
+    (f"顶板无镂空：仅显示窗 + Φ{RSTD:.1f} 复位孔；宁露黑边不切亮区", GREEN),
     (f"统一开口带 Z {AZ0:.2f}~{AZ1:.2f}（四边平齐）", BLUE),
     (f"上边：天线 {AX1-AX0:.2f} + I2C 合并宽窗 25.10/24.90", BLUE),
     (f"下边双 Type-C {G['DUAL_USBC'][1]-G['DUAL_USBC'][0]:.2f}；右边 18.00/23.00", GREEN),
@@ -312,7 +313,7 @@ JX, JY = 225.0, 132.0
 T("三视图读图说明", JX, JY, 9, BLUE)
 notes = [
     "① 正视图 = 屏幕正面：只见显示窗 + Φ4 复位孔，顶板完整不透明；",
-    "   屏幕黑边（右侧明显宽于左侧）被顶板压住，窗口已左移 2.75 对准亮区。",
+    "   窗口按实测 A.A 四周放大 0.5，宁露极窄黑边也不切亮区；已左移 2.75。",
     "② 上视图 = 从天线侧看：顶板整段连续；天线让位窗与 2 段",
     "   I2C 合并宽窗上下沿完全平齐（统一 Z 4.00~14.20）。",
     "④ 右视图 = 从右侧看：5V Type-C（18.00）与 XH2.54-5P（23.00）；",
@@ -445,7 +446,7 @@ for y0, y1, z0, z1, n in RGT_SLOTS:
 dh(RX0, RX0 + H, 0, f"{H:.2f}", -9); dv(0, HT, RX0, f"{HT:.2f}", -10)
 dt("④ 右视图（+Xo）  1:1   横轴 Yo：左=下边，右=上边（天线侧）", RX0, HT + 18, 3.4)
 
-dt("ESP32S3-LCD-EN-G-VIEW  Rev G  |  单位 mm  1:1  |  四边开口平齐 / 显示窗偏心对位",
+dt("ESP32S3-LCD-EN-H-VIEW  Rev H  |  单位 mm  1:1  |  四边开口平齐 / 显示窗按 A.A 放大让位",
    0, -112, 3.6)
 DXF = os.path.join(OUT, "ESP32S3_LCD_全覆盖外壳_三视图.dxf")
 d.saveas(DXF)

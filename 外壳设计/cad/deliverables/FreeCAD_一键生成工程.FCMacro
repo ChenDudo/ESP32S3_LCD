@@ -2,7 +2,7 @@
 """FreeCAD 外壳工程 (.FCStd) —— 可选的「着色版」生成宏
 
 现成的 ESP32S3_LCD_外壳工程.FCStd 已经生成好了，双击即可打开，
-内含上盖 A 版 / 底座 / PCB 参考板 3 个命名实体。
+内含上盖 / 底座 / PCB 参考板 3 个命名实体。
 
 本宏是可选的：FreeCADCmd 是纯控制台模式，生成的 .FCStd 不含
 GuiDocument（颜色 / 相机）。执行本宏会重新导入 STEP、设名称与颜色、
@@ -10,7 +10,6 @@ GuiDocument（颜色 / 相机）。执行本宏会重新导入 STEP、设名称�
 几何完全一致，只是补上外观属性。
 
 用法：FreeCAD 里 菜单「宏 → 宏...」→ 选中本文件 → 执行。
-想用 B 版上盖：把下面 TOP_FILE 改成 B 版文件名再执行一次即可。
 若整个 deliverables 文件夹被移动，只需改 BASE 这一个路径。
 """
 import os
@@ -20,8 +19,7 @@ import Part
 
 BASE = r"C:\Users\14210\WorkBuddy\2026-11-07-21-40-20\cad\deliverables"
 
-TOP_FILE = "ESP32S3_LCD_全覆盖外壳_上盖_A版_可编辑.step"
-# TOP_FILE = "ESP32S3_LCD_全覆盖外壳_上盖_B版_可编辑.step"
+TOP_FILE = "ESP32S3_LCD_全覆盖外壳_上盖_可编辑.step"
 BASE_FILE = "ESP32S3_LCD_全覆盖外壳_底座_可编辑.step"
 ASSY_FILE = "ESP32S3_LCD_全覆盖外壳_装配体_含PCB参考.step"
 OUT_FILE = "ESP32S3_LCD_外壳工程.FCStd"
@@ -76,10 +74,10 @@ def main():
         if not os.path.isfile(p):
             raise RuntimeError("找不到文件：%s\n请检查 BASE 路径。" % p)
 
-    doc = App.newDocument("ESP32S3_LCD_Enclosure_RevG")
-    doc.Label = "ESP32S3_LCD 全覆盖外壳 Rev G"
+    doc = App.newDocument("ESP32S3_LCD_Enclosure_RevH")
+    doc.Label = "ESP32S3_LCD 全覆盖外壳 Rev H"
 
-    add_part(doc, "TopCover_A", "上盖（A 版，打印件）",
+    add_part(doc, "TopCover", "上盖（打印件）",
              first_solid(read_shape(os.path.join(BASE, TOP_FILE))), GREY)
     add_part(doc, "Base", "底座（打印件）",
              first_solid(read_shape(os.path.join(BASE, BASE_FILE))), GREY)

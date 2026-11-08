@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""ESP32S3_LCD 全覆盖外壳 Rev G —— 导出可编辑的 STEP (AP214 BREP) 实体
+"""ESP32S3_LCD 全覆盖外壳 Rev H —— 导出可编辑的 STEP (AP214 BREP) 实体
 
 与 build_v2.py 的 STL 用同一套 params_v2.py 参数，但用 OpenCascade 解析几何
 重新建模：圆角是真正的圆柱面，螺丝孔是真正的圆柱面，窗口是平面多边形，
@@ -10,8 +10,7 @@
 STEP 版用解析圆弧，两者轮廓差 <0.01 mm，外形尺寸 / 孔径 / 开窗完全一致。
 
 输出（cad/deliverables/）：
-  ESP32S3_LCD_全覆盖外壳_上盖_A版_可编辑.step
-  ESP32S3_LCD_全覆盖外壳_上盖_B版_可编辑.step
+  ESP32S3_LCD_全覆盖外壳_上盖_可编辑.step
   ESP32S3_LCD_全覆盖外壳_底座_可编辑.step
   ESP32S3_LCD_全覆盖外壳_装配体_含PCB参考.step
 """
@@ -125,16 +124,13 @@ def main():
         with open(geom_path, encoding="utf-8") as f:
             ref = json.load(f).get("volumes", {})
 
-    top_a = build_top(P.WIN_A_W, P.WIN_A_H)
-    top_b = build_top(P.WIN_B_W, P.WIN_B_H)
+    top = build_top(P.WIN_W, P.WIN_H)
     base = build_base()
     pcb = build_pcb_reference()
 
     parts = [
-        (top_a, "ESP32S3_LCD_全覆盖外壳_上盖_A版_可编辑.step",
-         "ESP32S3_LCD_全覆盖外壳_上盖_A版_3D打印.stl"),
-        (top_b, "ESP32S3_LCD_全覆盖外壳_上盖_B版_可编辑.step",
-         "ESP32S3_LCD_全覆盖外壳_上盖_B版_3D打印.stl"),
+        (top, "ESP32S3_LCD_全覆盖外壳_上盖_可编辑.step",
+         "ESP32S3_LCD_全覆盖外壳_上盖_3D打印.stl"),
         (base, "ESP32S3_LCD_全覆盖外壳_底座_可编辑.step",
          "ESP32S3_LCD_全覆盖外壳_底座_3D打印.stl"),
     ]
@@ -148,10 +144,10 @@ def main():
     # 装配体：3 个独立 BREP 实体合在一个 STEP 里。
     # 不用 cq.Assembly.save —— 该路径在 cadquery 2.8 / Python 3.13 上会导出空文件。
     assy_path = os.path.join(OUT, "ESP32S3_LCD_全覆盖外壳_装配体_含PCB参考.step")
-    cq.Compound.makeCompound([top_a, base, pcb]).exportStep(assy_path)
+    cq.Compound.makeCompound([top, base, pcb]).exportStep(assy_path)
     print(f"  {os.path.basename(assy_path)}  (3 solids: top / base / PCB ref)")
     expect_assy = (ref.get(parts[0][2], {}).get("volume_cm3", 0)
-                   + ref.get(parts[2][2], {}).get("volume_cm3", 0)
+                   + ref.get(parts[1][2], {}).get("volume_cm3", 0)
                    + pcb.Volume() / 1000.0)
     all_ok &= check(assy_path, expect_assy)
 
