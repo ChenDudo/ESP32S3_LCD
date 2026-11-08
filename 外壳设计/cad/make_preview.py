@@ -3,7 +3,7 @@
 
 灰色虚线 = 实测 LCD A.A 73.44×48.96；红色实线 = 唯一显示窗 74.40×50.00，
 四周各放大 0.48/0.52 mm 让位。窗口中心 X 左移 2.75、Y 下移 0.90 对准偏心屏
-（Y 方向并非几何居中）。顶板 9 组凸字：右侧字头朝左、上边 I2C 字头朝下、RST 横排。
+（Y 方向并非几何居中）。顶板 9 组凸字：右侧字头朝左、上边 I2C 字头朝上、RST 横排。
 """
 import os
 import numpy as np
@@ -108,7 +108,7 @@ def top_view():
             bbox=dict(facecolor="white", alpha=0.72, edgecolor="none", pad=3))
     ax.text(0, P.H + 8,
             "Rev I 上盖俯视 · 窗口 X 左移 2.75 / Y 下移 0.90 对准偏心屏（非 Y 居中）"
-            f" · 顶板 9 组凸字（字高 {P.TEXT_SIZE:.2f}，右侧字头朝左、上边 I2C 字头朝下）· 单位 mm",
+            f" · 顶板 9 组凸字（字高 {P.TEXT_SIZE:.2f}，右侧字头朝左、上边 I2C 字头朝上）· 单位 mm",
             fontsize=11, color="#1b2a3a")
     ax.set_xlim(-8, P.W + 8)
     ax.set_ylim(-17, P.H + 12)

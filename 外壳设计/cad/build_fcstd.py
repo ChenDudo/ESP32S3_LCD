@@ -48,7 +48,7 @@ def single_solid(shape, tag):
 
 
 def find_pcb(assy):
-    """PCB 参考板 Z 范围 3.4~5.0；上盖 2.4~16.0，底座 0~3.4。"""
+    """PCB 参考板 Z 范围 3.4~5.0；上盖 2.4~25.1，底座 0~3.4。"""
     for s in assy.Solids:
         bb = s.BoundBox
         if abs(bb.ZMin - 3.4) < 0.05 and abs(bb.ZMax - 5.0) < 0.05:

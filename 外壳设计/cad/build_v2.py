@@ -2,7 +2,7 @@
 """ESP32S3_LCD 全覆盖不透明外壳 Rev I —— 生成 STL / DXF / 报价 / 下单说明
 
 结构：上盖（完整不透明顶板 + 四周侧壁 + 4 个四角连接柱，仅开显示区窗口 + Φ4 复位孔
-             + 顶板外表面一体成型的 9 组接口凸字标注 USB / COM / Power / UART / RST / I2C1~I2C4）
+             + 顶板外表面一体成型的 9 组接口凸字标注 USB / COM / POWER / UART / RST / I2C1~I2C4）
       底座（平板 + 4 支撑台 + 2 个对角定位销 + 4 连接柱台 + 4 沉孔）
       Rev I：4 个连接柱移到 PCB 板框之外的外壳四角，M3 不再穿过 PCB；
       PCB 由底座定位销定位。四边所有对外开口统一开口带 Z 4.00~12.20（11-08 调矮，
@@ -16,7 +16,7 @@
   顶面接口凸字 —— 字高 2.40、凸出 0.40、底面嵌入顶板 0.05，字形由 text_geom.py
   统一生成，STL / STEP / DXF / PDF / 预览完全一致。
   11-08 第四次修订：显示窗增加 Y 偏心 WIN_OFFSET_Y=-0.90（窗口 Y 35.60），
-  凸字缩小并移近接口；右侧字头朝左（rot +90）、上边 I2C 字头朝下（rot 180）。
+  凸字缩小并移近接口；右侧字头朝左（rot +90）、上边 I2C 字头朝上（rot 0）。
 """
 import os, json, csv, math
 import numpy as np
@@ -93,8 +93,8 @@ OUTER_PTS = rr_pts(P.W, P.H, P.R_OUT)
 
 # ---------------- 上盖 ----------------
 def build_top(win_w, win_h):
-    outer = prism(OUTER, P.T_BASE, P.H_TOTAL)                 # 罩体 Z 2.4~16.0
-    cavity = prism(INNER, P.T_BASE, P.Z_TOP_IN)               # 内腔 Z 2.4~14.2
+    outer = prism(OUTER, P.T_BASE, P.H_TOTAL)                 # 罩体 Z 2.4~25.1
+    cavity = prism(INNER, P.T_BASE, P.Z_TOP_IN)               # 内腔 Z 2.4~23.3
     window = prism(rr_at(P.WIN_CX, P.WIN_CY, win_w, win_h, P.WIN_R),
                    P.Z_TOP_IN - 0.2, P.H_TOTAL + 0.5)          # 显示窗切穿顶板
     # Rev I：顶板完整无镂空；天线让位与所有接口窗统一 Z 开口带（止于顶板内表面）
@@ -114,7 +114,7 @@ def build_top(win_w, win_h):
                       cyl(P.POST_PILOT_D / 2, P.POST_Z0 - 0.2, P.POST_PILOT_Z1, x, y)])
         posts.append(post)
     # 顶板完整封闭，无需加强筋
-    # 顶板外表面一体成型接口凸字（USB / COM / Power / UART / RST / I2C1~I2C4）
+    # 顶板外表面一体成型接口凸字（USB / COM / POWER / UART / RST / I2C1~I2C4）
     marks = []
     for _, _, _, _, polys, _ in TG.all_marks():
         for poly in polys:
@@ -267,8 +267,8 @@ T(m, f"Rev I 偏心屏：显示窗中心 X={P.WIN_CX:.2f} / Y={P.WIN_CY:.2f}"
   0, P.H + 32, 2.8, "ANT")
 T(m, f"单版本：窗口 {P.WIN_W:.2f} x {P.WIN_H:.2f} 比实测 A.A {P.LCD_AA_X:.2f} x {P.LCD_AA_Y:.2f} 四周各放大 {P.WIN_CLEAR_X:.2f} / {P.WIN_CLEAR_Y:.2f}",
   0, P.H + 37, 2.8, "ANT")
-T(m, "顶板 9 组凸字：USB / COM / Power / UART / RST + 上边 I2C1~I2C4；"
-     "右侧字头朝左、上边 I2C 字头朝下、RST 横排；全部贴近对应接口",
+T(m, "顶板 9 组凸字：USB / COM / POWER / UART / RST + 上边 I2C1~I2C4；"
+     "右侧字头朝左、上边 I2C 字头朝上、RST 横排；全部贴近对应接口",
   0, P.H + 42, 2.8, "NOTE")
 T(m, f"字高 {P.TEXT_SIZE:.2f}、凸出 {P.TEXT_RAISE:.2f}；MARK 层 1:1 轮廓，一体打印，勿打磨掉",
   0, P.H + 46, 2.8, "NOTE")
@@ -331,7 +331,7 @@ T(m2, "PCB 孔位：4x Φ7 支撑台 + 2 个对角定位销（1 圆 Φ3.8 + 1 �
   0, P.H + 13, 2.8)
 T(m2, "A 方案：另 2 个 φ4 孔空置只托底；菱形销沿两销连线削扁吸收打印收缩，避免顶销",
   0, P.H + 18, 2.8, "NOTE")
-T(m2, "四角 Φ6 连接柱在 PCB 板框之外；底板厚 2.40；总装配高 16.00", 0, P.H + 23, 2.8)
+T(m2, f"四角 Φ6 连接柱在 PCB 板框之外；底板厚 2.40；总装配高 {P.H_TOTAL:.2f}", 0, P.H + 23, 2.8)
 d2.saveas(os.path.join(OUT, "ESP32S3_LCD_全覆盖外壳_底座_加工图.dxf"))
 
 # ---- 3. 装配工程图 DXF（剖面 + BOM + 技术说明 + 标题栏） ----
@@ -370,13 +370,13 @@ m3.add_lwpolyline([PP(0, 0), PP(P.W, 0), PP(P.W, P.T_BASE), PP(0, P.T_BASE)],
                   close=True, dxfattribs={"layer": "SECTION"})
 # 层叠
 for z, label in [(P.Z_PCB_BOT, "PCB 底面"), (P.Z_PCB_TOP, "PCB t=1.6"),
-                 (9.10, "ESP32 核心板顶面(直焊)"), (12.10, "3.5in LCD 模块顶面")]:
+                 (9.10, "ESP32 核心板顶面(直焊)"), (P.Z_PCB_TOP + P.STACK_LCD_ABOVE_PCB, "3.5in LCD 模块顶面")]:
     LN(m3, PP(P.OX + 5, z), PP(P.W - P.OX - 5, z), "PCB_REF")
     T(m3, label, SX0 + 6 * SC, SZ + z * SC + 1.2, 2.0, "NOTE")
 LN(m3, PP(0, P.Z_TOP_IN), PP(P.W, P.Z_TOP_IN), "CENTER")
-T(m3, "顶板内表面 Z=14.2；LCD 顶面约 12.1，间隙约 2.1", SX0, SZ + 34 * SC, 2.4, "NOTE")
+T(m3, f"顶板内表面 Z={P.Z_TOP_IN:.2f}；LCD 顶面约 {P.Z_PCB_TOP + P.STACK_LCD_ABOVE_PCB:.2f}，间隙约 {P.STACK_CLEAR:.2f}", SX0, SZ + 34 * SC, 2.4, "NOTE")
 DIMV(m3, SZ, SZ + P.T_BASE * SC, SX0, "2.40", -10)
-DIMV(m3, SZ + P.T_BASE * SC, SZ + P.H_TOTAL * SC, SX0, "16.00 总高", -24)
+DIMV(m3, SZ + P.T_BASE * SC, SZ + P.H_TOTAL * SC, SX0, f"{P.H_TOTAL:.2f} 总高", -24)
 T(m3, "A-A 剖面 2:1（沿窗口中心横剖）", SX0, SZ + 40 * SC, 3.6)
 
 # BOM
@@ -422,7 +422,7 @@ notes = [
     "   PCB 由底座 2 个对角定位销（1 圆 Φ3.8 + 1 菱形 3.20）+ 4 个 Φ7 支撑台定位；",
     "   另 2 个 φ4 孔空置只托底。菱形销沿两销连线削扁，吸收 SLA 收缩约 0.31 mm。",
     "6b. 顶板外表面一体成型 9 组凸字（MARK 层）：USB / COM（下边，字头朝上）、",
-    f"    I2C1~I2C4（上边，字头朝下）、Power / UART（右边，竖排字头朝左）、",
+    f"    I2C1~I2C4（上边，字头朝上）、POWER / UART（右边，竖排字头朝左）、",
     f"    RST（上边复位孔旁，横排字头朝上）；字高 {P.TEXT_SIZE:.2f}、凸出 {P.TEXT_RAISE:.2f}。",
     "    9 组字均贴近各自接口的侧壁开窗，站在该边看过去方向正读。",
     "7. 材料必须绝缘非金属；不喷金属漆、不镀层、不用碳纤维/导电料；建议 PETG 或韧性树脂。",
@@ -485,7 +485,8 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev I —— 淘宝打样下单
     PCB 同侧两孔距 48.695，与 48.64 仅差 0.055 → LCD 两孔对准 PCB 一端两孔。
     LCD 板 97.92 长 < PCB 100 长，故 LCD 板【完全覆盖 PCB 四角 φ4 孔】，
     左端为实心板。旧版「底部 4 颗 M3 穿过 PCB 四角孔 → 拧进上盖柱」装不上：
-    螺杆在 Z 5.0~12.1 段被 LCD 板挡死，缩柱径 / 换 M2 / 不上 LCD 螺丝都无效。
+    螺杆在 Z 5.0~22.3 段被 LCD 板挡死（旧版按 12.1 估算，第五次修订按 BOM 校正为 22.3），
+    缩柱径 / 换 M2 / 不上 LCD 螺丝都无效。
   ★ 本版修法：外形每边 +3.00 mm → {P.W:.2f} x {P.H:.2f} x {P.H_TOTAL:.2f} mm，
     4 个连接柱移到外壳四角（PCB 板框之外，柱心 ({P.SCREW_C:.2f},{P.SCREW_C:.2f}) 等，Φ{P.POST_D:.1f}）。
     因 LCD 板完全在 PCB 板框内，柱子与屏幕绝无干涉；柱心到 PCB 圆角实体
@@ -501,7 +502,7 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev I —— 淘宝打样下单
       间隙，正好吸收 0.31 mm；垂直连线方向仍由 Φ3.8 接触定位，平面 3 自由度刚好
       约束完，不再过约束。
     4 颗 M3x12 只连接上盖与底座的四角柱，不再经过 PCB / LCD。
-  ★ 顶板内表面 Z=14.20 与 LCD 板顶（约 12.1）留约 2.1 mm；
+  ★ 顶板内表面 Z={P.Z_TOP_IN:.2f} 与 LCD 板顶（约 {P.Z_PCB_TOP + P.STACK_LCD_ABOVE_PCB:.2f}）留约 {P.STACK_CLEAR:.2f} mm；
     若装配后觉得 PCB/LCD 有轻微晃动，在顶板内侧贴 1~2 mm 自粘泡棉垫即可，
     不要擅自加高柱或缩小显示窗。
   ★ 若不接受外形变大：可改「右侧 2 颗加长 M3 穿过 LCD 安装孔 + 左侧 2 个卡扣」，
@@ -510,15 +511,15 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev I —— 淘宝打样下单
   【顶面接口凸字标注（11-08 追加，已做进 STL / STEP）】
   ★ 顶板外表面一体成型 9 组凸字，正视屏幕（天线朝上）：
       下边双 Type-C：左 "USB"、右 "COM"
-      右边 5V Type-C："Power"；右边 XH2.54-5P："UART"（原标注 5P 改名）
+      右边 5V Type-C："POWER"；右边 XH2.54-5P："UART"（原标注 5P 改名）
       上边 4 个 I2C 传感器口："I2C1" / "I2C2" / "I2C3" / "I2C4"（按座中心 X 对位）
       上边 Φ4 复位孔右侧："RST"（横排、字头朝上，按键标注按你要求保持正视可读）
   ★ 字头朝向统一为「字母顶部朝向显示窗」，站在对应那一边看过去就是正读：
-      下边 USB / COM 字头朝上；右边 Power / UART 竖排、字头朝左；
-      上边 I2C1~I2C4 字头朝下；只有 RST 例外（字头朝上）。
+      下边 USB / COM 字头朝上；右边 POWER / UART 竖排、字头朝左；
+      上边 I2C1~I2C4 字头朝上；只有 RST 例外（字头朝上）。
   ★ 9 组字全部移近各自接口的侧壁开窗：下边 Y≈3.30、上边 Y≈69.80、右边 X≈107.00，
     比上一版更贴边；字高由 3.20 缩小到 {P.TEXT_SIZE:.2f} mm（用户反馈「字体太大」）。
-  ★ 字高 {P.TEXT_SIZE:.2f} mm、凸出顶板 {P.TEXT_RAISE:.2f} mm（顶面 Z 16.00→16.40），
+  ★ 字高 {P.TEXT_SIZE:.2f} mm、凸出顶板 {P.TEXT_RAISE:.2f} mm（顶面 Z {P.H_TOTAL:.2f}→{P.H_TOTAL + P.TEXT_RAISE:.2f}），
     笔画最细约 {MK_STROKE:.2f} mm：SLA 光敏树脂可稳定成型，FDM 0.4 喷嘴可能断笔，
     请优先选 SLA；底面嵌入顶板 {P.TEXT_EMBED:.2f} mm 防掉字。
     9 组字都在显示窗外的顶板边框带内：距显示窗 >= {MK_D_WIN:.2f} mm、
@@ -553,10 +554,24 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev I —— 淘宝打样下单
   ★ 请转告商家：窗口在 X 左移 2.75、Y 下移 0.90 都是刻意对位偏心屏，
     绝非画歪，不要擅自把窗口移回几何居中或缩小。
 
-  【打样前必测：整机高度】把 LCD 屏和 ESP32 系统板装到 PCB 上后，
-  量「PCB 顶面到整机最高点」的距离。本设计内腔从 PCB 顶面算起留 9.20 mm
-  （顶板内表面 Z=14.2，PCB 顶面 Z=5.0；核心板直焊顶面约 9.1、LCD 顶面约 12.1 为最高）。
-  若实测 >9.2 mm，请改 params_v2.py 的 Z_TOP_IN / H_TOTAL 后重出图，否则会顶到顶板。
+  【整机高度已按 BOM 加高（11-08 第五次修订，取代旧版 16.00）】
+  ★ 你的实物堆叠是「LCD 模块 2.54 贴片排针 → PCB 2.54 贴片排母」。按工程
+    .epru 的 BOM 与 3.5 寸液晶屏规格书侧视图核算：
+      FH-00357 立贴 SMD 排母 塑高 8.50（备选直插件也是 8.50）
+      同系列排针 塑高 2.50 → 两板最小间距 11.00
+      LCM 含背光 3.50±0.2 + LCD 模块 PCB 1.60 + 触摸屏/胶约 1.20
+    Z 层叠：PCB 顶面 {P.Z_PCB_TOP:.2f} → 排母顶 13.50 → LCD 板底 16.00
+      → LCD 模块 PCB 顶 17.60 → LCM 顶 21.10
+      → 触摸屏顶约 {P.Z_PCB_TOP + P.STACK_LCD_ABOVE_PCB:.2f}
+      → 顶板内表面 {P.Z_TOP_IN:.2f}（留 {P.STACK_CLEAR:.2f}）→ 总高 {P.H_TOTAL:.2f}。
+  ★ 旧版 16.00 总高 / 9.20 内部净空【不够】：光排母顶面就到 13.50，
+    已贴住当时的顶板内表面 14.20，LCD 根本装不进去，缺口约 9.10 mm。
+    本版已按 BOM 加高到 {P.H_TOTAL:.2f}；顶板下开口上沿仍固定 12.20、
+    M3 盲孔底固定 13.80，避免侧壁被挖空 / 螺丝盲孔过深。
+  ★ 打样前请卡尺复核：量「PCB 顶面 → LCD 最上表面」= H，应满足
+    H + 1.00 <= {P.Z_TOP_IN - P.Z_PCB_TOP:.2f} mm；若实测更大，把 params_v2.py 的
+    Z_TOP_IN 改成 {P.Z_PCB_TOP:.2f} + H + 1.00 后全套重跑。
+    另量「PCB 底面 → 最低焊点」须 <1.00 mm（底板顶 2.40、PCB 底 3.40）。
 
   【孔径定案：PCB 四角 φ4 孔，不是 φ2】
   工程 .epru 里 4 个 FILL CIRCLE 第三个参数是【半径】78.7402 mil = 2.000 mm，
@@ -584,7 +599,7 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev I —— 淘宝打样下单
 
 【二、复制给商家的一段话】
   两件 3D 打印外壳，外形 {P.W:.2f} x {P.H:.2f} x {P.H_TOTAL:.2f} mm，整套约 {vol_all:.0f} cm3。
-  上盖顶板厚 1.8、侧壁厚 1.6、总高 16.0；显示窗 {P.WIN_W:.2f} x {P.WIN_H:.2f} mm
+  上盖顶板厚 1.8、侧壁厚 1.6、总高 {P.H_TOTAL:.2f}；显示窗 {P.WIN_W:.2f} x {P.WIN_H:.2f} mm
   （四角 R1.5），窗口中心 X={P.WIN_CX:.2f} / Y={P.WIN_CY:.2f}（相对外壳中心
   左移 {-P.WIN_OFFSET_X:.2f} mm、下移 {-P.WIN_OFFSET_Y:.2f} mm，为对准偏心屏显示区），
   请勿擅自把窗口移回几何居中；
@@ -596,8 +611,8 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev I —— 淘宝打样下单
   外壳四角有 4 个 Φ{P.POST_D:.1f} 连接柱（在 PCB 板框之外，别误当成 PCB 安装孔）；
   底座有 4 个 Φ{P.BASE_BOSS_D:.1f} 支撑台和 2 个对角定位销（1 圆 Φ{P.LOCATOR_D:.1f}
   + 1 菱形 {P.DIAMOND_W:.2f}），用来定位 PCB；另 2 个 PCB 孔空置。
-  顶板外表面有 9 组一体成型凸字标注 USB / COM / Power / UART / RST / I2C1~I2C4，
-  右侧 Power / UART 竖排字头朝左、上边 I2C1~I2C4 字头朝下、RST 横排字头朝上，
+  顶板外表面有 9 组一体成型凸字标注 USB / COM / POWER / UART / RST / I2C1~I2C4，
+  右侧 POWER / UART 竖排字头朝左、上边 I2C1~I2C4 字头朝上、RST 横排字头朝上，
   字高 {P.TEXT_SIZE:.2f}、凸出 {P.TEXT_RAISE:.2f} mm、笔画最细约 {MK_STROKE:.2f} mm，
   请按 STL 原样保留，不要打磨掉、不要喷漆盖住；字较细，务必选 SLA 光敏树脂打印。
   不透明绝缘非金属，不喷金属漆；请按 STL 原尺寸 1:1 打印，不要缩放、不要加支撑在窗口内。
@@ -620,7 +635,7 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev I —— 淘宝打样下单
      只露出显示区；上盖 4 个 Φ{P.POST_D:.1f} 柱正好对准底座四角的 Φ{P.POST_D:.1f} 台。
   4. 从底部 4 个沉孔拧入 M3x12 自攻螺丝，经底座 Φ3.4 通孔直接拧进上盖柱
      （底孔 Φ2.6）；螺丝【不穿过 PCB、不穿过 LCD】。塑料柱吃力即可，勿过度拧紧。
-  5. 若顶板与 LCD 板之间约 2.1 mm 间隙导致轻微晃动，贴 1~2 mm 泡棉垫再扣合。
+  5. 若顶板与 LCD 板之间约 {P.STACK_CLEAR:.2f} mm 间隙导致轻微晃动，贴 1~2 mm 泡棉垫再扣合。
 
 【五、接口开窗对应（PCB 左旋 90°、天线朝上的正视方位）】
   ★ 四边所有开口统一 Z {P.OPEN_Z0:.2f}~{P.OPEN_Z1:.2f}（开口高 {P.OPEN_Z_H:.2f}；
@@ -647,7 +662,7 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev I —— 淘宝打样下单
   顶板完整封闭、不镂空；天线及模组端部从上边侧壁让位窗穿出，外露段不被壳体包住。
   壳体是绝缘塑料不屏蔽；4 个连接柱在四角、距天线中心均 >45 mm，远超 2.4GHz 近场 20 mm。
   核心板为直接焊接（板间距约 2.5、板厚 1.6），天线铜层约 Z 8~9，顶板内表面
-  Z 14.2 与天线之间约 5mm 塑料间隙，介电加载较弱；
+  Z {P.Z_TOP_IN:.2f} 与天线之间约 {P.Z_TOP_IN - 9.0:.0f}mm 塑料间隙，介电加载更弱；
   装好后对比悬空 / 吸铁板的 WiFi RSSI，若掉 >3dB 可把天线端再多伸出 5~10 mm，
   或把顶板天线区内表面减薄 0.8 mm（外表面仍平整无洞）。
   接线与安装时避免整块金属背板贴近天线端。
@@ -698,6 +713,12 @@ geom = dict(
     W=P.W, H=P.H, R_OUT=P.R_OUT, T_WALL=P.T_WALL, T_BASE=P.T_BASE,
     H_TOTAL=P.H_TOTAL, H_CAVITY=P.H_CAVITY, Z_PCB_BOT=P.Z_PCB_BOT,
     Z_PCB_TOP=P.Z_PCB_TOP, Z_TOP_IN=P.Z_TOP_IN, T_TOP=P.T_TOP,
+    STACK_FEMALE_H=P.STACK_FEMALE_H, STACK_MALE_H=P.STACK_MALE_H,
+    STACK_BOARD_GAP=P.STACK_BOARD_GAP, STACK_LCM=P.STACK_LCM,
+    STACK_LCD_ABOVE_PCB=P.STACK_LCD_ABOVE_PCB, STACK_CLEAR=P.STACK_CLEAR,
+    LCD_TOP_Z=P.Z_PCB_TOP + P.STACK_LCD_ABOVE_PCB,
+    Z_TOP_IN_REQUIRED=P.Z_TOP_IN_REQUIRED, H_TOTAL_REQUIRED=P.H_TOTAL_REQUIRED,
+    STACK_OK=P.STACK_OK,
     OX=P.OX, OY=P.OY, PCB_PX=P.PCB_PX, PCB_PY=P.PCB_PY, PCB_R=P.PCB_R,
     WIN=list(WIN), LCD_AA=list(LCD_AA),
     WIN_W=P.WIN_W, WIN_H=P.WIN_H,

@@ -286,7 +286,7 @@ T("顶板同样连续完整；横轴 Xo：左 = Xo 小端，右 = Xo 大端。",
 
 
 # ==================== 4. 右视图（从 +Xo 看） ====================
-RX, RY = 225.0, 148.0
+RX, RY = 213.0, 148.0
 RW = H * S
 T("④ 右视图（从 +Xo 看，沿 -Xo）", RX, 180, 9, BLUE)
 RECT(RX, RY, RW, TH, INK, 0.65, fill=PALE)
@@ -328,7 +328,7 @@ specs = [
     (f"顶板 {TTI:.2f} / 侧壁 {G['T_WALL']:.2f} / 底板 {TB:.2f} / 内腔 {G['H_CAVITY']:.2f}", INK),
     (f"显示窗 {G['WIN_W']:.2f}×{G['WIN_H']:.2f} R{G['WIN_R']:.1f}（唯一版本）", REDC),
     (f"实测 A.A {G['LCD_AA_W']:.2f}×{G['LCD_AA_H']:.2f}，四周让位 {G['WIN_CLEAR_X']:.2f}/{G['WIN_CLEAR_Y']:.2f}", REDC),
-    (f"窗口中心 X={G['WIN_CX']:.2f}/Y={G['WIN_CY']:.2f}；X 左移 {-G['WIN_OFFSET_X']:.2f}、Y 下移 {-G.get('WIN_OFFSET_Y', 0):.2f}", REDC),
+    (f"窗口中心 X={G['WIN_CX']:.2f}/Y={G['WIN_CY']:.2f}；左移 {-G['WIN_OFFSET_X']:.2f}、下移 {-G.get('WIN_OFFSET_Y', 0):.2f}", REDC),
     (f"顶板无镂空：仅显示窗 + Φ{RSTD:.1f} 复位孔；宁露黑边不切亮区", GREEN),
     (f"统一开口带 Z {AZ0:.2f}~{AZ1:.2f}（四边平齐）", BLUE),
     (f"上边：天线 {AX1-AX0:.2f} + I2C 合并宽窗 25.10/24.90", BLUE),
@@ -339,12 +339,12 @@ specs = [
     (f"四角 Φ{G['POST_D']:.1f} 连接柱在 PCB 板框外；M3 不穿板", REDC),
     (f"PCB 由 2 个对角销定位（圆 Φ{G['LOCATOR_D']:.1f} + 菱形 {G['DIAMOND_W']:.2f}）", INK),
     ("另 2 个 φ4 孔空置；菱形销沿对角削扁吸收 0.31 mm 收缩", INK),
-    (f"顶板 9 组凸字（字高 {G['TEXT_SIZE']:.2f}）：右侧字头朝左 / 上边 I2C 字头朝下 / RST 横排", GREEN),
+    (f"顶板 9 组凸字（字高 {G['TEXT_SIZE']:.2f}）：右侧朝左 / I2C 朝上 / RST 横排", GREEN),
     ("凸字在显示窗外边框带，勿打磨/喷砂；不影响天线", INK),
     ("材料：PETG / 韧性树脂，绝缘非金属", INK),
 ]
 for i, (s, col) in enumerate(specs):
-    T("· " + s, IX2, 253 - i * 6.3, 6.4, col)
+    T("· " + s, IX2, 253 - i * 6.3, 6.1, col)
 
 
 # ==================== 右下：读图说明 / 天线净空 / 图例 ====================
@@ -364,8 +364,8 @@ for i, s in enumerate(notes):
 
 T("天线净空 / 射频提示", JX, 82, 9, BLUE)
 T("· 天线及 ESP32 模组端部经侧壁让位窗伸出壳外，不被壳体包住。", JX, 74, 6.3, INK)
-T("· 核心板直焊，天线铜层约 Z 8~9，顶板内表面 Z 14.2，塑料间隙", JX, 68, 6.3, REDC)
-T("  约 5 mm，介电加载更弱；装好后对比悬空 / 吸铁板 RSSI。", JX, 62, 6.3, REDC)
+T(f"· 核心板直焊，天线铜层约 Z 8~9，顶板内表面 Z {ZTI:.2f}，塑料间隙", JX, 68, 6.3, REDC)
+T(f"  约 {ZTI - 9.0:.0f} mm，介电加载更弱；装好后对比悬空 / 吸铁板 RSSI。", JX, 62, 6.3, REDC)
 T("· 若 RSSI 掉 >3 dB：把天线端再多伸出 5~10 mm，或把顶板", JX, 56, 6.3, INK)
 T("  天线区内表面减薄 0.8 mm（外表面仍平整、无洞）。", JX, 50, 6.3, INK)
 T("· 4 连接柱距天线中心 >45 mm；近场 20 mm 内禁金属/覆铜。", JX, 44, 6.3, INK)
