@@ -169,9 +169,9 @@
         73.0,
         1.8
       ],
-      4.0,
-      12.2,
-      "ESP32 核心板 2 个 Type-C（UART / USB）共用窗"
+      6.0,
+      16.2,
+      "ESP32 核心板 2 个 Type-C（UART / USB）共用窗（核心板 Z 基准，单独抬高）"
     ],
     [
       "5V-USBC",
@@ -210,6 +210,23 @@
   "OPEN_Z_H": 8.2,
   "OPEN_Z_TOP_WALL": 11.100000000000001,
   "RIB_W": 2.0,
+  "DUAL_Z0": 6.0,
+  "DUAL_Z1": 16.2,
+  "DUAL_Z_H": 10.2,
+  "DUAL_Z_TOP_WALL": 7.100000000000001,
+  "CORE_PIN_H": 2.5,
+  "CORE_PCB_T": 1.6,
+  "CORE_BOT_Z": 7.5,
+  "CORE_TOP_Z": 9.1,
+  "CORE_USBC_SOCK_H": 3.6,
+  "CORE_USBC_PORT_DZ": 1.8,
+  "CORE_PORT_Z": 10.9,
+  "CABLE_SHELL_H": 8.0,
+  "CABLE_SHELL_W": 16.0,
+  "CABLE_CLEAR_TOP": 1.3,
+  "CABLE_CLEAR_BOT": 0.9,
+  "CABLE_SHELL_BOT_Z": 6.9,
+  "CABLE_SHELL_TOP_Z": 14.9,
   "I2C_GROUPS": [
     [
       15.0,
@@ -4266,7 +4283,7 @@
   "volumes": {
     "ESP32S3_LCD_全覆盖外壳_上盖_3D打印.stl": {
       "watertight": true,
-      "volume_cm3": 19.1,
+      "volume_cm3": 18.98,
       "bounds": [
         [
           0.0,

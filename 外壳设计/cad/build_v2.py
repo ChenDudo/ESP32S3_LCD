@@ -5,8 +5,9 @@
              + 顶板外表面一体成型的 9 组接口凸字标注 USB / COM / POWER / UART / RST / I2C1~I2C4）
       底座（平板 + 4 支撑台 + 2 个对角定位销 + 4 连接柱台 + 4 沉孔）
       Rev I：4 个连接柱移到 PCB 板框之外的外壳四角，M3 不再穿过 PCB；
-      PCB 由底座定位销定位。四边所有对外开口统一开口带 Z 4.00~12.20（11-08 调矮，
-      上沿留 2.00 实壁），上下沿完全平齐；
+      PCB 由底座定位销定位。11-08 第六次修订后开口带按 Z 基准分两组：
+      A 组（PCB 直焊：上边 I2C / 天线、右边 5V / XH-5P）Z 4.00~12.20、上下沿平齐；
+      B 组（下边核心板双 Type-C，核心板直焊在 PCB 之上）Z 6.00~16.20，单独抬高；
       天线让位窗 27.00 与 I2C 合并宽窗同高；双 Type-C / 5V / XH-5P 均按
       带壳插头 + 线材外径留余量。顶板保持完整不镂空。
 
@@ -259,7 +260,8 @@ DIMV(m, P.SCREW_POS[0][1], P.SCREW_POS[1][1], 0, "66.00", -20)
 T(m, f"上盖俯视 1:1  (单位 mm)  显示窗 {P.WIN_W:.2f} x {P.WIN_H:.2f}（按实测 A.A 放大让位）", 0, -30, 3.6)
 T(m, f"实测 LCD A.A {P.LCD_AA_X:.2f} x {P.LCD_AA_Y:.2f}；窗口四周各让位 {P.WIN_CLEAR_X:.2f} / {P.WIN_CLEAR_Y:.2f}，请勿缩小", 0, -35, 2.8, "NOTE")
 T(m, "顶板完整封闭、无镂空；仅显示窗 + Φ4 复位孔", 0, P.H + 22, 3.0, "ANT")
-T(m, f"四边统一开口带 Z {P.OPEN_Z0:.2f}~{P.OPEN_Z1:.2f}（高 {P.OPEN_Z_H:.2f}）：天线 27.00 与 I2C 宽窗平齐；双 Type-C 36.00；5V 18.00 / XH-5P 23.00",
+T(m, f"开口带分两组：A 组（PCB 直焊：I2C / 天线 / 5V / XH-5P）Z {P.OPEN_Z0:.2f}~{P.OPEN_Z1:.2f}；"
+     f"B 组（核心板双 Type-C）Z {P.DUAL_Z0:.2f}~{P.DUAL_Z1:.2f}",
   0, P.H + 27, 2.8, "ANT")
 T(m, f"Rev I 偏心屏：显示窗中心 X={P.WIN_CX:.2f} / Y={P.WIN_CY:.2f}"
      f"（相对外壳中心左移 {-P.WIN_OFFSET_X:.2f}、下移 {-P.WIN_OFFSET_Y:.2f}），"
@@ -272,7 +274,8 @@ T(m, "顶板 9 组凸字：USB / COM / POWER / UART / RST + 上边 I2C1~I2C4；"
   0, P.H + 42, 2.8, "NOTE")
 T(m, f"字高 {P.TEXT_SIZE:.2f}、凸出 {P.TEXT_RAISE:.2f}；MARK 层 1:1 轮廓，一体打印，勿打磨掉",
   0, P.H + 46, 2.8, "NOTE")
-T(m, f"开口上沿 Z {P.OPEN_Z1:.2f}，距顶板内表面留 {P.OPEN_Z_TOP_WALL:.2f} 实壁；Type-C 线端注塑壳插拔净空已核算",
+T(m, f"A 组上沿 Z {P.OPEN_Z1:.2f}（留 {P.OPEN_Z_TOP_WALL:.2f} 实壁）／B 组上沿 Z {P.DUAL_Z1:.2f}"
+     f"（留 {P.DUAL_Z_TOP_WALL:.2f} 实壁）；双 Type-C 插口中心 Z {P.CORE_PORT_Z:.2f}，线端注塑壳插拔净空已核算",
   0, P.H + 50, 2.8, "NOTE")
 # 四边侧壁展开图（放在右侧 x=125 起）
 SX, SY = 125.0, 0.0
@@ -296,7 +299,8 @@ side_view("下边（双 Type-C）展开 1:1", P.W, bot_segs, 32)
 side_view("右边（5V / XH5P）展开 1:1", P.H, rgt_segs, 56)
 side_view("左边（封闭，无开口）展开 1:1", P.H, [], 80)
 T(m, f"侧壁展开：横轴 = 边长方向，纵轴 = 侧壁高 {P.H_CAVITY:.2f} (Z {P.T_BASE:.2f}~{P.Z_TOP_IN:.2f})", SX, 100, 2.6, "NOTE")
-T(m, f"SLOT 层 = 需开通的窗口（Z {P.OPEN_Z0:.2f}~{P.OPEN_Z1:.2f}，高 {P.OPEN_Z_H:.2f}）；其余为实壁", SX, 105, 2.6, "NOTE")
+T(m, f"SLOT 层 = 需开通的窗口；A 组 Z {P.OPEN_Z0:.2f}~{P.OPEN_Z1:.2f}（高 {P.OPEN_Z_H:.2f}）、"
+     f"B 组双 Type-C Z {P.DUAL_Z0:.2f}~{P.DUAL_Z1:.2f}（高 {P.DUAL_Z_H:.2f}）；其余为实壁", SX, 105, 2.6, "NOTE")
 d.saveas(os.path.join(OUT, "ESP32S3_LCD_全覆盖外壳_上盖_加工图.dxf"))
 
 # ---- 2. 底座 1:1 加工图 ----
@@ -370,7 +374,10 @@ m3.add_lwpolyline([PP(0, 0), PP(P.W, 0), PP(P.W, P.T_BASE), PP(0, P.T_BASE)],
                   close=True, dxfattribs={"layer": "SECTION"})
 # 层叠
 for z, label in [(P.Z_PCB_BOT, "PCB 底面"), (P.Z_PCB_TOP, "PCB t=1.6"),
-                 (9.10, "ESP32 核心板顶面(直焊)"), (P.Z_PCB_TOP + P.STACK_LCD_ABOVE_PCB, "3.5in LCD 模块顶面")]:
+                 (P.CORE_TOP_Z, "ESP32 核心板顶面(直焊)"),
+                 (P.CORE_PORT_Z, "核心板 Type-C 插口中心"),
+                 (P.CORE_PORT_Z + P.CABLE_SHELL_H / 2, "Type-C 线头壳顶"),
+                 (P.Z_PCB_TOP + P.STACK_LCD_ABOVE_PCB, "3.5in LCD 模块顶面")]:
     LN(m3, PP(P.OX + 5, z), PP(P.W - P.OX - 5, z), "PCB_REF")
     T(m3, label, SX0 + 6 * SC, SZ + z * SC + 1.2, 2.0, "NOTE")
 LN(m3, PP(0, P.Z_TOP_IN), PP(P.W, P.Z_TOP_IN), "CENTER")
@@ -411,8 +418,14 @@ notes = [
     "   .epru 中 LCD 模块丝印外框 1.856~58.144（中心 30.000）对 PCB 中心 30.900 亦差 0.900。",
     "   打样前点亮屏幕实测：亮区左/右缘到模块缘 L/R，(L-R)/2 即 X 偏移量；",
     "   上/下缘余量 U/D，(D-U)/2 即 Y 偏移量；不符改 params_v2.py 两行并重跑全部脚本。",
-    f"3. 顶板完整封闭不镂空；四边开口统一 Z {P.OPEN_Z0:.2f}~{P.OPEN_Z1:.2f}"
-    f"（高 {P.OPEN_Z_H:.2f}，上沿留 {P.OPEN_Z_TOP_WALL:.2f} 实壁），天线让位窗与 I2C 窗上下沿平齐。",
+    f"3. 顶板完整封闭不镂空；开口带按 Z 基准分两组，不再四边统一："
+    f"A 组（PCB 直焊接口）Z {P.OPEN_Z0:.2f}~{P.OPEN_Z1:.2f}"
+    f"（高 {P.OPEN_Z_H:.2f}，上沿留 {P.OPEN_Z_TOP_WALL:.2f} 实壁），天线让位窗与 I2C 窗平齐；",
+    f"   3b. B 组（核心板双 Type-C）Z {P.DUAL_Z0:.2f}~{P.DUAL_Z1:.2f}"
+    f"（高 {P.DUAL_Z_H:.2f}，上沿留 {P.DUAL_Z_TOP_WALL:.2f} 实壁）。"
+    f"插口中心 Z {P.CORE_PORT_Z:.2f} = 底板 2.40 + 支撑台 1.00 + PCB 1.60"
+    f" + 核心板排针 {P.CORE_PIN_H:.2f} + 核心板 PCB {P.CORE_PCB_T:.2f}"
+    f" + 母座口高 {P.CORE_USBC_PORT_DZ:.2f}；线头壳 {P.CABLE_SHELL_H:.2f} 厚。",
     "4. 天线投影 20mm 内禁止金属件、覆铜；4 个连接柱距天线中心均 >45mm。",
     "5. 上边：2 段 I2C 合并宽窗（4 个 XH2.54-4P，座距 12.96）+ Φ4 复位孔 + 27.00 天线让位窗。",
     "   下边：ESP32 核心板（直焊）双 Type-C 共用 36.00 窗；右边：5V 18.00 + XH-5P 23.00。",
@@ -603,9 +616,12 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev I —— 淘宝打样下单
   （四角 R1.5），窗口中心 X={P.WIN_CX:.2f} / Y={P.WIN_CY:.2f}（相对外壳中心
   左移 {-P.WIN_OFFSET_X:.2f} mm、下移 {-P.WIN_OFFSET_Y:.2f} mm，为对准偏心屏显示区），
   请勿擅自把窗口移回几何居中；
-  顶板完整无镂空，仅显示窗 + Φ4 复位孔；四边侧壁统一开口带
-  Z {P.OPEN_Z0:.2f}~{P.OPEN_Z1:.2f}（开口高 {P.OPEN_Z_H:.2f}，上沿留 {P.OPEN_Z_TOP_WALL:.2f} 实壁；
-  天线让位窗 27.00 与 I2C 合并宽窗平齐），窗口已按带壳插头与线材留余量，
+  顶板完整无镂空，仅显示窗 + Φ4 复位孔；侧壁开口带按接口 Z 基准分两组，不是四边统一：
+  A 组（PCB 直焊：I2C / 天线 / 5V / XH-5P）Z {P.OPEN_Z0:.2f}~{P.OPEN_Z1:.2f}
+  （开口高 {P.OPEN_Z_H:.2f}，上沿留 {P.OPEN_Z_TOP_WALL:.2f} 实壁；天线窗 27.00 与 I2C 宽窗平齐）；
+  B 组（下边核心板双 Type-C，核心板直焊在 PCB 之上，插口中心 Z {P.CORE_PORT_Z:.2f}）
+  Z {P.DUAL_Z0:.2f}~{P.DUAL_Z1:.2f}（开口高 {P.DUAL_Z_H:.2f}，上沿留 {P.DUAL_Z_TOP_WALL:.2f} 实壁），
+  请勿把 B 组误改成 A 组高度；窗口已按带壳插头与线材留余量，
   窗口四周已按实测 A.A 放大让位以吸收装配偏差，请勿擅自缩小或移回居中；
   顶板天线区不要开洞、不要加支撑。
   外壳四角有 4 个 Φ{P.POST_D:.1f} 连接柱（在 PCB 板框之外，别误当成 PCB 安装孔）；
@@ -638,25 +654,59 @@ note = f"""ESP32-S3 LCD 全覆盖显示屏外壳 Rev I —— 淘宝打样下单
   5. 若顶板与 LCD 板之间约 {P.STACK_CLEAR:.2f} mm 间隙导致轻微晃动，贴 1~2 mm 泡棉垫再扣合。
 
 【五、接口开窗对应（PCB 左旋 90°、天线朝上的正视方位）】
-  ★ 四边所有开口统一 Z {P.OPEN_Z0:.2f}~{P.OPEN_Z1:.2f}（开口高 {P.OPEN_Z_H:.2f}；
-    下沿留 {P.OPEN_Z0-P.T_BASE:.2f} 实壁、上沿留 {P.OPEN_Z_TOP_WALL:.2f} 实壁到顶板内表面），
-    天线让位窗与 I2C 插座窗完全平齐；窗口按「带壳插头 + 线材外径 + 插拔空间」留余量。
-    【Type-C 线头外壳核算】母座口中心 Z≈6.6~7.0，线端注塑壳 6~8 厚 -> 壳顶 ≤11.0，
-    上沿 {P.OPEN_Z1:.2f} 仍留 >=1.20 插拔净空；下沿 4.00 低于插头壳下沿，不顶住插头。
+  ★【11-08 第六次修订】开口带按接口的真实 Z 基准分两组，不再四边统一：
+    A 组 = 直接焊在 PCB 顶面的接口（上边 4x I2C / 天线让位窗、
+           右边 5V Type-C / XH2.54-5P）：Z {P.OPEN_Z0:.2f}~{P.OPEN_Z1:.2f}，高 {P.OPEN_Z_H:.2f}；
+    B 组 = 下边核心板上的双 Type-C：Z {P.DUAL_Z0:.2f}~{P.DUAL_Z1:.2f}，高 {P.DUAL_Z_H:.2f}。
+    核心板直焊在 PCB 之上，插口中心比 A 组高 {P.CORE_PORT_Z - (P.Z_PCB_TOP + P.CORE_USBC_PORT_DZ):.2f} mm，两者底部并不持平；
+    沿用旧的统一上沿 {P.OPEN_Z1:.2f} 会把 Type-C 线头顶住。
+  ★ B 组 Z 堆叠逐级累加（本次核算，单位 mm，自外壳底面算起）：
+      外壳底面                       0.00
+      底座底板厚                     2.40  -> 底板顶  2.40
+      4 个 Φ7 支撑台                 1.00  -> PCB 底面 3.40
+      PCB 板厚                       1.60  -> PCB 顶面 5.00
+      核心板直焊排针塑高             {P.CORE_PIN_H:.2f}  -> 核心板底面 {P.CORE_BOT_Z:.2f}
+                                          (.epru BOM：LAIL-PZ2.54-* 塑高 2.50 / 配合针长 6.00)
+      核心板 PCB 板厚                {P.CORE_PCB_T:.2f}  -> 核心板元件面 {P.CORE_TOP_Z:.2f}
+                                          (ESP32-S3-Metric.pdf：63.39x27.94、两侧 2x22 焊盘)
+      Type-C 母座口中心高出板面      {P.CORE_USBC_PORT_DZ:.2f}  -> 插口中心 {P.CORE_PORT_Z:.2f}
+                                          (YD-ESP32-S3-SCH-V1.4.pdf：TYPEC-304-BCP16 16P，座高约 {P.CORE_USBC_SOCK_H:.2f})
+      插入的线端注塑壳              {P.CABLE_SHELL_H:.2f} 厚 -> 壳底 {P.CORE_PORT_Z-P.CABLE_SHELL_H/2:.2f} / 壳顶 {P.CORE_PORT_Z+P.CABLE_SHELL_H/2:.2f}
+                                          (壳截面约 {P.CABLE_SHELL_W:.2f} 宽 x {P.CABLE_SHELL_H:.2f} 厚)
+      上 / 下插拔与公差余量       +{P.CABLE_CLEAR_TOP:.2f} / -{P.CABLE_CLEAR_BOT:.2f} -> 开口 Z {P.DUAL_Z0:.2f}~{P.DUAL_Z1:.2f}
+    => 旧上沿 {P.OPEN_Z1:.2f} 会被壳顶 {P.CORE_PORT_Z+P.CABLE_SHELL_H/2:.2f} 顶住 {P.CORE_PORT_Z+P.CABLE_SHELL_H/2-P.OPEN_Z1:.2f} mm，
+       连插拔余量共缺 {P.DUAL_Z1-P.OPEN_Z1:.2f} mm；本版上沿 {P.DUAL_Z1:.2f}，到顶板内表面
+       {P.Z_TOP_IN:.2f} 仍留 {P.DUAL_Z_TOP_WALL:.2f} 实壁，侧壁强度够。
+  ★ A 组核算（PCB 直焊口）：插口中心 Z≈6.6~7.0、线端注塑壳 6~8 厚
+    -> 壳顶 ≤11.0，上沿 {P.OPEN_Z1:.2f} 仍留 >=1.20 插拔净空；下沿 {P.OPEN_Z0:.2f} 不顶住插头。
+  ★ 天线让位窗与 I2C 插座窗仍上下沿平齐（同属 A 组）；
+    所有窗口按「带壳插头 + 线材外径 + 插拔空间」留余量。
+  ★ 安装方式已由用户 11-08 确认：.epru BOM 里的 ZX-PM2.54-1-22PY
+    「1x22P 直插排母 塑高 8.50」【不焊接】，核心板用 LAIL-PZ2.54-* 排针
+    直接焊到 PCB 通孔，板间距取 {P.CORE_PIN_H:.2f}（不按 8.50 算），本设计以此定案。
+  ★ 打样前请用卡尺实测三项：
+    ① 核心板底面到 PCB 顶面的板间距是否 ={P.CORE_PIN_H:.2f}；
+    ② 核心板 Type-C 插口中心到核心板板面是否 ≈{P.CORE_USBC_PORT_DZ:.2f}；
+    ③ 拿实际 USB-C 线插入，量线端注塑壳厚是否 ≤{P.CABLE_SHELL_H:.2f}。
+    不符时改 params_v2.py 的 CORE_PIN_H / CORE_USBC_PORT_DZ / CABLE_SHELL_H
+    三个常量，再按 README 第 5 节六个脚本全套重跑。
   ★ Rev I 外形每边 +3.00 mm，以下坐标全部相对旧版 +3.00，但相对 PCB 的位置不变。
   上边：天线让位窗 27.00 宽（{P.ANT_X0:.2f}~{P.ANT_X1:.2f}）+ 2 段 I2C 合并宽窗
         （{P.I2C_GROUPS[0][0]:.2f}~{P.I2C_GROUPS[0][1]:.2f} /
          {P.I2C_GROUPS[1][0]:.2f}~{P.I2C_GROUPS[1][1]:.2f}，各覆盖 2 个 XH2.54-4P，
          座中心距仅 12.96 故不再各开 12mm 小窗；段间各留 2.00 加强筋）+ 顶板 Φ4 复位键孔
   下边：ESP32 核心板（直接焊在 PCB 上）自带 2 个 Type-C（UART / USB）
-        共用 36.00 宽窗（{P.DUAL_USBC_X0:.2f}~{P.DUAL_USBC_X1:.2f}）
+        共用 36.00 宽窗（{P.DUAL_USBC_X0:.2f}~{P.DUAL_USBC_X1:.2f}），
+        属 B 组 Z {P.DUAL_Z0:.2f}~{P.DUAL_Z1:.2f}（其余三边是 A 组，勿混用）
   右边：5V Type-C 18.00 宽窗（{P.RIGHT_5V_Y0:.2f}~{P.RIGHT_5V_Y1:.2f}）
         + XH2.54-5P 23.00 宽窗（{P.RIGHT_XH_Y0:.2f}~{P.RIGHT_XH_Y1:.2f}）
   左边：封闭，无外部接口
   底部：4 个 M3 螺丝沉孔（外壳四角，PCB 板框之外）
   【余量依据】XH2.54 带扣插头约 13~15 宽、线束出口需 8~10 高；Type-C 线端注塑壳
-  约 12~16 宽 x 6~8 厚、线材 Φ3~5，折弯另需 3~5。开口带 {P.OPEN_Z_H:.2f} 高、各窗宽度
-  均含上述余量；打样前建议拿实际线材比一下，若仍紧可改 params_v2.py 加宽或调高上沿。
+  约 12~16 宽 x 6~8 厚、线材 Φ3~5，折弯另需 3~5。A 组开口带 {P.OPEN_Z_H:.2f} 高、
+  B 组 {P.DUAL_Z_H:.2f} 高；36.00 宽窗 > 2x{P.CABLE_SHELL_W:.2f} 线头壳并排，宽度够
+  （两座中心距约 10，两根粗线同时插会互相挤，属线材本身限制，非外壳问题）。
+  打样前建议拿实际线材比一下，若仍紧可改 params_v2.py 加宽或调高上沿。
 
 【六、天线净空】
   顶板完整封闭、不镂空；天线及模组端部从上边侧壁让位窗穿出，外露段不被壳体包住。
@@ -736,6 +786,17 @@ geom = dict(
     I2C_X=P.I2C_X, I2C_SLOT_W=P.I2C_SLOT_W,
     OPEN_Z0=P.OPEN_Z0, OPEN_Z1=P.OPEN_Z1, OPEN_Z_H=P.OPEN_Z_H,
     OPEN_Z_TOP_WALL=P.OPEN_Z_TOP_WALL, RIB_W=P.RIB_W,
+    # 11-08 第六次：B 组（核心板双 Type-C）专用开口带与完整 Z 堆叠
+    DUAL_Z0=P.DUAL_Z0, DUAL_Z1=P.DUAL_Z1, DUAL_Z_H=P.DUAL_Z_H,
+    DUAL_Z_TOP_WALL=P.DUAL_Z_TOP_WALL,
+    CORE_PIN_H=P.CORE_PIN_H, CORE_PCB_T=P.CORE_PCB_T,
+    CORE_BOT_Z=P.CORE_BOT_Z, CORE_TOP_Z=P.CORE_TOP_Z,
+    CORE_USBC_SOCK_H=P.CORE_USBC_SOCK_H, CORE_USBC_PORT_DZ=P.CORE_USBC_PORT_DZ,
+    CORE_PORT_Z=P.CORE_PORT_Z,
+    CABLE_SHELL_H=P.CABLE_SHELL_H, CABLE_SHELL_W=P.CABLE_SHELL_W,
+    CABLE_CLEAR_TOP=P.CABLE_CLEAR_TOP, CABLE_CLEAR_BOT=P.CABLE_CLEAR_BOT,
+    CABLE_SHELL_BOT_Z=P.CORE_PORT_Z - P.CABLE_SHELL_H / 2,
+    CABLE_SHELL_TOP_Z=P.CORE_PORT_Z + P.CABLE_SHELL_H / 2,
     I2C_GROUPS=[list(g) for g in P.I2C_GROUPS],
     DUAL_USBC=[P.DUAL_USBC_X0, P.DUAL_USBC_X1],
     RIGHT_SLOTS=[[P.RIGHT_5V_Y0, P.RIGHT_5V_Y1],

@@ -256,7 +256,7 @@ RECT(TX + AX0 * S, TY + AZ0 * S, (AX1 - AX0) * S, (AZ1 - AZ0) * S,
      BLUE, 0.6, fill=ANTF)
 TC("27.00 天线让位窗", TX + (AX0 + AX1) / 2 * S,
    TY + (AZ0 + AZ1) / 2 * S - 1.8, 6, BLUE)
-T(f"统一开口带 Z {AZ0:.2f}~{AZ1:.2f}", TX + AX0 * S + 1,
+T(f"A 组开口带 Z {AZ0:.2f}~{AZ1:.2f}", TX + AX0 * S + 1,
   TY + AZ1 * S - 4.5, 5.5, BLUE)
 T("2 段 I2C 合并宽窗（4 座）", TX + 13, TY + TB * S + 2, 5.8, GREEN)
 # 尺寸
@@ -330,7 +330,7 @@ specs = [
     (f"实测 A.A {G['LCD_AA_W']:.2f}×{G['LCD_AA_H']:.2f}，四周让位 {G['WIN_CLEAR_X']:.2f}/{G['WIN_CLEAR_Y']:.2f}", REDC),
     (f"窗口中心 X={G['WIN_CX']:.2f}/Y={G['WIN_CY']:.2f}；左移 {-G['WIN_OFFSET_X']:.2f}、下移 {-G.get('WIN_OFFSET_Y', 0):.2f}", REDC),
     (f"顶板无镂空：仅显示窗 + Φ{RSTD:.1f} 复位孔；宁露黑边不切亮区", GREEN),
-    (f"统一开口带 Z {AZ0:.2f}~{AZ1:.2f}（四边平齐）", BLUE),
+    (f"开口 A {AZ0:.2f}~{AZ1:.2f} / B {G['DUAL_Z0']:.2f}~{G['DUAL_Z1']:.2f}", BLUE),
     (f"上边：天线 {AX1-AX0:.2f} + I2C 合并宽窗 25.10/24.90", BLUE),
     (f"下边双 Type-C {G['DUAL_USBC'][1]-G['DUAL_USBC'][0]:.2f}；右边 18.00/23.00", GREEN),
     (f"PCB 四角 φ{G['PCB_HOLE_D']:.1f} 孔距 91.34 × 48.70（2 个对角有销）", INK),
@@ -354,9 +354,9 @@ notes = [
     "① 正视图 = 屏幕正面：显示窗 + Φ4 复位孔 + 9 组接口凸字，顶板完整不透明；",
     "   窗口按实测 A.A 四周放大 0.5；X 左移 2.75、Y 下移 0.90，不是 Y 轴居中。",
     "② 上视图 = 从天线侧看：顶板整段连续；天线让位窗与 2 段",
-    f"   I2C 合并宽窗上下沿完全平齐（统一 Z {AZ0:.2f}~{AZ1:.2f}，高 {AZ1-AZ0:.2f}）。",
+    f"   I2C 合并宽窗上下沿平齐（A 组 Z {AZ0:.2f}~{AZ1:.2f}，高 {AZ1-AZ0:.2f}）。",
     "④ 右视图 = 从右侧看：5V Type-C（18.00）与 XH2.54-5P（23.00）；",
-    "   ③ 辅助下视图补双 Type-C 共用 36.00 窗；均含插线余量。",
+    f"   ③ 下视图：双 Type-C 36.00 窗属 B 组 Z {G['DUAL_Z0']:.2f}~{G['DUAL_Z1']:.2f}（单独抬高）。",
     "各视图 1.6:1，尺寸数字为实物 mm；深灰实心字 = 顶板一体成型凸字。",
 ]
 for i, s in enumerate(notes):
@@ -468,7 +468,7 @@ dr(AX0, SY0 + AZ0, AX1, SY0 + AZ1, "ANT")
 dh(0, W, SY0, f"{W:.2f}", -9); dv(SY0, SY0 + HT, 0, f"{HT:.2f}", -10)
 dh(AX0, AX1, SY0 + HT, "27.00 让位窗", 8)
 dt("② 上视图（天线侧 / +Yo）  1:1   顶板连续完整", 0, SY0 + HT + 18, 3.4)
-dt(f"四边统一开口带 Z {AZ0:.2f}~{AZ1:.2f}（高 {AZ1-AZ0:.2f}，上留 {G['OPEN_Z_TOP_WALL']:.2f} 实壁）；天线与 I2C 窗平齐；顶板 Z {ZTI:.1f}~{G['H_TOTAL']:.1f} 不切断", 0, SY0 - 18, 2.8)
+dt(f"开口带 A 组 Z {AZ0:.2f}~{AZ1:.2f} / B 组（核心板双 Type-C）Z {G['DUAL_Z0']:.2f}~{G['DUAL_Z1']:.2f}；顶板 Z {ZTI:.1f}~{G['H_TOTAL']:.1f} 不切断", 0, SY0 - 18, 2.8)
 
 # 辅助下视图 1:1
 BY0 = -90.0

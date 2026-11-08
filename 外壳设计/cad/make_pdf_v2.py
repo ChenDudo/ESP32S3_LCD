@@ -231,9 +231,9 @@ T(f"窗口 X 左移 {-G['WIN_OFFSET_X']:.2f}（推算待实测）、Y 下移 {-G
 
 T("四边接口开窗（PCB 左旋 90°、天线朝上的正视图）", IX, 137, 8.5, BLUE)
 info = [
-    ("上边", f"统一 Z {G['OPEN_Z0']:.2f}~{G['OPEN_Z1']:.2f}（高 {G['OPEN_Z_H']:.2f}）：27.00 天线窗与 I2C 宽窗平齐", REDC),
-    ("下边", "核心板直焊，双 Type-C 共用 36.00 宽窗", INK),
-    ("右边", "5V Type-C 18.00 + XH2.54-5P 23.00 宽窗", INK),
+    ("上边", f"A 组 Z {G['OPEN_Z0']:.2f}~{G['OPEN_Z1']:.2f}：天线 27.00 与 I2C 宽窗平齐", REDC),
+    ("下边", f"B 组 Z {G['DUAL_Z0']:.2f}~{G['DUAL_Z1']:.2f}：核心板双 Type-C 36.00 宽窗", BLUE),
+    ("右边", f"A 组 Z {G['OPEN_Z0']:.2f}~{G['OPEN_Z1']:.2f}：5V 18.00 + XH-5P 23.00", INK),
     ("左边", "封闭，无外部接口", GRAY),
     ("底部", "4× M3 沉孔，从底面拧紧", INK),
 ]
@@ -249,7 +249,7 @@ specs = [
     f"窗口 {G['WIN_W']:.2f}×{G['WIN_H']:.2f} R{G['WIN_R']:.1f}；中心 X={G['WIN_CX']:.2f} / Y={G['WIN_CY']:.2f}",
     f"实测 A.A {G['LCD_AA_W']:.2f}×{G['LCD_AA_H']:.2f}，四周让位 {G['WIN_CLEAR_X']:.2f}/{G['WIN_CLEAR_Y']:.2f}",
     f"偏心屏：X 左移 {-G['WIN_OFFSET_X']:.2f}、Y 下移 {-G.get('WIN_OFFSET_Y', 0):.2f} 对准显示区",
-    f"顶板完整无镂空：仅显示窗 + Φ4 复位孔；四边开口统一 Z {G['OPEN_Z0']:.2f}~{G['OPEN_Z1']:.2f}",
+    f"顶板完整无镂空；开口 A {G['OPEN_Z0']:.2f}~{G['OPEN_Z1']:.2f} / B {G['DUAL_Z0']:.2f}~{G['DUAL_Z1']:.2f}",
     "插线余量：窗口按带壳插头 + 线材 Φ3~5 留，不按母座贴边",
     "4×Φ6 连接柱在 PCB 板框外；M3 不穿板、φ4 孔空置",
     "PCB 由 2 个对角定位销（圆销 + 菱形销）定位；内缘距 PCB 4.00",
@@ -325,10 +325,12 @@ T("菱形销连线向留 0.40 单边间隙，吸收 SLA 收缩约 0.31 mm，避�
 # A-A 剖面 2:1
 SX, SZ, SCL = 30.0, 20.0, 1.30
 def SP(x, z): return (SX + x * SCL, SZ + z * SCL)
-T("A-A 剖面 1.5:1（沿显示窗中心横剖，见页 1）", SX, 70, 9, BLUE)
-T(f"装配层叠 Z（自外壳底面算起，mm）：PCB 底面 {G['Z_PCB_BOT']:.2f} → 顶面 {G['Z_PCB_TOP']:.2f} → ESP32 核心板顶面约 9.10（直焊）",
+T("A-A 剖面 1.3:1（沿显示窗中心横剖，见页 1）", SX, 70, 9, BLUE)
+T(f"装配层叠 Z（mm）：PCB 底 {G['Z_PCB_BOT']:.2f} → 顶 {G['Z_PCB_TOP']:.2f} → 核心板顶 {G['CORE_TOP_Z']:.2f}（直焊）"
+  f" → 双 Type-C 插口中心 {G['CORE_PORT_Z']:.2f}",
   SX, 64, 6.6, INK)
-T(f"→ 排母/排针合高 {G['STACK_BOARD_GAP']:.2f} → LCD 顶面约 {G['LCD_TOP_Z']:.2f} → 顶板内表面 {G['Z_TOP_IN']:.2f}；内腔净高 {G['H_CAVITY']:.2f}，LCD 上方留 {G['STACK_CLEAR']:.2f}",
+T(f"→ 线头壳顶 {G['CABLE_SHELL_TOP_Z']:.2f}（故 B 组开口 {G['DUAL_Z0']:.2f}~{G['DUAL_Z1']:.2f}）；"
+  f"排母/排针合高 {G['STACK_BOARD_GAP']:.2f} → LCD 顶面 {G['LCD_TOP_Z']:.2f} → 顶板内表面 {G['Z_TOP_IN']:.2f}（留 {G['STACK_CLEAR']:.2f}）",
   SX, 58.5, 6.6, INK)
 
 
@@ -357,7 +359,9 @@ LN(*SP(HOLES[0][0], 0), *SP(HOLES[0][0], G["H_TOTAL"]), REDC, 0.3, dash=(2, 1.5)
 LN(*SP(HOLES[1][0], 0), *SP(HOLES[1][0], G["H_TOTAL"]), REDC, 0.3, dash=(2, 1.5))
 # 层叠参考线（仅画线，Z 值见上方文字说明）
 for z, col in [(G["Z_PCB_BOT"], GRAY), (G["Z_PCB_TOP"], INK),
-               (9.10, BLUE), (G["LCD_TOP_Z"], GREEN), (G["Z_TOP_IN"], REDC)]:
+               (G["CORE_TOP_Z"], BLUE), (G["CORE_PORT_Z"], BLUE),
+               (G["CABLE_SHELL_TOP_Z"], GREEN),
+               (G["LCD_TOP_Z"], GREEN), (G["Z_TOP_IN"], REDC)]:
     LN(*SP(G["OX"] + 5, z), *SP(W - G["OX"] - 5, z), col, 0.3, dash=(3, 1.5))
 # 底板厚 2.40 已在右下「底板 Z 0~2.4」文字中给出，此处不再重复画短尺寸线，
 # 避免与大尺寸线 / 剖面轮廓互相压叠。
@@ -390,20 +394,21 @@ def side(y, title, length, segs, note):
     T(note, SX, y - 7.5, 6.2, GRAY)
 
 OZ0, OZ1 = G["OPEN_Z0"], G["OPEN_Z1"]
+DZ0, DZ1 = G["DUAL_Z0"], G["DUAL_Z1"]
 GL, GR = G["I2C_GROUPS"]
 DU = G["DUAL_USBC"]
 R5V, RXV = G["RIGHT_SLOTS"]
 top_segs = [(GL[0], GL[1], OZ0, OZ1, "I2C 合并窗 25.10", GREEN),
             (ANT[0], ANT[2], OZ0, OZ1, "ANT 让位窗 27.00", REDC),
             (GR[0], GR[1], OZ0, OZ1, "I2C 合并窗 24.90", GREEN)]
-side(158, f"上边（天线侧）展开 1:1  —  统一开口带 Z {OZ0:.2f}~{OZ1:.2f}（高 {OZ1-OZ0:.2f}，上留 {G['OPEN_Z_TOP_WALL']:.2f} 实壁）", W, top_segs,
+side(158, f"上边（天线侧）展开 1:1  —  A 组开口带 Z {OZ0:.2f}~{OZ1:.2f}（高 {OZ1-OZ0:.2f}，上留 {G['OPEN_Z_TOP_WALL']:.2f} 实壁）", W, top_segs,
      "4 个 XH2.54-4P 座中心距仅 12.96，单开 12 窗放不下带壳插头 → 左右各 2 座合并宽窗；"
      "天线让位窗与 I2C 窗上下沿完全平齐，段间各留 2.00 加强筋。")
-side(116, "下边（双 Type-C）展开 1:1", W,
-     [(DU[0], DU[1], OZ0, OZ1, "2× Type-C 共用窗 36.00", GREEN)],
-     "核心板直接焊在 PCB 上，UART / USB 两口中心约 46.5 / 58.5；原 26.00 窗偏窄，"
-     "加宽到 36.00 给线端注塑壳 + 线材折弯留余量。")
-side(74, "右边（5V / XH5P）展开 1:1", H,
+side(116, f"下边（双 Type-C）展开 1:1  —  B 组开口带 Z {DZ0:.2f}~{DZ1:.2f}（高 {DZ1-DZ0:.2f}，上留 {G['DUAL_Z_TOP_WALL']:.2f} 实壁）", W,
+     [(DU[0], DU[1], DZ0, DZ1, "B 组 2× Type-C 36.00", GREEN)],
+     f"核心板直焊：插口中心 Z {G['CORE_PORT_Z']:.2f}、线头壳顶 {G['CABLE_SHELL_TOP_Z']:.2f}；"
+     f"旧上沿 {OZ1:.2f} 会顶住 → B 组抬到 {DZ1:.2f}（完整 Z 链见下单说明）")
+side(74, f"右边（5V / XH5P）展开 1:1  —  A 组 Z {OZ0:.2f}~{OZ1:.2f}", H,
      [(R5V[0], R5V[1], OZ0, OZ1, "5V Type-C 18.00", GREEN),
       (RXV[0], RXV[1], OZ0, OZ1, "XH2.54-5P 23.00", GREEN)],
      "5V Type-C 输出口 (USB1) 由 10.00 加宽到 18.00；XH2.54-5P (CN3) 由 16.50 加宽到 23.00，"
@@ -442,7 +447,7 @@ tips = [
     "· 推荐 FDM PETG 或 SLA 韧性树脂；不透明、绝缘",
     "· 禁止金属打印 / 碳纤维 / 导电料 / 金属漆 / 电镀",
     "· 顶板朝上平放打印；层高 ≤0.2mm，窗口与柱精度优先",
-    "· 顶板完整无镂空；四边窗口平齐且已留线材余量，勿缩小",
+    "· 顶板完整无镂空；开口 A/B 两组不同高，均已留线材余量，勿缩小",
     "· 顶板 9 组凸字勿打磨/喷砂；按 STL 1:1 打印，窗口内不加支撑",
     f"· 装好 LCD/ESP32 实测最高点：距 PCB 顶面 >{G['Z_TOP_IN'] - G['Z_PCB_TOP'] - G['STACK_CLEAR']:.2f}mm 需再加高",
 ]
@@ -452,9 +457,9 @@ for i, s in enumerate(tips):
 T("设计依据", IX, 36, 8.5, BLUE)
 T("依据：ESP32S3_LCD 工程 + PCB_PCB1_1_2026-11-07.pdf 装配层", IX, 29, 6.1, GRAY)
 T("板框 61.80×100.00 R2；4×φ4 孔距 91.34×48.70（CIRCLE 半径 2mm×2）", IX, 23.5, 6.1, GRAY)
-T(f"ESP32-S3-Metric.pdf：系统板 63.39×27.94 直焊 U1/U2；开口带 Z {OZ0:.2f}~{OZ1:.2f}", IX, 18, 6.1, GRAY)
+T(f"ESP32-S3-Metric.pdf：系统板 63.39×27.94 直焊；双 Type-C 口中心 Z {G['CORE_PORT_Z']:.2f} → B 组 {DZ0:.2f}~{DZ1:.2f}", IX, 18, 6.1, GRAY)
 T("ATK-MD0350 图3.1：模块板 56.41×97.92、仅一端 2 孔距 48.64；板覆盖 PCB 四角孔", IX, 12.5, 6.1, GRAY)
-FOOTER(f"注：Rev I 四角柱在板框外、M3 不穿板；四边开口 Z {OZ0:.2f}~{OZ1:.2f} 平齐（上沿留 {G['OPEN_Z_TOP_WALL']:.2f} 实壁）；顶板完整且带 9 组凸字；PCB 由 2 个对角销定位。")
+FOOTER(f"注：Rev I 四角柱在板框外、M3 不穿板；开口分 A 组 {OZ0:.2f}~{OZ1:.2f} / B 组 {DZ0:.2f}~{DZ1:.2f}（核心板双 Type-C 单独抬高）；顶板完整且带 9 组凸字；PCB 由 2 个对角销定位。")
 
 c.save()
 print("PDF:", PDF)
