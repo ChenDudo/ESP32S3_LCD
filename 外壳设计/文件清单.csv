@@ -12,27 +12,27 @@ EDA 工程源,ref/esp32s3_lcd/project2.json,150,json,EDA 工程元数据,f5247c6
 关键设计依据,ref/输入资料/资料图_ATK-MD0350_模块尺寸_安装孔端放大.png,554574,png,★ 仅一端 2 孔、孔距 48.64,f872fd59091ee122e4778904d01ccb5a
 参数化源码,cad/build_fcstd.py,3666,py,FreeCADCmd 生成 .FCStd 工程,038c6ebe95071c3723f9795bf1fd0fb6
 参数化源码,cad/build_step.py,6552,py,生成 3 个 STEP 解析实体,31d5fcadfbf544153cc7673e795cc7a2
-参数化源码,cad/build_v2.py,35482,py,生成 STL、DXF、报价、下单说明、geom_v2.json,2748fd44dbdd67a7290353c09f34d779
-参数化源码,cad/make_pdf_v2.py,18996,py,生成 3 页 A4 工程图,7cde264e31d2df14e5b59867d9ebdbe8
+参数化源码,cad/build_v2.py,35382,py,生成 STL、DXF、报价、下单说明、geom_v2.json,5b017c73f879168312a1349d4151efb9
+参数化源码,cad/make_pdf_v2.py,19021,py,生成 3 页 A4 工程图,31f255ac9d5a2916e8528820ee7db1e4
 参数化源码,cad/make_preview.py,4921,py,生成俯视/等距预览 PNG,0c2467591bebb682c2e44c16c98b7723
-参数化源码,cad/make_views.py,20367,py,生成 A3 三视图 PDF/DXF,0c8f4deb138f0e06e8a02b8bcc378706
+参数化源码,cad/make_views.py,20373,py,生成 A3 三视图 PDF/DXF,e338abae9e305bc26415e75f3f23aebe
 参数化源码,cad/params_v2.py,10268,py,★ 唯一参数源：外形/开窗/柱位/定位销/偏心量/A.A 让位,b5f4bf3dca8dfa8b749dad93cdd08b99
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_三视图.dxf,59792,dxf,1:1 二维加工图（DXF R2010 / mm）,28eaa9b9970b7767fb5456b368ee73e8
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_三视图.pdf,54024,pdf,A3 三视图 + 辅助下视图,60b63ce6572c5d7f6be9f7041b38cdf8
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_三视图.dxf,59790,dxf,1:1 二维加工图（DXF R2010 / mm）,dbee6e4e8aadadc5a58adf46e99f1c38
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_三视图.pdf,53584,pdf,A3 三视图 + 辅助下视图,b28a070ef8df30bf52af3bed3fd24c8a
 最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_上盖_3D打印.stl,125784,stl,★ 3D 打印交付（发给商家）,b7da01ee4aad11c703b94d9417518b71
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_上盖_加工图.dxf,68893,dxf,1:1 二维加工图（DXF R2010 / mm）,d90396abb89edeae609fe241d326737f
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_上盖_加工图.dxf,68885,dxf,1:1 二维加工图（DXF R2010 / mm）,109bc1026217a27914b28e3700ee0055
 最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_上盖_可编辑.step,276150,step,STEP AP214 解析实体，CAD 内可改特征,8457737309af0fd56a61fa087444192d
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_工程图.pdf,72146,pdf,3 页 A4 工程图,7e756c9af0a5562a12ba0021d060b15c
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_工程图.pdf,72153,pdf,3 页 A4 工程图,464db053fec87aa3fc67aa501dfe22be
 最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_底座_3D打印.stl,153084,stl,★ 3D 打印交付（发给商家）,d89b9f13298344db7ace4afc994f4d27
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_底座_加工图.dxf,56594,dxf,1:1 二维加工图（DXF R2010 / mm）,e0f3d2dee8a0e02b661e3bc0f17054f9
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_底座_加工图.dxf,56590,dxf,1:1 二维加工图（DXF R2010 / mm）,6e9666a46aeba70335281d43913a9842
 最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_底座_可编辑.step,157527,step,STEP AP214 解析实体，CAD 内可改特征,18733404c232229b599f4b5f2c3bf552
 最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_装配体_含PCB参考.step,490177,step,3 件装配 STEP，PCB 为参考件不打印,7a0bcd5425dab55719a4a4d2aa994c3d
-最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_装配工程图.dxf,68062,dxf,1:1 二维加工图（DXF R2010 / mm）,aaa5d75de9c0e657fad4ef8e88ace209
+最终交付,cad/deliverables/ESP32S3_LCD_全覆盖外壳_装配工程图.dxf,68062,dxf,1:1 二维加工图（DXF R2010 / mm）,a73da5fdb82a6c9ab9c3a3df38727c4b
 最终交付,cad/deliverables/ESP32S3_LCD_外壳工程.FCStd,19083,fcstd,FreeCAD 工程文件（双击即开）,82173933f8567618d52b2295c126fae8
 最终交付,cad/deliverables/FreeCAD_一键生成工程.FCMacro,3680,fcmacro,FreeCAD 一键宏（可选着色版）,a65eed26dc133b6f278235f39bdeea04
 最终交付,cad/deliverables/上盖_顶板完整_俯视预览.png,91239,png,绿虚线 A.A / 红实线显示窗让位对比,1298901a19152be560e8a52c775ca219
 最终交付,cad/deliverables/上盖_顶板完整_等距预览.png,140779,png,上盖 3D 等距预览,917fa94ddd0600f360204ba57c0e4c03
-最终交付,cad/deliverables/外壳实物报价.csv,1063,csv,外壳实物报价（不含 PCB/LCD/核心板）,2fae711bd8cb734dc376c3c3327ba129
-最终交付,cad/deliverables/给商家的下单说明.txt,12425,txt,给商家的下单说明与装配顺序,e037ed4cf43f17f966f797dcd10a57a2
-说明文档,README.md,16182,md,本目录总说明：精简策略、导航、参数、版本演进、重跑、报价,25ac5c8bfe15db31d20ef8f636111446
+最终交付,cad/deliverables/外壳实物报价.csv,965,csv,外壳实物报价（不含 PCB/LCD/核心板）,e9edc3f21646bad7fab820c48b709cca
+最终交付,cad/deliverables/给商家的下单说明.txt,12431,txt,给商家的下单说明与装配顺序,9aa6afccc2a3af8049fb9b13a3bd4935
+说明文档,README.md,16684,md,本目录总说明：精简策略、导航、参数、版本演进、重跑、报价,1ff2bd9322893758751ea19dfbb8555d
 说明文档,文件清单.csv,-,csv,关键文件索引（本文件）,-

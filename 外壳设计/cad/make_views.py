@@ -339,7 +339,7 @@ T("图例", JX, 35, 8.5, BLUE)
 RECT(JX, 27, 7, 3.5, REDC, 0.4, fill=WINF); T("显示窗 / 复位孔", JX + 10, 28, 6.2, INK)
 RECT(JX + 70, 27, 7, 3.5, GREEN, 0.4, fill=GRNF); T("接口开窗", JX + 80, 28, 6.2, INK)
 RECT(JX + 130, 27, 7, 3.5, BLUE, 0.4, fill=ANTF); T("天线让位窗（仅侧壁）", JX + 140, 28, 6.2, INK)
-LN(JX, 24, JX + 7, 24, GRAY, 0.35, dash=(2, 1.2)); T("虚线 = PCB 参考 / 螺丝柱隐藏线", JX + 10, 23.5, 6.2, INK)
+LN(JX, 24, JX + 7, 24, GRAY, 0.35, dash=(2, 1.2)); T("虚线 = PCB 参考 / 四角连接柱隐藏线", JX + 10, 23.5, 6.2, INK)
 RECT(JX + 130, 22.5, 7, 3.5, INK, 0.4, fill=SIDE); T("浅蓝 = 顶板 / 底板实体", JX + 140, 23.5, 6.2, INK)
 
 c.save()
