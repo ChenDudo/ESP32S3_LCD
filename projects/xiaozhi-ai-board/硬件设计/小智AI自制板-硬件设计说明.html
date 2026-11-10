@@ -71,10 +71,13 @@
 <div class="wrap">
 
 <header>
-  <div class="kicker">Hardware design spec · rev 1.0</div>
+  <div class="kicker">Hardware design spec · rev 1.4</div>
   <h1>小智 AI 自制板硬件设计说明</h1>
   <p class="sub">主控 ESP32-S3 · 目标：可跑通 xiaozhi-esp32 官方固件，支持唤醒词、全双工语音、屏幕表情<br>
-  <span style="font-size:12.5px;color:#8b949e">rev 1.1：喇叭与电池改为外接，USB-C 供电，预留 VBAT 焊盘</span></p>
+  <span style="font-size:12.5px;color:#8b949e">rev 1.1：喇叭与电池改为外接，USB-C 供电，预留 VBAT 焊盘<br>
+  rev 1.2：显示屏定案为中景园 ZJY133T-IG01（1.3″ 240×240 IPS / ST7789V2 / 12pin 焊接 FPC）<br>
+  rev 1.3：机身缩到 64×64×22，PCB 58×52；天线净空压到 12.4mm，接口位置重排<br>
+  rev 1.4：增加 TF 卡（microSD，SPI3 独立总线，自弹式卡座在右壁上方）</span></p>
   <div class="summary">
     <strong>一句话结论：</strong>一套能跑小智的最小系统 = <strong>ESP32-S3-WROOM-1-N16R8 模组 + 音频 ADC + 音频 DAC/功放 + 喇叭 + 3.3V 电源</strong>，共 5 类器件。
     关键不在能不能响，而在<strong>麦克风有没有硬件回采参考通道</strong>——这决定它能不能做全双工打断，也决定了你选 ES8311 单芯片还是 ES7210+ES8311 两颗。
@@ -172,8 +175,8 @@
   <path d="M670 191L686 191" fill="none" stroke="#888780" stroke-width="1.2" marker-end="url(#ar)"/>
 
   <rect x="265" y="276" width="140" height="52" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
-  <text x="335" y="295" text-anchor="middle" dominant-baseline="central" font-size="12.5" font-weight="500" fill="#2C2C2A">SPI 屏 / OLED</text>
-  <text x="335" y="313" text-anchor="middle" dominant-baseline="central" font-size="11.5" fill="#5F5E5A">ST7789 / GC9A01</text>
+  <text x="335" y="295" text-anchor="middle" dominant-baseline="central" font-size="12.5" font-weight="500" fill="#2C2C2A">LCD 1.3″ 240×240</text>
+  <text x="335" y="313" text-anchor="middle" dominant-baseline="central" font-size="11.5" fill="#5F5E5A">ST7789V2 · 12pin 焊接</text>
 
   <rect x="440" y="276" width="150" height="52" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
   <text x="515" y="295" text-anchor="middle" dominant-baseline="central" font-size="12.5" font-weight="500" fill="#2C2C2A">按键 / WS2812</text>
@@ -252,9 +255,11 @@
     <tr><td>按键</td><td>6×6 轻触 ×2</td><td>BOOT（GPIO0）+ RESET（EN）</td><td>刷砖后的唯一救砖通道，务必留</td></tr>
     <tr><td>波轮</td><td class="mono">EC11 带按压开关</td><td>20 脉冲/圈，18 定位段，Φ6 半轴</td><td>旋转调音量，按压做对话/打断；轴长 15mm 需锯短到 12mm</td></tr>
     <tr><td>状态灯</td><td class="mono">WS2812B-2020</td><td>单线 RGB</td><td>小智用它做表情/状态指示</td></tr>
-    <tr><td>屏幕（可选）</td><td class="mono">GC9A01 1.28″ 圆屏 / ST7789 1.54″</td><td>SPI，240×240 / 240×280</td><td>带背光三极管，BL 脚 PWM 调光</td></tr>
+    <tr><td>显示屏<span class="tag t-teal">定案</span></td><td class="mono">中景园 ZJY133T-IG01（瀚彩玻璃）</td><td>1.3″ IPS 240×240，ST7789V2，4 线 SPI，12pin 焊接 FPC（0.7 mm 间距）</td><td>自带背光（2×LED 并联，40 mA）；<strong>必须串 10 Ω 限流</strong>；接口细节见《显示屏接口设计》</td></tr>
+    <tr><td>背光开关</td><td class="mono">2N7002 + 10 Ω + 100 Ω + 100 kΩ</td><td>低边 NMOS，20 kHz PWM 调光</td><td>屏的 LEDA 接 3V3、LEDK 经 10 Ω 到漏极；别用 GPIO 直接灌 LED 电流</td></tr>
+    <tr><td>TF 卡<span class="tag t-teal">定案</span></td><td class="mono">TF-01A 自弹式（带 CD）</td><td>microSD，SPI 模式，14 × 14 × 1.9 mm</td><td>装板正面右上角，卡从右壁上方插入；CS/MISO/CD 各 10 kΩ 上拉，10 µF + 100 nF</td></tr>
     <tr><td>电池<span class="tag t-teal">外接</span></td><td class="mono">VBAT/GND 焊盘 + 可选 TP4056</td><td>PMOS 自动切换；充电与保护封装空贴预留</td><td>供电默认走 USB-C；分压电阻先贴，方便后续读电量</td></tr>
-    <tr><td>天线</td><td>模组自带 PCB 天线</td><td>净空区 ≥ 15 mm 无铜、远离电池与金属</td><td>射频经验不足就别用 IPEX + 外置天线</td></tr>
+    <tr><td>天线</td><td>模组自带 PCB 天线</td><td>净空区 ≥ 15 mm 无铜、远离电池与金属</td><td>本机屏顶距天线只有 <strong>12.4 mm</strong>，靠顶部全层禁铜 + 纯塑料外壳补偿，详见结构 rev 1.6</td></tr>
   </tbody>
 </table>
 
@@ -288,16 +293,16 @@
 </table>
 
 <div class="card tip">
-  <h4>板边接口布局（rev 1.3）</h4>
-  整机底面贴桌面，所以<strong>所有连接器都不能放在 PCB 底边</strong>。76×60 的板这样分配：<br>
-  <strong>左边</strong>：USB-C（贴边，供供电与烧录）＋ 两个 Φ2.5 救砖针孔（对应 EN 与 GPIO0 的测试点）；<br>
-  <strong>右边</strong>：MX1.25 喇叭座 ＋ VBAT/GND 焊盘；<br>
-  <strong>底边</strong>：不放任何连接器，只保留测试点焊盘（沉金圆点，不凸出）。
+  <h4>板边接口布局（rev 1.7）</h4>
+  整机底面贴桌面，所以<strong>所有连接器都不能放在 PCB 底边</strong>。58×52 的板这样分配：<br>
+  <strong>左壁上方</strong>：BOOT/RST 两个 Φ2.5 针孔（Y 10–12）；<strong>左壁下方</strong>：USB-C（Y 49–58）；<br>
+  <strong>右壁上方</strong>：TF 卡槽（Y 7–18，自弹式，按一下弹 3 mm）；<strong>右壁下方</strong>：MX1.25 喇叭座 ＋ VBAT/GND 焊盘（Y 46–60）；<br>
+  <strong>底边</strong>：不放任何连接器，只保留测试点焊盘（沉金圆点，不凸出）；<strong>顶部</strong>：只放模组天线，禁铜。
 </div>
 
 <div class="card warn">
   <h4>别省这几颗</h4>
-  ① 模组旁的 <strong>10 µF + 0.1 µF 去耦</strong>（每个电源脚一组，别共用大电容了事）；② 功放电源脚 <strong>100 µF 电解 + 0.1 µF</strong>，否则大音量时电压跌落会把主控拉复位；③ 喇叭输出走线<strong>并联 RC 吸收网络</strong>（10 Ω + 220 pF），抑制 EMI。
+  ① 模组旁的 <strong>10 µF + 0.1 µF 去耦</strong>（每个电源脚一组，别共用大电容了事）；② 功放电源脚 <strong>100 µF 低矮聚合物（6.3×4.2，腔高只有 4.6）+ 0.1 µF</strong>，否则大音量时电压跌落会把主控拉复位；③ 喇叭输出走线<strong>并联 RC 吸收网络</strong>（10 Ω + 220 pF），抑制 EMI。
 </div>
 
 <h2><span class="num">04</span>推荐引脚分配</h2>
@@ -321,11 +326,47 @@
     <tr><td>KNOB_B</td><td class="mono">GPIO6</td><td>波轮 B 相；同上</td></tr>
     <tr><td>KNOB_SW</td><td class="mono">GPIO4</td><td>波轮按压（兼作对话/打断键）；10 kΩ 上拉 + 100 nF</td></tr>
     <tr><td>LED_DIN</td><td class="mono">GPIO48</td><td>WS2812 数据</td></tr>
-    <tr><td>LCD_SCLK / MOSI</td><td class="mono">GPIO12 / 11</td><td>SPI 时钟与数据</td></tr>
-    <tr><td>LCD_DC / CS / RST / BL</td><td class="mono">GPIO13 / 10 / 9 / 8</td><td>BL 建议接三极管做 PWM 调光</td></tr>
+    <tr><td>LCD_SCLK / MOSI</td><td class="mono">GPIO12 / 11</td><td>SPI2（FSPI）的 IO_MUX 原生脚，各自串 33 Ω；屏只写不读，<strong>不需要 MISO</strong></td></tr>
+    <tr><td>LCD_DC / CS / RST / BL</td><td class="mono">GPIO13 / 10 / 9 / 8</td><td>DC/CS 各串 33 Ω；RST 10 kΩ 上拉 + 100 nF；BL 经 100 Ω 驱动 2N7002 低边开关，20 kHz PWM</td></tr>
+    <tr><td>SD_CLK / MOSI / MISO</td><td class="mono">GPIO39 / 40 / 38</td><td>SPI3 独立总线（20 MHz）；CLK 串 22 Ω，MISO 10 kΩ 上拉</td></tr>
+    <tr><td>SD_CS / SD_CD</td><td class="mono">GPIO47 / 21</td><td>CS 10 kΩ 上拉（上电不选中）；CD 10 kΩ 上拉，卡插入→GND</td></tr>
     <tr><td>BAT_ADC</td><td class="mono">GPIO5</td><td>电池分压检测（100 kΩ / 100 kΩ）</td></tr>
   </tbody>
 </table>
+
+<h3>显示屏接口（rev 1.2 定案）</h3>
+<p>屏是 <strong>12pin 焊接式 FPC</strong>，没有连接器，焊盘直接做在 PCB 正面上。四个数字先记住，画封装和结构都靠它们：</p>
+<table>
+  <thead><tr><th style="width:28%">项</th><th style="width:26%">值</th><th style="width:46%">为什么</th></tr></thead>
+  <tbody>
+    <tr><td>焊盘</td><td class="mono">12 × 0.35 × 1.90，间距 0.7</td><td>FPC 金手指 0.35 × 1.85 @0.7，整排 8.05 mm</td></tr>
+    <tr><td>整排偏置</td><td class="mono">−3.0 mm（向 pin 1 侧）</td><td>这块屏的 FPC 不在屏中心，偏了约 3 mm，最容易画错</td></tr>
+    <tr><td>屏 VDD</td><td class="mono">3.3 V 上限</td><td>规格书 max 就是 3.3 V，Buck 输出要压在 3.30 V 以内</td></tr>
+    <tr><td>背光限流</td><td class="mono">10 Ω（6.8–15 Ω 可调）</td><td>2 颗 LED 并联，3.3 V 与 Vf 之间只剩 0.3 V</td></tr>
+  </tbody>
+</table>
+<p>电气、封装、FPC 折弯与结构开窗的完整推导见 <a href="显示屏接口设计-ZJY133T-IG01.html"><strong>《显示屏接口设计-ZJY133T-IG01》</strong></a>。</p>
+
+<h3>TF 卡（rev 1.4 新增）</h3>
+<p>单独走 <strong>SPI3</strong>，不和屏共总线——屏是只写 40 MHz，卡要 400 kHz 起步再升到 20 MHz，共用就得来回切时钟，固件容易踩坑。
+卡座用<strong>自弹式（push-push）带 CD</strong>，装在 PCB 正面右上角，卡从右壁上方插入。</p>
+<table>
+  <thead><tr><th style="width:18%">信号</th><th style="width:16%">GPIO</th><th style="width:66%">外围 / 说明</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">SD_CLK</td><td class="mono">GPIO39</td><td>SPI3 时钟，串 22 Ω（压 20 MHz 边沿振铃）</td></tr>
+    <tr><td class="mono">SD_MOSI</td><td class="mono">GPIO40</td><td>主控 → 卡</td></tr>
+    <tr><td class="mono">SD_MISO</td><td class="mono">GPIO38</td><td>卡 → 主控；10 kΩ 上拉，卡不在位时不悬空</td></tr>
+    <tr><td class="mono">SD_CS</td><td class="mono">GPIO47</td><td><strong>10 kΩ 上拉</strong>：上电默认不选中，否则卡会在启动时乱响应</td></tr>
+    <tr><td class="mono">SD_CD</td><td class="mono">GPIO21</td><td>卡检测，10 kΩ 上拉，插入 → GND；卡座没 CD 就省略</td></tr>
+    <tr><td class="mono">3V3 / GND</td><td>—</td><td>卡座旁 10 µF + 100 nF；写峰值约 100 mA，与屏/功放共用 3.3 V 轨</td></tr>
+  </tbody>
+</table>
+<div class="card warn">
+  <h4>三条不能错</h4>
+  ① CS 上电必须为高（10 kΩ 上拉），卡座不能抢 SPI 总线；② 卡座金属壳离模组天线 <strong>16.5 mm</strong>，别往天线区挪；
+  ③ 卡座贴 PCB 右缘，卡口对准右壁槽（Y 7–18），卡插到底外端与外壳齐平、按一下弹 3 mm 才能捏出来。
+</div>
+<p>卡用 microSD（≤32 GB，FAT32），固件挂载后路径 <code>/sdcard</code>；CD 脚可做热插拔检测（检测到卡再挂载，没卡不影响启动）。</p>
 
 <h3>波轮（旋钮编码器）电路</h3>
 <table>
@@ -374,7 +415,9 @@
 </ul>
 
 <h3>③ 模组天线净空与结构</h3>
-<p>用 WROOM-1 自带 PCB 天线时，模组天线端下方及前方 <strong>15 mm 内禁铺铜、禁走线</strong>，且不能被电池、金属外壳、屏幕背板遮挡。如果结构上做不到，换 <code>WROOM-1U</code>（IPEX 外置天线），但需要自己调匹配网络——没有网分就别走这条路。</p>
+<p>用 WROOM-1 自带 PCB 天线时，模组天线端下方及前方 <strong>15 mm 内禁铺铜、禁走线</strong>，且不能被电池、金属外壳、屏幕背板遮挡。
+64mm 机身做不到 15mm：屏顶距天线端只有 <strong>12.4mm</strong>，补偿是 PCB 顶部 6mm 全层禁铜、天线区纯塑料无螺柱、屏背不贴铜箔；
+打样后测 RSSI，低于 −70 dBm 就把屏再下移 3mm，仍不行换 <code>WROOM-1U</code>（IPEX 外置天线），但需要自己调匹配网络。</p>
 
 <h2><span class="num">06</span>打板前检查清单</h2>
 <ul class="check">
@@ -388,8 +431,17 @@
   <li>功放使能脚有 RC 延时；喇叭输出有 RC 吸收网络</li>
   <li>功放电源脚有 100 µF + 0.1 µF 就近去耦</li>
   <li>模拟 3.3 V 与数字 3.3 V 通过磁珠单点连接，未直接并联</li>
-  <li>天线净空区已确认，结构件不遮挡</li>
+  <li>PCB 板框 58 × 52，顶部 6mm 为天线禁铜带（全层），该区域内无走线、无过孔、无器件</li>
+  <li>天线净空区已确认：屏顶距天线 12.4mm，结构件（螺柱/筋位/金属）不进入天线区</li>
   <li>3.3 V 输出实测带载（500 mA）不低于 3.2 V，纹波 &lt; 50 mV</li>
+  <li>屏的 12 个焊盘为 0.35 × 1.90、间距 0.7，整排相对屏中心偏 <strong>−3.0 mm</strong>（pin 1 侧）</li>
+  <li>屏 VDD 实测 ≤3.30 V（带背光 100%），去耦 1 µF + 100 nF 在焊盘 2 mm 内</li>
+  <li>背光 10 Ω 限流 + 2N7002 低边开关；LEDA 接 3V3，LEDK 不经 10 Ω 不允许直接下地</li>
+  <li>屏背到 PCB 正面 = <strong>9.7 mm</strong>，已与结构 rev 1.6 的屏槽深度对过（FPC 只有 13.13 mm，余 0.98）</li>
+  <li>SPI 四线各串 33 Ω 且靠 ESP32；SCLK/SDA 没进天线净空区</li>
+  <li>TF 卡座 14×14 贴 PCB 右缘，卡口与右壁槽（Y 7–18）对正，插拔/自弹顺畅</li>
+  <li>SD_CS / SD_MISO / SD_CD 各有 10 kΩ 上拉；上电瞬间 CS 为高</li>
+  <li>卡座 3V3 旁有 10 µF + 100 nF；卡座金属壳距天线 ≥16 mm</li>
   <li>留出 UART0（TX/RX）测试点，作为 USB 失效时的救砖后路</li>
 </ul>
 
@@ -410,6 +462,7 @@
 
 <footer>
   引脚分配与器件型号为通用参考方案，最终以乐鑫 ESP32-S3 数据手册、所选 codec 数据手册及 xiaozhi-esp32 仓库 <code>docs/custom-board.md</code> 为准。
+  显示屏部分以《显示屏接口设计-ZJY133T-IG01》与中景园规格书 Ver D 为准。
 </footer>
 
 </div>

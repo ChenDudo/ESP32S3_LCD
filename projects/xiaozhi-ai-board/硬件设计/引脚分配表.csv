@@ -1,0 +1,31 @@
+功能,信号,网络名,ESP32_GPIO,方向,外围/备注
+显示,LCD_SCLK,LCD_SCLK,GPIO12,主控→屏,SPI2 IO_MUX 原生脚；串 33Ω 靠主控
+显示,LCD_MOSI,LCD_SDA,GPIO11,主控→屏,SPI2 IO_MUX 原生脚；串 33Ω；屏只写不读，无 MISO
+显示,LCD_DC,LCD_DC,GPIO13,主控→屏,串 33Ω
+显示,LCD_CS,LCD_CS,GPIO10,主控→屏,FSPICS0 原生脚；串 33Ω；不要直接接地
+显示,LCD_RST,LCD_RST,GPIO9,主控→屏,10kΩ 上拉到 3V3 + 100nF 到地
+显示,LCD_BL,LCD_BL,GPIO8,主控→Q1 栅极,100Ω 串栅极 + 100kΩ 下拉；PWM 20kHz
+存储,SD_CLK,SD_CLK,GPIO39,主控→卡,SPI3 独立总线；串 22Ω
+存储,SD_MOSI,SD_MOSI,GPIO40,主控→卡,SPI3
+存储,SD_MISO,SD_MISO,GPIO38,卡→主控,SPI3；10kΩ 上拉到 3V3
+存储,SD_CS,SD_CS,GPIO47,主控→卡,10kΩ 上拉（上电默认不选中）
+存储,SD_CD,SD_CD,GPIO21,输入,卡插入→GND；10kΩ 上拉
+音频,I2S_MCLK,CODEC_MCLK,GPIO14,主控→codec,ES8311/ES7210 共用
+音频,I2S_BCLK,CODEC_BCLK,GPIO15,双向,位时钟
+音频,I2S_WS,CODEC_LRCK,GPIO16,双向,帧同步
+音频,I2S_DIN,CODEC_ASDOUT,GPIO17,codec→主控,麦克风数据
+音频,I2S_DOUT,CODEC_DSDIN,GPIO18,主控→codec,播放数据
+音频,I2C_SDA,CODEC_SDA,GPIO41,双向,4.7kΩ 上拉到 3V3
+音频,I2C_SCL,CODEC_SCL,GPIO42,主控→codec,4.7kΩ 上拉到 3V3
+音频,PA_EN,PA_EN,GPIO7,主控→功放,串 10kΩ + 1µF 延时，消上电 POP
+交互,KNOB_A,KNOB_A,GPIO2,输入,10kΩ 上拉 + 100nF 到地
+交互,KNOB_B,KNOB_B,GPIO6,输入,10kΩ 上拉 + 100nF 到地
+交互,KNOB_SW,KNOB_SW,GPIO4,输入,10kΩ 上拉 + 100nF；按压＝对话/打断
+交互,LED_DIN,WS2812_DIN,GPIO48,主控→灯,串 330Ω；状态灯
+电源,BAT_ADC,BAT_ADC,GPIO5,输入,VBAT 100kΩ/100kΩ 分压 + 100nF
+系统,BOOT,BOOT,GPIO0,输入,6×6 轻触到 GND；strapping，仅上电采样
+系统,EN,EN,EN,—,10kΩ 上拉 + 1µF 到地；6×6 轻触到 GND
+系统,UART0_TX,U0TXD,GPIO43,输出,测试点（救砖）
+系统,UART0_RX,U0RXD,GPIO44,输入,测试点（救砖）
+系统,USB_D-,USB_DM,GPIO19,双向,USB-C D-；ESD 保护
+系统,USB_D+,USB_DP,GPIO20,双向,USB-C D+；ESD 保护

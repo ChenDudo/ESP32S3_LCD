@@ -12,6 +12,7 @@
 | 板型 | 自定义板型，照抄 `main/boards/bread-compact-wifi` 改造 | 目录：`main/boards/xiaozhi-ai-board/` |
 | 分区表 | 16MB 方案（`partitions/v2`） | 其中 8MB 是 assets 分区，存唤醒词模型/字体/音效，**Flash 小于 16MB 放不下** |
 | 旋钮 | `iot_knob` 组件（小智已内置抽象） | 10ms 软件轮询，手拧场景足够；S3 虽带硬件 PCNT，暂不必用 |
+| 显示 | ESP-IDF `esp_lcd` + ST7789V2 面板驱动 | **必须用厂家初始化序列**（VCOM/gamma/0x21 反显），见 `board-config/` |
 | 编译路径 | **必须纯 ASCII** | ESP-IDF 对中文路径的报错极难排查 |
 
 ## 引脚分配（板级 config.h）
@@ -34,6 +35,34 @@
 | BOOT | 0 | strapping，仅上电瞬间采样 |
 
 **不要碰的脚**：GPIO19/20（USB D−/D+）、GPIO0/3/45/46 不做对外输出。
+
+## 显示屏（ZJY133T-IG01）
+
+| 项 | 值 |
+|---|---|
+| 分辨率 / 颜色 | 240 × 240，RGB565（16 bit） |
+| SPI | `SPI2_HOST`，mode 0，40 MHz（实测稳后可 60 MHz），**无 MISO** |
+| 引脚 | SCLK 12 / MOSI 11 / DC 13 / CS 10 / RST 9 / BL 8 |
+| 背光 | LEDC 20 kHz、10 bit，正逻辑（低边 2N7002） |
+| 反显 | `invert_color = true`（IPS，初始化 0x21） |
+| 镜像 / 交换 | 全关（竖屏正向） |
+
+**不要用 ST7789 的通用初始化**：这块屏的 VCOM（0xBB=0x3F）、gamma、gate 数（0xE4）都与默认值不同，用错会发灰、对比度差。
+厂家序列已整理成 `board-config/st7789_vendor_init.c`，可直接调 `zjy133t_panel_init(panel_io)`。
+引脚与显示宏见 `board-config/config.h`。硬件依据见 `../硬件设计/显示屏接口设计-ZJY133T-IG01.html`。
+
+## TF 卡（microSD）
+
+| 项 | 值 |
+|---|---|
+| 总线 | `SPI3_HOST` 独立总线（**不跟屏共用 SPI2**），20 MHz |
+| 引脚 | CLK 39 / MOSI 40 / MISO 38 / CS 47 / CD 21 |
+| 文件系统 | FAT32，挂载点 `/sdcard` |
+| 容量 | ≤32 GB（SDHC，出厂格式化成 FAT32） |
+
+挂载用 `esp_vfs_fat_sdspi_mount()`：`slot_config.host_id = SPI3_HOST`，引脚填上表，`format_if_mount_failed = false`。
+CD 脚（GPIO21）10k 上拉、卡插入为低，可以先读 CD 再决定是否挂载，没卡不影响启动。
+卡座 CS 有 10k 上拉，启动时不会被卡抢总线。
 
 ## 要写的代码
 
@@ -59,6 +88,7 @@
 ## 待办
 
 - [ ] 建 PlatformIO / ESP-IDF 工程骨架
+- [ ] 把 `board-config/` 的宏与厂家初始化序列并入上游板型
 - [ ] 写板型 `config.h` 与板型类
 - [ ] 单测：LCD 点亮 / I2S 出声 / 编码器计数
 - [ ] 接入小智主流程，验证唤醒与打断

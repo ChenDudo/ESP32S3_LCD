@@ -47,3 +47,41 @@ desktop.ini
 
 # ===== WorkBuddy 本地会话状态（每台机器不同）=====
 .workbuddy/
+
+# ===== 本地临时文件 / 预览产物（与仓库无关，不入库）=====
+.tmp/
+.tmp*/
+*.tmp
+*.log
+_preview/
+
+# ===== Python 缓存与虚拟环境（一次性脚本放 _preview/ 或 .tmp/，别丢根目录）=====
+__pycache__/
+*.py[cod]
+.venv/
+
+# ===== 编辑器 / 合并残留 / 本地配置 =====
+.vscode/
+.idea/
+.history/
+*.swp
+*.swo
+*~
+~$*
+*.orig
+*.rej
+.env
+.env.*
+!.env.example
+
+# ===== KiCad / EDA 本地备份 =====
+*-bak
+_autosave-*
+*.kicad_prl
+
+# ===== ESP-IDF 本地构建（可再生成）=====
+build/
+sdkconfig
+sdkconfig.old
+managed_components/
+

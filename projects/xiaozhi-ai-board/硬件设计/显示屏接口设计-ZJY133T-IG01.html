@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小智 AI 板 · 显示屏接口设计（ZJY133T-IG01 / ST7789V2）</title>
+<style>
+  :root{
+    --ink:#1f2328; --ink2:#57606a; --ink3:#8b949e;
+    --line:#e3e6ea; --bg:#ffffff; --bg2:#f6f8fa; --bg3:#eef1f4;
+    --blue:#185fa5; --blue-bg:#e6f1fb;
+    --teal:#0f6e56; --teal-bg:#e1f5ee;
+    --amber:#854f0b; --amber-bg:#faeeda;
+    --coral:#993c1d; --coral-bg:#faece7;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:40px 24px 80px;
+    background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    font-size:14px; line-height:1.7; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:880px;margin:0 auto;}
+  header{border-bottom:2px solid var(--ink);padding-bottom:18px;margin-bottom:32px;}
+  .kicker{font-size:12px;letter-spacing:.12em;color:var(--ink3);text-transform:uppercase;margin-bottom:10px;}
+  h1{font-size:26px;font-weight:600;margin:0 0 10px;letter-spacing:-.01em;}
+  .sub{font-size:14px;color:var(--ink2);margin:0;}
+  .summary{
+    margin-top:20px;padding:16px 18px;background:var(--blue-bg);
+    border-left:3px solid var(--blue);border-radius:0 6px 6px 0;
+    font-size:13.5px;color:#0c447c;
+  }
+  h2{font-size:17px;font-weight:600;margin:44px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line);}
+  h2 .num{color:var(--ink3);font-weight:500;margin-right:8px;}
+  h3{font-size:14.5px;font-weight:600;margin:26px 0 8px;}
+  p{margin:0 0 12px;}
+  ul,ol{margin:0 0 14px;padding-left:22px;}
+  li{margin-bottom:6px;}
+  code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12.5px;background:var(--bg3);padding:1.5px 5px;border-radius:4px;color:#24292f;}
+  pre{background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:14px 16px;overflow:auto;font-size:12px;line-height:1.6;margin:14px 0;}
+  pre code{background:none;padding:0;font-size:12px;}
+  table{width:100%;border-collapse:collapse;margin:14px 0 20px;font-size:13px;}
+  th{text-align:left;font-weight:600;background:var(--bg2);color:var(--ink2);padding:9px 11px;border-bottom:1px solid var(--line);font-size:12.5px;}
+  td{padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  td.mono,th.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;}
+  .tag{display:inline-block;font-size:11px;line-height:1.6;padding:0 7px;border-radius:4px;font-weight:500;white-space:nowrap;}
+  .t-blue{background:var(--blue-bg);color:var(--blue);}
+  .t-teal{background:var(--teal-bg);color:var(--teal);}
+  .t-amber{background:var(--amber-bg);color:var(--amber);}
+  .t-coral{background:var(--coral-bg);color:var(--coral);}
+  .card{border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin:14px 0;background:var(--bg);}
+  .card h4{margin:0 0 8px;font-size:13.5px;font-weight:600;}
+  .card.warn{background:var(--amber-bg);border-color:#f0d6a8;}
+  .card.warn h4{color:var(--amber);}
+  .card.tip{background:var(--teal-bg);border-color:#bfe4d8;}
+  .card.tip h4{color:var(--teal);}
+  .diagram{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:16px 8px 8px;margin:16px 0;}
+  .caption{font-size:12px;color:var(--ink3);padding:0 12px 8px;text-align:center;}
+  .check{list-style:none;padding-left:0;}
+  .check li{position:relative;padding-left:26px;margin-bottom:8px;}
+  .check li::before{content:"";position:absolute;left:0;top:5px;width:14px;height:14px;border:1.5px solid var(--ink3);border-radius:3px;}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media (max-width:700px){.two{grid-template-columns:1fr;}}
+  footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:var(--ink3);}
+  .kv td:first-child{width:34%;color:var(--ink2);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker">LCD interface design · rev 1.0</div>
+  <h1>显示屏接口设计：中景园 ZJY133T-IG01</h1>
+  <p class="sub">1.3″ IPS 240×240 · ST7789V2 · 4 线 SPI · 12 pin 焊接式 FPC（0.7 mm 间距）· 瀚彩（HSD）玻璃<br>
+  <span style="font-size:12.5px;color:#8b949e">适用：小智 AI 板 rev 1.7（机身 64×64×22）· 2026-11-10</span></p>
+  <div class="summary">
+    <strong>一句话结论：</strong>这是一块<strong>自带背光、没有触摸、只能写不能读</strong>的 SPI 裸屏模组。三件事必须先定死：
+    ① VDD 只用 3.3 V，且轨道要压在 <strong>3.30 V 以内</strong>（规格上限就是 3.3 V）；
+    ② 背光两颗 LED 并联，<strong>必须串 10 Ω 限流</strong>，直接接 3.3 V 会烧；
+    ③ FPC 只有 <strong>13.13 mm</strong>，屏背到 PCB 的距离被它锁死在 <strong>9.7 mm</strong>，这直接决定外壳屏槽深度。
+  </div>
+</header>
+
+<h2><span class="num">01</span>定案与关键参数</h2>
+
+<p>选型已定：中景园 <code>ZJY133T-IG01</code>，瀚彩玻璃、焊接式 12 pin。资料整包在
+<a href="../硬件资料/中景园1.3寸240X240%20TFT%20LCD技术资料/">硬件资料/中景园1.3寸240X240 TFT LCD技术资料/</a>，
+只取 <code>瀚彩玻璃/1.30IPS焊接12pin-…-ZJY133T-IG01/</code> 这一支（另外两支是插接 12pin 和插接 24pin，封装完全不同，别买错）。</p>
+
+<table class="kv">
+  <tbody>
+    <tr><td>尺寸 / 分辨率</td><td>1.3 英寸 / 240 × 240，RGB 竖条纹，<strong>65K 色（RGB565）</strong></td></tr>
+    <tr><td>驱动 IC / 接口</td><td>ST7789V2 / 4 线 SPI（CS、D/C、SCL、SDA），<strong>无 MISO、无 TE</strong></td></tr>
+    <tr><td>模组外形</td><td class="mono">26.16 × 29.22 × 1.5 mm（max）</td></tr>
+    <tr><td>显示区 AA</td><td class="mono">23.40 × 23.40 mm</td></tr>
+    <tr><td>玻璃 / 偏光片</td><td class="mono">25.80 × 28.40 / 25.50 × 25.40 mm</td></tr>
+    <tr><td>亮度 / 对比度</td><td>350 cd/m²（typ）/ 800:1（typ），全视角 IPS，响应 30 ms</td></tr>
+    <tr><td>背光</td><td>2 颗白光 LED <strong>并联</strong>；VLED 2.9–3.1 V；ILED 40 mA（typ）/ 60 mA（max）</td></tr>
+    <tr><td>电源</td><td class="mono">VDD 2.5 / 2.8 / 3.3 V（min/typ/<strong>max</strong>），工作 8–10 mA，睡眠 15 µA</td></tr>
+    <tr><td>工作温度</td><td>−20 ~ +70 ℃（存储 −30 ~ +80 ℃）</td></tr>
+    <tr><td>重量</td><td>2.4 g</td></tr>
+  </tbody>
+</table>
+
+<div class="card warn">
+  <h4>和上一版结构文档的差别</h4>
+  结构方案 rev 1.4 里预留的是 <strong>Φ40 圆屏（GC9A01）</strong>，rev 1.5 换成这块方屏，rev 1.6 又把机身从 82×82×24 缩到 <strong>64×64×22</strong>。
+  屏在面板上偏左 10.6mm 给 Φ24 波轮让位；屏顶到天线只剩 <strong>12.4mm</strong>（建议 15），取舍见结构文档 rev 1.7。
+</div>
+
+<h2><span class="num">02</span>12 pin 定义与 GPIO 分配</h2>
+
+<p>FPC 引脚按规格书第 6 页，1 脚在 FPC 一端（靠近背光焊点一侧），12 脚在另一端。注意这块屏<strong>只有一路 VDD，没有单独的 VDDIO</strong>，逻辑电平跟 VDD 走。</p>
+
+<table>
+  <thead>
+    <tr><th style="width:8%">Pin</th><th style="width:14%">信号</th><th style="width:30%">功能</th><th style="width:14%">接到</th><th style="width:34%">外围</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="mono">1</td><td class="mono">GND</td><td>地</td><td>GND</td><td>与 pin 5/6/12 一起就近过孔下地</td></tr>
+    <tr><td class="mono">2</td><td class="mono">LEDK</td><td>背光 LED 阴极</td><td class="mono">→ 10 Ω → Q1 漏极</td><td>低边 NMOS 开关，PWM 调光</td></tr>
+    <tr><td class="mono">3</td><td class="mono">LEDA</td><td>背光 LED 阳极</td><td class="mono">3V3</td><td>就近 1 µF + 100 nF</td></tr>
+    <tr><td class="mono">4</td><td class="mono">VDD</td><td>屏逻辑电源 2.5–3.3 V</td><td class="mono">3V3（经磁珠）</td><td>1 µF + 100 nF，<strong>耐压 ≥6.3 V</strong></td></tr>
+    <tr><td class="mono">5</td><td class="mono">GND</td><td>地</td><td>GND</td><td>—</td></tr>
+    <tr><td class="mono">6</td><td class="mono">GND</td><td>地</td><td>GND</td><td>—</td></tr>
+    <tr><td class="mono">7</td><td class="mono">D/C</td><td>命令/数据选择</td><td class="mono">GPIO13</td><td>串 33 Ω（靠主控端）</td></tr>
+    <tr><td class="mono">8</td><td class="mono">CS</td><td>片选，低有效</td><td class="mono">GPIO10</td><td>串 33 Ω；<strong>不要直接接地</strong>，留着以后共总线</td></tr>
+    <tr><td class="mono">9</td><td class="mono">SCL</td><td>SPI 时钟</td><td class="mono">GPIO12</td><td>串 33 Ω；这是 FSPI 的 IO_MUX 脚，可跑满速</td></tr>
+    <tr><td class="mono">10</td><td class="mono">SDA</td><td>SPI 数据（只写）</td><td class="mono">GPIO11</td><td>串 33 Ω；同为 FSPI IO_MUX 脚</td></tr>
+    <tr><td class="mono">11</td><td class="mono">RESET</td><td>复位，低有效</td><td class="mono">GPIO9</td><td>10 kΩ 上拉到 3V3 + 100 nF 到地</td></tr>
+    <tr><td class="mono">12</td><td class="mono">GND</td><td>地</td><td>GND</td><td>—</td></tr>
+  </tbody>
+</table>
+
+<h3>为什么是这几个 GPIO</h3>
+<ul>
+  <li><strong>GPIO12 / 11 是 SPI2（FSPI）的 IO_MUX 原生脚</strong>：SCLK 走 IO_MUX 才能稳定跑 40–60 MHz；走 GPIO 矩阵会有额外延迟与抖动。CS 用 GPIO10 正好是 FSPICS0。</li>
+  <li>GPIO8 / 9 / 13 走 GPIO 矩阵，只做低速控制（BL / RST / DC），40 MHz 下没问题。</li>
+  <li>避开了：GPIO26–32（Flash）、GPIO33–37（N16R8 的八线 PSRAM）、GPIO19/20（USB）、GPIO0/3/45/46（strapping）。</li>
+  <li>与音频不冲突：I2S 在 14–18，I2C 在 41/42，PA_EN 在 7，编码器在 2/6/4，WS2812 在 48。</li>
+</ul>
+
+<div class="card tip">
+  <h4>没有 MISO 是好事</h4>
+  这块屏不返回任何数据，读 ID 也只在诊断时用。固件里不要给它分配 MISO，<code>esp_lcd</code> 的面板 IO 只配 MOSI 即可；
+  以后要读屏（比如读 ID 确认焊接）时，可以临时把 SDA 脚当输入用——ST7789 的 SDA 是双向的，但本项目不需要。
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 780 350" width="100%" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>ESP32-S3 与屏的 SPI / 控制连接</title>
+  <desc>ESP32-S3 的 GPIO12/11/13/10/9/8 经 33 欧姆串联电阻接到屏的 SCL / SDA / DC / CS / RESET 与背光栅极。</desc>
+  <defs>
+    <marker id="a1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+  <rect x="30" y="40" width="180" height="290" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.8"/>
+  <text x="120" y="64" text-anchor="middle" font-size="13" font-weight="600" fill="#0C447C">ESP32-S3</text>
+  <text x="120" y="80" text-anchor="middle" font-size="11" fill="#185FA5">WROOM-1-N16R8</text>
+
+  <rect x="600" y="40" width="150" height="245" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.8"/>
+  <text x="675" y="64" text-anchor="middle" font-size="13" font-weight="600" fill="#2C2C2A">ZJY133T-IG01</text>
+  <text x="675" y="80" text-anchor="middle" font-size="10.5" fill="#5F5E5A">12 pin FPC</text>
+
+  <g font-size="11.5" font-family="ui-monospace,Consolas,monospace">
+    <text x="46" y="108" fill="#0C447C">GPIO12</text>
+    <text x="46" y="148" fill="#0C447C">GPIO11</text>
+    <text x="46" y="188" fill="#0C447C">GPIO13</text>
+    <text x="46" y="228" fill="#0C447C">GPIO10</text>
+    <text x="46" y="268" fill="#0C447C">GPIO9</text>
+    <text x="46" y="308" fill="#0C447C">GPIO8</text>
+
+    <text x="700" y="108" fill="#5F5E5A" text-anchor="end">9 SCL</text>
+    <text x="700" y="148" fill="#5F5E5A" text-anchor="end">10 SDA</text>
+    <text x="700" y="188" fill="#5F5E5A" text-anchor="end">7 D/C</text>
+    <text x="700" y="228" fill="#5F5E5A" text-anchor="end">8 CS</text>
+    <text x="700" y="268" fill="#5F5E5A" text-anchor="end">11 RESET</text>
+  </g>
+
+  <g stroke="#888780" stroke-width="1.1" fill="none">
+    <path d="M210 104H330"/><path d="M380 104H596"/>
+    <path d="M210 144H330"/><path d="M380 144H596"/>
+    <path d="M210 184H330"/><path d="M380 184H596"/>
+    <path d="M210 224H330"/><path d="M380 224H596"/>
+    <path d="M210 264H596"/>
+    <path d="M210 304H330"/><path d="M380 304H560"/>
+  </g>
+  <text x="570" y="308" font-size="11" fill="#854f0b">→ Q1 栅极（背光，不接屏）</text>
+
+  <g fill="#FFFFFF" stroke="#5F5E5A" stroke-width="0.9">
+    <rect x="330" y="96" width="50" height="16" rx="2"/>
+    <rect x="330" y="136" width="50" height="16" rx="2"/>
+    <rect x="330" y="176" width="50" height="16" rx="2"/>
+    <rect x="330" y="216" width="50" height="16" rx="2"/>
+    <rect x="330" y="296" width="50" height="16" rx="2"/>
+  </g>
+  <g font-size="10.5" fill="#57606a" text-anchor="middle">
+    <text x="355" y="90">33Ω</text><text x="355" y="130">33Ω</text>
+    <text x="355" y="170">33Ω</text><text x="355" y="210">33Ω</text>
+    <text x="355" y="290">100Ω</text>
+  </g>
+
+  <text x="410" y="246" font-size="10" fill="#8b949e">10kΩ 上拉 + 100nF（复位 RC）</text>
+</svg>
+<div class="caption">SPI 四线 + 复位 + 背光栅极；33 Ω 串联电阻一律放在 ESP32 一侧，紧靠引脚</div>
+</div>
+
+<h2><span class="num">03</span>电源：3.3 V 直供，但必须压在上限内</h2>
+
+<p>规格书的 VDD 是 2.5 V(min) / 2.8 V(typ) / <strong>3.3 V(max)</strong>。也就是说 3.3 V 正好是上限，不是“典型值”。
+板上的 3.3 V Buck 如果有 ±2% 的误差，输出会到 3.37 V，就超了。</p>
+
+<table>
+  <thead><tr><th style="width:26%">方案</th><th style="width:16%">器件</th><th style="width:58%">取舍</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><span class="tag t-teal">采用</span> 3.3 V 直供</td>
+      <td class="mono">0 颗</td>
+      <td>把 Buck 输出定在 <strong>3.30 V −0/+1%</strong>，屏 VDD 经一颗 600 Ω@100 MHz 磁珠 + 1 µF/100 nF 去耦。单电源、免电平转换，ST7789 模组几乎都这么用</td>
+    </tr>
+    <tr>
+      <td><span class="tag t-amber">备选</span> 2.8 V LDO</td>
+      <td class="mono">ME6211C28</td>
+      <td>更贴规格，但 SPI 四根 3.3 V 信号会超过 VDD+0.3 V 的绝对最大值，得再加电平转换（4 路），首版不值得</td>
+    </tr>
+    <tr>
+      <td><span class="tag t-coral">禁止</span> 5 V 直供</td>
+      <td>—</td>
+      <td>绝对最大 4.6 V，5 V 会直接打穿</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="card warn">
+  <h4>上电顺序与复位</h4>
+  VDD 与信号同时上电即可（ST7789 允许）。RESET 由 GPIO9 控制，外部 10 kΩ 上拉、100 nF 到地；
+  固件里复位拉低 <strong>≥10 µs</strong>、等 <strong>120 ms</strong> 再发初始化。别把 RESET 直接接 3V3——上电时序不稳时会白屏。
+</div>
+
+<p>3.3 V 轨预算（峰值）：ESP32-S3 射频 350 mA + 屏逻辑 10 mA + 背光 40 mA + ES8311/麦克风 20 mA + 余量 ≈ <strong>500 mA</strong>。
+现有 ≥1 A 的 Buck 够用；背光的 40 mA 是脉冲电流，去耦要放在屏座旁边，不要只靠主输入电容。</p>
+
+<h2><span class="num">04</span>背光：两颗并联 LED，串 10 Ω，低边 MOSFET 调光</h2>
+
+<p>背光是 2 颗白光 LED 并联，VLED 2.9–3.1 V、40 mA（typ）。3.3 V 与 3.0 V 之间只有 <strong>0.3 V 余量</strong>，所以限流电阻不是“可选”，是必须的：
+0.3 V ÷ 40 mA = 7.5 Ω，取 <strong>10 Ω</strong>（1%，0805）。</p>
+
+<table>
+  <thead><tr><th style="width:20%">3.3 V 实际</th><th style="width:20%">Vf = 2.9 V</th><th style="width:20%">Vf = 3.0 V</th><th style="width:20%">Vf = 3.1 V</th><th style="width:20%">判定</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">3.30 V</td><td class="mono">40 mA</td><td class="mono">30 mA</td><td class="mono">20 mA</td><td><span class="tag t-teal">✓ 安全</span></td></tr>
+    <tr><td class="mono">3.40 V</td><td class="mono">50 mA</td><td class="mono">40 mA</td><td class="mono">30 mA</td><td><span class="tag t-amber">接近 60 mA 上限</span></td></tr>
+    <tr><td class="mono">3.20 V</td><td class="mono">30 mA</td><td class="mono">20 mA</td><td class="mono">10 mA</td><td><span class="tag t-amber">偏暗（约 175 cd/m²）</span></td></tr>
+  </tbody>
+</table>
+
+<p>亮度与电流近似成正比，所以这颗电阻同时是“亮度校准点”。首批实测后可在 <strong>6.8–15 Ω</strong> 之间换，别低于 6.8 Ω。</p>
+
+<div class="diagram">
+<svg viewBox="0 0 720 320" width="100%" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>背光与屏电源电路</title>
+  <desc>3.3V 经磁珠给屏 VDD 去耦；LEDA 接 3.3V，LEDK 经 10 欧姆到 2N7002 漏极，栅极由 GPIO8 经 100 欧姆驱动，100k 下拉。</desc>
+
+  <!-- 3V3 rail -->
+  <text x="42" y="66" font-size="12" font-family="ui-monospace,Consolas,monospace" fill="#0C447C">3V3</text>
+  <path d="M50 74V80H300" fill="none" stroke="#185FA5" stroke-width="1.3"/>
+
+  <!-- ferrite + VDD -->
+  <rect x="300" y="72" width="50" height="16" rx="2" fill="#FFFFFF" stroke="#5F5E5A"/>
+  <text x="325" y="66" font-size="10.5" text-anchor="middle" fill="#57606a">FB 600Ω</text>
+  <path d="M350 80H520" fill="none" stroke="#185FA5" stroke-width="1.3"/>
+  <text x="528" y="84" font-size="11.5" fill="#0C447C">VDD（pin 4）</text>
+
+  <path d="M470 80V112M470 120V142" fill="none" stroke="#888780" stroke-width="1"/>
+  <path d="M456 112H484M456 120H484" fill="none" stroke="#888780" stroke-width="1.3"/>
+  <text x="492" y="120" font-size="10" fill="#8b949e">1µF ∥ 100nF</text>
+  <path d="M452 142H488M458 147H482M464 152H476" fill="none" stroke="#888780" stroke-width="1"/>
+  <text x="496" y="150" font-size="9.5" fill="#8b949e">GND</text>
+
+  <!-- LEDA -->
+  <path d="M70 80V150H250" fill="none" stroke="#993C1D" stroke-width="1.3"/>
+  <text x="140" y="142" font-size="11" fill="#993C1D">LEDA（pin 3）</text>
+
+  <!-- LED -->
+  <path d="M250 150H272" fill="none" stroke="#993C1D" stroke-width="1.3"/>
+  <path d="M250 138L250 162L272 150Z" fill="none" stroke="#993C1D" stroke-width="1.3"/>
+  <path d="M272 138V162" fill="none" stroke="#993C1D" stroke-width="1.3"/>
+  <path d="M272 150H360" fill="none" stroke="#993C1D" stroke-width="1.3"/>
+  <text x="252" y="182" font-size="10" fill="#993C1D">2×LED 并联</text>
+  <text x="300" y="142" font-size="11" fill="#993C1D">LEDK（pin 2）</text>
+
+  <!-- current limit -->
+  <rect x="360" y="142" width="50" height="16" rx="2" fill="#FFFFFF" stroke="#5F5E5A"/>
+  <text x="385" y="134" font-size="10.5" text-anchor="middle" fill="#57606a">10Ω 1%</text>
+  <path d="M410 150H575" fill="none" stroke="#993C1D" stroke-width="1.3"/>
+
+  <!-- NMOS Q1 -->
+  <path d="M575 150V172H552" fill="none" stroke="#5F5E5A" stroke-width="1.3"/>
+  <path d="M542 168V212" fill="none" stroke="#5F5E5A" stroke-width="1.3"/>
+  <path d="M552 168V182M552 184V196M552 198V212" fill="none" stroke="#5F5E5A" stroke-width="1.3"/>
+  <path d="M552 205H575V238" fill="none" stroke="#5F5E5A" stroke-width="1.3"/>
+  <path d="M552 190H575V205" fill="none" stroke="#5F5E5A" stroke-width="1.3"/>
+  <polygon points="563,186 556,190 563,194" fill="#5F5E5A"/>
+  <path d="M560 238H590M565 243H585M570 248H580" fill="none" stroke="#888780" stroke-width="1"/>
+  <text x="596" y="176" font-size="10.5" fill="#57606a">Q1 2N7002</text>
+
+  <!-- gate drive -->
+  <path d="M542 190H500" fill="none" stroke="#0F6E56" stroke-width="1.3"/>
+  <rect x="450" y="182" width="50" height="16" rx="2" fill="#FFFFFF" stroke="#5F5E5A"/>
+  <text x="475" y="176" font-size="10.5" text-anchor="middle" fill="#57606a">100Ω</text>
+  <path d="M450 190H410" fill="none" stroke="#0F6E56" stroke-width="1.3"/>
+  <text x="404" y="194" font-size="11" text-anchor="end" fill="#0F6E56">GPIO8 / PWM</text>
+  <circle cx="510" cy="190" r="2.2" fill="#0F6E56"/>
+
+  <path d="M510 190V220M510 260V272" fill="none" stroke="#888780" stroke-width="1"/>
+  <rect x="502" y="220" width="16" height="40" rx="2" fill="#FFFFFF" stroke="#5F5E5A"/>
+  <text x="524" y="244" font-size="10" fill="#8b949e">100k</text>
+  <path d="M496 272H524M500 277H520M504 282H516" fill="none" stroke="#888780" stroke-width="1"/>
+
+  <text x="50" y="232" font-size="10.5" fill="#8b949e">PWM 20 kHz / 10 bit</text>
+  <text x="50" y="250" font-size="10.5" fill="#8b949e">占空比 0–100% 对应亮度 0–100%</text>
+</svg>
+<div class="caption">屏 VDD 单独经磁珠 + 去耦，背光电流走另一条支路，避免 20 kHz 纹波串进屏逻辑与麦克风</div>
+</div>
+
+<div class="card tip">
+  <h4>为什么不用厂家参考电路里的 PNP</h4>
+  厂家用 S8550（高边 PNP）+ 10 Ω，能用，但 PNP 需要基极电流、关断有存储时间，低亮度 PWM 时波形不干净。
+  换成低边 2N7002（SOT-23，Vgs(th) 1 V 左右，3.3 V 栅极完全导通）更简单，GPIO 高电平即亮，固件里 <code>DISPLAY_BACKLIGHT_OUTPUT_INVERT=false</code>。
+</div>
+
+<h3>背光备选（首版不贴）</h3>
+<ul>
+  <li><strong>AW9364 恒流驱动</strong>：厂家规格书推荐，4 通道恒流、1-wire 调光，亮度不随 3.3 V/LED 批次漂移。代价是多一颗 DFN 封装 + 调光协议，固件要改。等做到电池版再考虑。</li>
+  <li><strong>5 V + 47 Ω</strong>：只在 USB 供电时有 5 V，亮度和稳定性最好；但插电池时屏会暗，且 5 V 轨要被 40 mA 拉，不推荐做默认。</li>
+</ul>
+
+<h2><span class="num">05</span>SPI 时序与固件参数</h2>
+
+<p>规格书写的是写周期 ≥16 ns，也就是 <strong>时钟上限 62.5 MHz</strong>。实际取值：</p>
+
+<table>
+  <thead><tr><th style="width:20%">时钟</th><th style="width:28%">240×240 全屏（115 200 B）</th><th style="width:24%">帧率</th><th style="width:28%">建议</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">40 MHz</td><td class="mono">23.0 ms</td><td class="mono">≈ 43 fps</td><td><span class="tag t-teal">默认</span> 余量最大，杜邦线/排线也稳</td></tr>
+    <tr><td class="mono">60 MHz</td><td class="mono">15.4 ms</td><td class="mono">≈ 65 fps</td><td><span class="tag t-blue">实测后可选</span> 仍在 62.5 MHz 内</td></tr>
+    <tr><td class="mono">80 MHz</td><td class="mono">11.5 ms</td><td class="mono">≈ 87 fps</td><td><span class="tag t-coral">超规格</span> 很多模组能跑，但不保证，别默认</td></tr>
+  </tbody>
+</table>
+
+<p>模式 0（CPOL=0、CPHA=0），MSB first，8 bit。数据在 SCL 上升沿锁存。CS 每次事务拉低，事务间可保持低电平以省时间。</p>
+
+<h3>初始化序列（来自厂家 <code>lcd_init.c</code>，实测可用）</h3>
+
+<p>注意这块屏是 IPS，初始化里必须发 <code>0x21</code>（INVON，反显），否则颜色整体反相；VCOM 是 <code>0xBB=0x3F</code>，gamma 是厂家调好的 14 字节，别照抄通用 ST7789 例程。</p>
+
+<table>
+  <thead><tr><th style="width:12%">命令</th><th style="width:64%">数据</th><th style="width:12%">延时</th><th style="width:12%">说明</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">0x11</td><td class="mono">—</td><td class="mono">120 ms</td><td>Sleep out</td></tr>
+    <tr><td class="mono">0x36</td><td class="mono">0x00</td><td>—</td><td>MADCTL，竖屏正向；180° 用 0xC0，90° 用 0x70，270° 用 0xA0</td></tr>
+    <tr><td class="mono">0x3A</td><td class="mono">0x05</td><td>—</td><td>16 bit / RGB565</td></tr>
+    <tr><td class="mono">0xB2</td><td class="mono">1F 1F 00 33 33</td><td>—</td><td>Porch</td></tr>
+    <tr><td class="mono">0xB7</td><td class="mono">0x00</td><td>—</td><td>VGH 12.2 V / VGL −7.16 V</td></tr>
+    <tr><td class="mono">0xBB</td><td class="mono">0x3F</td><td>—</td><td>VCOM</td></tr>
+    <tr><td class="mono">0xC0</td><td class="mono">0x2C</td><td>—</td><td>LCMCTRL</td></tr>
+    <tr><td class="mono">0xC2</td><td class="mono">0x01</td><td>—</td><td>VDV/VRH 使能</td></tr>
+    <tr><td class="mono">0xC3</td><td class="mono">0x0F</td><td>—</td><td>VRH = 4.3 V</td></tr>
+    <tr><td class="mono">0xC4</td><td class="mono">0x20</td><td>—</td><td>VDV = 0</td></tr>
+    <tr><td class="mono">0xC6</td><td class="mono">0x13</td><td>—</td><td>帧率</td></tr>
+    <tr><td class="mono">0xD0</td><td class="mono">A4 A1</td><td>—</td><td>Power control</td></tr>
+    <tr><td class="mono">0xD6</td><td class="mono">0xA1</td><td>—</td><td>睡眠时 gate 输出 GND</td></tr>
+    <tr><td class="mono">0xE0</td><td class="mono">F0 06 0D 0B 0A 07 2E 43 45 38 14 13 25 29</td><td>—</td><td>正 gamma</td></tr>
+    <tr><td class="mono">0xE1</td><td class="mono">F0 07 0A 08 07 23 2E 33 44 3A 16 17 26 2C</td><td>—</td><td>负 gamma</td></tr>
+    <tr><td class="mono">0xE4</td><td class="mono">1D 00 00</td><td>—</td><td>240 gate 线</td></tr>
+    <tr><td class="mono">0x21</td><td class="mono">—</td><td>—</td><td><strong>IPS 反显，必须有</strong></td></tr>
+    <tr><td class="mono">0x11</td><td class="mono">—</td><td class="mono">120 ms</td><td>厂家原序列里有第二次，保留</td></tr>
+    <tr><td class="mono">0x29</td><td class="mono">—</td><td>—</td><td>Display on</td></tr>
+  </tbody>
+</table>
+
+<h3>esp_lcd 对应关系</h3>
+<table>
+  <thead><tr><th style="width:30%">参数</th><th style="width:70%">取值 / 说明</th></tr></thead>
+  <tbody>
+    <tr><td><code>spi_mode</code></td><td>0</td></tr>
+    <tr><td><code>pclk_hz</code></td><td>40 000 000（先用 40 M，稳定后再试 60 M）</td></tr>
+    <tr><td><code>trans_queue_depth</code></td><td>10（DMA 队列，单色块刷新够用）</td></tr>
+    <tr><td><code>lcd_cmd_bits / lcd_param_bits</code></td><td>8 / 8</td></tr>
+    <tr><td><code>reset_gpio_num</code></td><td>GPIO9；<code>reset_active_high = false</code></td></tr>
+    <tr><td><code>rgb_ele_order</code></td><td><code>LCD_RGB_ELEMENT_ORDER_RGB</code>（接反了红蓝会互换）</td></tr>
+    <tr><td><code>bits_per_pixel</code></td><td>16</td></tr>
+    <tr><td><code>invert_color</code></td><td><strong>true</strong>（对应初始化里的 0x21）</td></tr>
+    <tr><td><code>mirror_x / mirror_y / swap_xy</code></td><td>false / false / false（竖屏正向；装反了改这三个，不要改走线）</td></tr>
+  </tbody>
+</table>
+
+<div class="card warn">
+  <h4>初始化序列怎么塞进 esp_lcd</h4>
+  ESP-IDF 的 ST7789 组件自带一套通用初始化，<strong>不要直接用</strong>——VCOM 和 gamma 跟这块屏对不上，会出现对比度差、发灰。
+  用 <code>esp_lcd_panel_st7789_vendor_config_t</code> 的 vendor init 序列，或干脆用 <code>esp_lcd_panel_io_tx_param()</code> 手写一遍上表。
+  注意 gamma 有 14 字节，某些版本的 init cmd 结构体 <code>data[4]</code> 是定长 4 字节，装不下，要么拆成多次发送，要么走手写路径。
+</div>
+
+<h2><span class="num">06</span>PCB 封装与布线</h2>
+
+<h3>焊盘尺寸（唯一权威值，按规格书第 5 页）</h3>
+
+<table>
+  <thead><tr><th style="width:24%">项</th><th style="width:22%">值</th><th style="width:54%">说明</th></tr></thead>
+  <tbody>
+    <tr><td>焊盘数</td><td class="mono">12</td><td>1 脚在 pin 1 一侧，丝印打点</td></tr>
+    <tr><td>焊盘尺寸</td><td class="mono">0.35 × 1.90 mm</td><td>FPC 金手指 0.35 × 1.85，PCB 侧每边放长 0.025–0.05，方便吃锡</td></tr>
+    <tr><td>间距</td><td class="mono">0.7 mm</td><td>中心距；间隙 0.35 mm</td></tr>
+    <tr><td>整排宽度</td><td class="mono">8.05 mm</td><td>0.35 + 11 × 0.7</td></tr>
+    <tr><td>整排中心偏置</td><td class="mono">−3.0 mm</td><td>相对屏中心线，<strong>偏向 pin 1 一侧</strong>（图纸量得 2.9–3.1，首版按 3.0 画，打样前用卡尺复核）</td></tr>
+    <tr><td>焊盘行位置</td><td class="mono">Y +12.75 ~ +14.65</td><td>以屏中心为原点、向下为 +Y；即紧贴屏下边（+14.61）往里 1.9 mm</td></tr>
+    <tr><td>定位孔</td><td class="mono">2 × Φ1.0 @ 10.00</td><td>在 FPC 上，不在 PCB 上；做焊接工装时用它做销孔，PCB 不必开孔</td></tr>
+  </tbody>
+</table>
+
+<div class="diagram">
+<svg viewBox="0 0 520 500" width="100%" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>屏焊盘与外形俯视尺寸</title>
+  <desc>屏外形 26.16×29.22，12 个 0.35×1.90 焊盘，0.7 间距，整排中心相对屏中心向 pin1 侧偏 3.0 毫米，焊盘紧贴屏下边。</desc>
+  <defs>
+    <marker id="d1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M1 1L9 5L1 9" fill="none" stroke="#8b949e" stroke-width="1.1"/>
+    </marker>
+  </defs>
+
+  <!-- panel outline: 26.16 x 29.22 at 10 px/mm, center (260,200) -->
+  <rect x="129" y="54" width="262" height="292" fill="none" stroke="#185FA5" stroke-width="1" stroke-dasharray="6 4"/>
+  <text x="260" y="44" text-anchor="middle" font-size="11" fill="#185FA5">屏外形 26.16 × 29.22（虚线）</text>
+
+  <!-- window 24x24 centered on AA (260, 196) -->
+  <rect x="140" y="76" width="240" height="240" fill="#E6F1FB" opacity="0.45" stroke="none"/>
+  <text x="260" y="200" text-anchor="middle" font-size="11" fill="#185FA5">AA 23.4 / 视窗 24.0</text>
+
+  <!-- centerline -->
+  <path d="M260 54V356" stroke="#B4B2A9" stroke-width="0.7" stroke-dasharray="3 3"/>
+  <text x="266" y="66" font-size="9.5" fill="#8b949e">屏中心线</text>
+
+  <!-- pads: 12 x 0.35x1.9, pitch 0.7, row center x = 260-30 = 230, y 320..339 (12.75..14.65 => y0=200+127.5=327.5?) -->
+  <!-- center y=200; +12.75 -> 327.5 ; +14.65 -> 346.5 -->
+  <g fill="#993C1D">
+    <rect x="189.75" y="327.5" width="3.5" height="19"/>
+    <rect x="196.75" y="327.5" width="3.5" height="19"/>
+    <rect x="203.75" y="327.5" width="3.5" height="19"/>
+    <rect x="210.75" y="327.5" width="3.5" height="19"/>
+    <rect x="217.75" y="327.5" width="3.5" height="19"/>
+    <rect x="224.75" y="327.5" width="3.5" height="19"/>
+    <rect x="231.75" y="327.5" width="3.5" height="19"/>
+    <rect x="238.75" y="327.5" width="3.5" height="19"/>
+    <rect x="245.75" y="327.5" width="3.5" height="19"/>
+    <rect x="252.75" y="327.5" width="3.5" height="19"/>
+    <rect x="259.75" y="327.5" width="3.5" height="19"/>
+    <rect x="266.75" y="327.5" width="3.5" height="19"/>
+  </g>
+  <text x="185" y="342" text-anchor="end" font-size="10" fill="#993C1D">pin 1</text>
+  <text x="275" y="342" font-size="10" fill="#993C1D">pin 12</text>
+
+  <!-- 3.0 offset dimension -->
+  <path d="M230 300H260" stroke="#0F6E56" stroke-width="1" marker-start="url(#d1)" marker-end="url(#d1)"/>
+  <text x="245" y="292" text-anchor="middle" font-size="10" fill="#0F6E56">3.0</text>
+
+  <!-- 8.05 span -->
+  <path d="M189.75 368H270.25" stroke="#8b949e" stroke-width="0.9" marker-start="url(#d1)" marker-end="url(#d1)"/>
+  <text x="230" y="382" text-anchor="middle" font-size="10" fill="#57606a">8.05（12 pad）</text>
+
+  <!-- pitch note -->
+  <path d="M193.25 402V396" fill="none" stroke="#8b949e" stroke-width="0.5"/>
+  <text x="200" y="405" font-size="9.5" fill="#57606a">间距 0.7 / 焊盘 0.35 宽 × 1.9 长</text>
+
+  <!-- height dim -->
+  <path d="M270.25 327.5H420M270.25 346.5H420" fill="none" stroke="#8b949e" stroke-width="0.5" stroke-dasharray="2 2"/>
+  <path d="M420 327.5V346.5" fill="none" stroke="#8b949e" stroke-width="0.9" marker-start="url(#d1)" marker-end="url(#d1)"/>
+  <text x="428" y="341" font-size="10" fill="#57606a">1.9</text>
+
+  <text x="30" y="470" font-size="10.5" fill="#8b949e">焊盘行紧贴屏下边，FPC 从屏下边出来向下走 10 mm，在 PCB 上 90° 折弯后落在焊盘上</text>
+</svg>
+<div class="caption">俯视：虚线是屏外形，红色 12 个焊盘；整排偏置 3.0 mm 是这块屏最容易画错的一处</div>
+</div>
+
+<h3>布线要点</h3>
+<ul>
+  <li><strong>33 Ω 串联电阻靠近 ESP32</strong>，不靠近屏；作用是压 SPI 边沿振铃，不是限流。</li>
+  <li>SCLK / SDA 尽量同层走、少打过孔；到屏的距离控制在 <strong>40 mm 内</strong>。屏就在板子正面，实际会很短。</li>
+  <li><strong>别把 SPI 走到天线净空区</strong>（模组天线端 15 mm），也别从麦克风模拟走线旁边平行穿过。</li>
+  <li>4 个 GND 脚（1/5/6/12）在焊盘两侧就近打过孔到地平面，不要只靠 FPC 的 GND 当回流。</li>
+  <li>VDD 的去耦电容放在焊盘 2 mm 内：1 µF（0603/0805）+ 100 nF（0402/0603）。</li>
+  <li>焊盘开窗做成实连（不做热焊盘），回流焊时 FPC 散热快，热焊盘容易虚焊。</li>
+  <li>丝印画出屏外形虚线 + pin 1 圆点；屏装上后丝印会被盖住，装配时靠 pin 1 点对位。</li>
+</ul>
+
+<h2><span class="num">07</span>结构与装配：13.13 mm 的 FPC 决定一切</h2>
+
+<p>屏背面到 PCB 正面的距离不能超过 <strong>10.7 mm</strong>（13.13 − 折弯 0.6 − 焊盘 1.85）。按 rev 1.7 的 Z 向叠层算：前壁内表面 21.0，屏槽深 1.7（屏 1.5 + 泡棉 0.2），屏背 19.5，PCB 正面 9.8，间隙 <strong>9.7</strong>。</p>
+
+<div class="diagram">
+<svg viewBox="0 0 700 360" width="100%" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>屏槽与 FPC 折弯侧视</title>
+  <desc>前壁开窗 24，屏槽深 1.7，屏背后 10 mm 是 PCB，FPC 从屏下边竖直下行 10 mm，折弯 0.6，焊盘 1.85，总长 12.45，小于 13.13。</desc>
+  <defs>
+    <marker id="d2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M1 1L9 5L1 9" fill="none" stroke="#8b949e" stroke-width="1.1"/>
+    </marker>
+  </defs>
+
+  <!-- front wall -->
+  <rect x="90" y="40" width="480" height="10" fill="#F1EFE8" stroke="#B4B2A9"/>
+  <text x="580" y="50" font-size="10.5" fill="#5F5E5A">前壁 1.0</text>
+
+  <!-- panel -->
+  <rect x="245" y="50" width="210" height="12" fill="#E6F1FB" stroke="#185FA5"/>
+  <text x="350" y="59" text-anchor="middle" font-size="10" fill="#0C447C">屏 1.5（26.16 × 29.22，含背光/铁框）</text>
+  <!-- tower walls -->
+  <rect x="235" y="50" width="8" height="92" fill="#F1EFE8" stroke="#B4B2A9"/>
+  <rect x="457" y="50" width="8" height="92" fill="#F1EFE8" stroke="#B4B2A9"/>
+  <text x="231" y="128" text-anchor="end" font-size="9.5" fill="#8b949e">屏槽壁</text>
+  <text x="469" y="128" font-size="9.5" fill="#8b949e">屏槽壁</text>
+
+  <!-- PCB -->
+  <rect x="130" y="144" width="400" height="13" fill="#E1F5EE" stroke="#0F6E56"/>
+  <text x="330" y="153" text-anchor="middle" font-size="10" fill="#085041">PCB 1.6（正面）</text>
+
+  <!-- pads -->
+  <rect x="440" y="141" width="15" height="4" fill="#993C1D"/>
+  <text x="438" y="136" text-anchor="end" font-size="9" fill="#993C1D">焊盘 1.85</text>
+
+  <!-- FPC -->
+  <path d="M455 62V136Q455 141 450 141H440" fill="none" stroke="#993C1D" stroke-width="2" stroke-linecap="round"/>
+  <text x="464" y="100" font-size="9.5" fill="#993C1D">FPC</text>
+
+  <!-- dimensions -->
+  <path d="M478 50V64" stroke="#8b949e" stroke-width="0.9" marker-start="url(#d2)" marker-end="url(#d2)"/>
+  <text x="486" y="60" font-size="9.5" fill="#57606a">1.7</text>
+  <path d="M120 64V144" stroke="#8b949e" stroke-width="0.9" marker-start="url(#d2)" marker-end="url(#d2)"/>
+  <text x="126" y="107" font-size="9.5" fill="#57606a">9.7</text>
+
+  <text x="80" y="230" font-size="11" fill="#57606a">FPC 总长 13.13 = 竖直 9.7 + 折弯 0.6 + 焊盘 1.85 ≈ 12.15</text>
+  <text x="80" y="252" font-size="11" fill="#0F6E56">余量 0.98 mm —— 屏槽再深 1 mm 就拉不到焊盘</text>
+  <text x="80" y="282" font-size="10.5" fill="#8b949e">折弯半径按 R0.3 走，FPC 只能朝“背面朝外”单面折，别反向折</text>
+  <text x="80" y="304" font-size="10.5" fill="#8b949e">FPC 宽 10.30，屏槽壁在下边这一段必须开口 ≥10.6</text>
+</svg>
+<div class="caption">侧视：屏贴在前壁，FPC 从屏下边下行到 PCB 正面，90° 折弯后焊盘朝下贴板</div>
+</div>
+
+<table>
+  <thead><tr><th style="width:26%">结构项</th><th style="width:24%">数值</th><th style="width:50%">说明</th></tr></thead>
+  <tbody>
+    <tr><td>视窗</td><td class="mono">24.0 × 24.0</td><td>对 AA 每边压 0.3 mm；中心相对屏外形中心<strong>上移 0.41 mm</strong>（29.22 比 28.40 多在 FPC 侧）</td></tr>
+    <tr><td>屏槽</td><td class="mono">26.5 × 29.6 × 1.7</td><td>单边间隙 0.17–0.19；前唇 1.25 mm 宽贴 0.2 mm 双面胶，屏背垫 0.5 mm 泡棉防震</td></tr>
+    <tr><td>屏槽壁</td><td>深 9.7，厚 1.0</td><td>从前壁内表面向 PCB 延伸，距板面留 0.3 mm；定位 + 遮光 + 挡灰</td></tr>
+    <tr><td>FPC 出口</td><td class="mono">宽 ≥10.6</td><td>屏下边居中偏 pin 1 侧 3.0 mm；槽壁在这一段必须开口，不能压住 FPC</td></tr>
+    <tr><td>屏中心</td><td class="mono">(21.4, 33.0)</td><td>机身边长 64；左边框 9.4，到 Φ24 波轮 8.3（外形）/ 9.4（视窗）</td></tr>
+    <tr><td>视窗边缘</td><td>C0.2 倒角</td><td>前壁内侧倒角，避免注塑/打印毛边压到玻璃</td></tr>
+  </tbody>
+</table>
+
+<h3>装配顺序</h3>
+<ol>
+  <li>先把 FPC 焊到 PCB 上（此时屏是悬空的），万用表确认 12 个焊点无连锡、无虚焊。</li>
+  <li>上电点亮测试，确认全屏无坏线、颜色正常，再往下装。</li>
+  <li>把屏放进前壳屏槽（FPC 已连板，整组从内侧放入），前唇双面胶压紧，槽底泡棉顶住屏背。</li>
+  <li>PCB 落到螺柱上，FPC 自然拉直成 10 mm 竖直段；不要硬拽，折弯处塞 0.5 mm 泡棉做应力释放。</li>
+  <li>上后盖，遮光检查：暗室下从视窗四周看有无背光漏出。</li>
+</ol>
+
+<div class="card warn">
+  <h4>不要这样装</h4>
+  <ul style="margin-bottom:0">
+    <li>不要用热熔胶直接糊 FPC 折弯处——胶固化收缩会把 FPC 拉裂。</li>
+    <li>不要把屏贴在 PCB 上再折 FPC——PCB 元件面朝前时，屏与板之间只有 0.5 mm，FPC 没有折弯空间。</li>
+    <li>不要在屏背压硬质垫块——屏背是铁框+背光，局部受压会出现白斑（mura）。</li>
+  </ul>
+</div>
+
+<h3>机身已缩到 64：屏的位置与代价</h3>
+<p>82×82 那版屏只占前面板 29%，框显得很大，所以 rev 1.6 把机身缩到 <strong>64 × 64 × 22</strong>，屏占比升到 37.5%。
+屏中心落在 <strong>(21.4, 33.0)</strong>，比面板几何中心左 10.6 mm——给右侧 Φ24 波轮让位；左边框 9.4、视窗到轮 9.4，视觉上是对称的。</p>
+<p>代价是屏顶到模组天线只剩 <strong>12.4 mm</strong>（乐鑫建议 15）。补偿措施见结构文档 rev 1.7：PCB 顶部全层禁铜、外壳纯塑料、天线区不放螺柱；
+打样后实测 RSSI，低于 −70 dBm 就把屏下移 3mm，仍不行换 <code>WROOM-1U</code> + IPEX。</p>
+
+<h2><span class="num">08</span>上电验证与故障表</h2>
+
+<ol>
+  <li><strong>不通电</strong>：万用表二极管档测 LEDA–LEDK，正向应有 2.4–2.7 V 压降；VDD–GND 不短路。</li>
+  <li><strong>上电</strong>：3.3 V 输入，背光关断时整板电流应只比原来多 <strong>≈10 mA</strong>，多了就是屏内部短路或焊反。</li>
+  <li><strong>复位</strong>：RESET 拉低 10 µs 后释放，等 120 ms 再发初始化。若临时把 SDA 改成双向做回读，<code>0x04</code> 应返回 <code>0x85 0x85 0x52</code>（不同批次第三字节可能不同）；正常驱动不需要读。</li>
+  <li><strong>点屏</strong>：全白 → 全黑 → 红/绿/蓝，检查坏点、偏色、边缘漏光。</li>
+  <li><strong>背光</strong>：50% 占空比时电流约 15–20 mA；从 0 到 100% 扫一遍，确认无闪烁、无啸叫。</li>
+  <li><strong>压力测试</strong>：40 MHz 连续刷新 10 分钟，观察是否花屏、复位、掉帧。</li>
+</ol>
+
+<table>
+  <thead><tr><th style="width:24%">现象</th><th style="width:40%">最可能原因</th><th style="width:36%">处理</th></tr></thead>
+  <tbody>
+    <tr><td>全白、无图像</td><td>CS/DC 接反；RESET 没释放；SPI 模式错</td><td>查 7/8 脚；确认 mode 0；示波器看 SCL 与 SDA 是否有波形</td></tr>
+    <tr><td>花屏、图像偏移</td><td>SPI 超频；0x2A/0x2B 窗口设置错；地回流差</td><td>降到 20 MHz 试；确认 240 列/行；补 GND 过孔</td></tr>
+    <tr><td>颜色反相（像底片）</td><td>没发 0x21，或 <code>invert_color</code> 设错</td><td>发 0x21；<code>invert_color=true</code></td></tr>
+    <tr><td>红蓝互换</td><td>RGB/BGR 顺序</td><td><code>rgb_ele_order</code> 改 <code>BGR</code>，或 0x36 bit3</td></tr>
+    <tr><td>整体发灰、对比度低</td><td>用了通用 ST7789 初始化，VCOM/gamma 不对</td><td>换成本文 05 节的厂家序列</td></tr>
+    <tr><td>亮度不足</td><td>限流电阻偏大；LED 批次 Vf 偏高；PWM 占空比低</td><td>实测 Vf 后把 10 Ω 降到 6.8–8.2 Ω；确认 100% 占空比</td></tr>
+    <tr><td>低亮度闪烁</td><td>PWM 频率与帧率拍频；电源纹波</td><td>PWM 改 20 kHz 且不与帧率成整数比；VDD 加 10 µF</td></tr>
+    <tr><td>偶发白屏/复位</td><td>3.3 V 跌落；FPC 虚焊；复位脚干扰</td><td>示波器抓 3.3 V；补焊 FPC；RST 加 100 nF</td></tr>
+  </tbody>
+</table>
+
+<h2><span class="num">09</span>打板前检查清单</h2>
+<ul class="check">
+  <li>型号是 <code>ZJY133T-IG01</code>（瀚彩 / 焊接 12pin / 0.7 mm 间距），不是 IF51 或 IF05</li>
+  <li>12 个焊盘：0.35 × 1.90，间距 0.7，整排 8.05，中心相对屏中心偏 <strong>−3.0 mm</strong>（pin 1 侧）</li>
+  <li>焊盘行贴屏下边，FPC 折弯处无元件、无过孔、无丝印压住</li>
+  <li>屏外形 26.16 × 29.22 丝印虚线已画，pin 1 有圆点</li>
+  <li>VDD 有 1 µF + 100 nF，LEDA 有 1 µF，且都在焊盘 2 mm 内</li>
+  <li>背光 10 Ω + 2N7002 + 100 Ω 栅极 + 100 k 下拉，PWM 在 GPIO8</li>
+  <li>SPI 四线各串 33 Ω，位置靠 ESP32；SCLK=12、SDA=11、DC=13、CS=10</li>
+  <li>RESET 有 10 kΩ 上拉 + 100 nF，接 GPIO9；没有直接接 3V3</li>
+  <li>4 个 GND 脚各自就近过孔下地，不是只靠一根线串过去</li>
+  <li>SPI 走线没进顶部天线禁铜区；本机屏顶距天线只有 12.4 mm，天线区全层禁铜（见结构 rev 1.7）</li>
+  <li>3.3 V 实测 ≤3.30 V（带屏 + 背光 100%）</li>
+  <li>3D 打印前确认：视窗 24.0、屏槽 26.5 × 29.6 × 1.7、屏背到 PCB <strong>9.7</strong>（结构 rev 1.7）、FPC 出口 ≥10.6 宽</li>
+  <li>首批焊接后做 08 节的 6 步点屏验证，再装壳</li>
+</ul>
+
+<footer>
+  数据来源：中景园《ZJY133T-IG01 Product Specification》Ver D（2020-06-30）、ST7789V3 规格书、厂家 <code>lcd_init.c</code> 例程；
+  结构数值对应《小智AI板-结构与打样方案》rev 1.7。FPC 整排偏置 3.0 mm 为图纸量测值，打样前请用实物卡尺复核。
+</footer>
+
+</div>
+</body>
+</html>
