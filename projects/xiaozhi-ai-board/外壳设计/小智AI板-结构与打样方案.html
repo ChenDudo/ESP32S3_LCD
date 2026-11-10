@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小智 AI 板 · 结构与打样方案 rev1.4（82×82×24，侧壁波轮）</title>
+<style>
+  :root{
+    --ink:#1f2328; --ink2:#57606a; --ink3:#8b949e;
+    --line:#e3e6ea; --bg:#fff; --bg2:#f6f8fa; --bg3:#eef1f4;
+    --blue:#185fa5; --blue-bg:#e6f1fb;
+    --teal:#0f6e56; --teal-bg:#e1f5ee;
+    --amber:#854f0b; --amber-bg:#faeeda;
+    --coral:#993c1d; --coral-bg:#faece7;
+    --red:#a32d2d;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;padding:40px 24px 80px;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    font-size:14px;line-height:1.7;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:880px;margin:0 auto;}
+  header{border-bottom:2px solid var(--ink);padding-bottom:18px;margin-bottom:30px;}
+  .kicker{font-size:12px;letter-spacing:.12em;color:var(--ink3);text-transform:uppercase;margin-bottom:10px;}
+  h1{font-size:25px;font-weight:600;margin:0 0 10px;letter-spacing:-.01em;}
+  .sub{font-size:14px;color:var(--ink2);margin:0;}
+  .summary{margin-top:20px;padding:16px 18px;background:var(--blue-bg);border-left:3px solid var(--blue);
+    border-radius:0 6px 6px 0;font-size:13.5px;color:#0c447c;}
+  h2{font-size:17px;font-weight:600;margin:44px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line);}
+  h2 .num{color:var(--ink3);font-weight:500;margin-right:8px;}
+  h3{font-size:14.5px;font-weight:600;margin:26px 0 8px;}
+  p{margin:0 0 12px;}
+  ul,ol{margin:0 0 14px;padding-left:22px;}
+  li{margin-bottom:6px;}
+  code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12.5px;
+    background:var(--bg3);padding:1.5px 5px;border-radius:4px;color:#24292f;}
+  table{width:100%;border-collapse:collapse;margin:14px 0 20px;font-size:13px;}
+  th{text-align:left;font-weight:600;background:var(--bg2);color:var(--ink2);
+    padding:9px 11px;border-bottom:1px solid var(--line);font-size:12.5px;}
+  td{padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  td.mono,th.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;}
+  .tag{display:inline-block;font-size:11px;line-height:1.6;padding:0 7px;border-radius:4px;font-weight:500;white-space:nowrap;}
+  .t-blue{background:var(--blue-bg);color:var(--blue);}
+  .t-teal{background:var(--teal-bg);color:var(--teal);}
+  .t-amber{background:var(--amber-bg);color:var(--amber);}
+  .t-red{background:var(--coral-bg);color:var(--red);}
+  .card{border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin:14px 0;}
+  .card h4{margin:0 0 8px;font-size:13.5px;font-weight:600;}
+  .card.warn{background:var(--amber-bg);border-color:#f0d6a8;}
+  .card.warn h4{color:var(--amber);}
+  .card.tip{background:var(--teal-bg);border-color:#bfe4d8;}
+  .card.tip h4{color:var(--teal);}
+  .diagram{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:16px 8px 8px;margin:16px 0;}
+  .caption{font-size:12px;color:var(--ink3);padding:0 12px 8px;text-align:center;}
+  .check{list-style:none;padding-left:0;}
+  .check li{position:relative;padding-left:26px;margin-bottom:8px;}
+  .check li::before{content:"";position:absolute;left:0;top:5px;width:14px;height:14px;
+    border:1.5px solid var(--ink3);border-radius:3px;}
+  footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:var(--ink3);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker">Mechanical layout · rev 1.4</div>
+  <h1>结构与打样方案：82 × 82 × 24 mm（侧壁波轮）</h1>
+  <p class="sub">波轮移到右侧壁、轮缘露出 2.8mm · 底面贴桌面零开孔 · USB-C 在左壁</p>
+  <div class="summary">
+    <strong>rev 1.4 变更：</strong>波轮从顶面移到右侧壁，轮缘从侧壁开槽处露出 <strong>2.8mm</strong>，摸得到、看不见整体。
+    代价是机身从 19mm 回到 <strong>24mm</strong>——因为“立式 EC11 + 水平轮”是上下叠的：6.5（本体）＋4.8（轮厚）＋1.6（板）＋其余，绕不过去。
+  </div>
+</header>
+
+<h2><span class="num">01</span>24mm 是怎么算出来的</h2>
+
+<table>
+  <thead><tr><th style="width:16%">Z 区间</th><th style="width:14%">厚度</th><th style="width:70%">内容</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">0 – 2.0</td><td>2.0 mm</td><td>后盖板（排液孔；<strong>贴桌面，无接口</strong>）</td></tr>
+    <tr><td class="mono">2.0 – 9.5</td><td>7.5 mm</td><td>元件腔：模组朝下，限高 5.5mm</td></tr>
+    <tr><td class="mono">9.5 – 11.1</td><td>1.6 mm</td><td>PCB（右边缘正好落在编码器本体下）</td></tr>
+    <tr><td class="mono">11.1 – 17.6</td><td>6.5 mm</td><td>EC11 本体（<strong>立式，轴朝上</strong>）</td></tr>
+    <tr><td class="mono">17.6 – 18.0</td><td>0.4 mm</td><td>轴肩 / 轮子垫圈</td></tr>
+    <tr><td class="mono">18.0 – 22.8</td><td>4.8 mm</td><td><strong>波轮</strong>（Φ24 × 5）</td></tr>
+    <tr><td class="mono">22.8 – 24.0</td><td>1.2 mm</td><td>前壁（轮上方留 0.2 间隙）</td></tr>
+  </tbody>
+</table>
+
+<p>如果坚持 19mm，只有一条路：把 EC11 换成<strong>卧式（轴水平）</strong>安装——需要一块 12×14 的垂直转接小板或用横轴编码器，轮子改成 Φ16 竖着放。见 06 节。</p>
+
+<h2><span class="num">02</span>布局</h2>
+
+<div class="diagram">
+<svg viewBox="0 0 680 480" width="100%" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>82×82mm 布局：波轮在右侧壁</title>
+  <desc>外壳 82×82mm，屏居中偏左，右侧壁内嵌 Φ24 波轮，轮缘超出外壳轮廓 2.8mm；USB-C 在左壁。</desc>
+  <defs>
+    <marker id="d4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M1 1L9 5L1 9" fill="none" stroke="#8b949e" stroke-width="1.1"/>
+    </marker>
+  </defs>
+
+  <rect x="120" y="55" width="328" height="328" rx="16" fill="#ffffff" stroke="#5F5E5A" stroke-width="1.2"/>
+
+  <rect x="200" y="55" width="168" height="72" fill="#FCEBEB" stroke="#E24B4A" stroke-width="0.6" stroke-dasharray="4 3"/>
+  <text x="284" y="89" text-anchor="middle" font-size="10" fill="#A32D2D">天线净空 15mm</text>
+  <text x="284" y="105" text-anchor="middle" font-size="9" fill="#A32D2D">机内禁金属</text>
+
+  <circle cx="272" cy="219" r="80" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.8"/>
+  <text x="272" y="213" text-anchor="middle" font-size="10.5" font-weight="500" fill="#0C447C">Φ40 圆屏</text>
+  <text x="272" y="229" text-anchor="middle" font-size="9" fill="#185FA5">居中偏左，给波轮让位</text>
+
+  <circle cx="411" cy="219" r="48" fill="none" stroke="#0F6E56" stroke-width="0.9" stroke-dasharray="4 3"/>
+  <path d="M448 195A48 48 0 0 1 448 243" fill="none" stroke="#0F6E56" stroke-width="2.4"/>
+  <text x="411" y="213" text-anchor="middle" font-size="10" font-weight="500" fill="#085041">波轮 Φ24</text>
+  <text x="411" y="229" text-anchor="middle" font-size="9" fill="#0F6E56">虚线为机身内轮廓</text>
+
+  <rect x="112" y="242" width="14" height="40" rx="3" fill="#ffffff" stroke="#5F5E5A" stroke-width="0.9"/>
+  <circle cx="126" cy="190" r="4" fill="none" stroke="#8b949e" stroke-width="0.7" stroke-dasharray="2 2"/>
+  <circle cx="126" cy="204" r="4" fill="none" stroke="#8b949e" stroke-width="0.7" stroke-dasharray="2 2"/>
+
+  <rect x="462" y="300" width="14" height="36" rx="2" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.9"/>
+  <rect x="462" y="348" width="14" height="20" rx="2" fill="#FAEEDA" stroke="#BA7517" stroke-width="0.9"/>
+  <circle cx="392" cy="150" r="5" fill="#ffffff" stroke="#A32D2D" stroke-width="0.9"/>
+
+  <path d="M108 262L74 262" fill="none" stroke="#B4B2A9" stroke-width="0.6"/>
+  <text x="40" y="266" font-size="10.5" fill="#57606a">USB-C</text>
+  <path d="M120 197L92 197" fill="none" stroke="#B4B2A9" stroke-width="0.6"/>
+  <text x="40" y="194" font-size="10.5" fill="#57606a">BOOT/RST</text>
+  <text x="40" y="209" font-size="9" fill="#8b949e">针孔 Φ2.5</text>
+
+  <path d="M456 176L500 150" fill="none" stroke="#B4B2A9" stroke-width="0.6"/>
+  <text x="504" y="146" font-size="10.5" fill="#085041">轮缘露出 2.8mm</text>
+  <text x="504" y="161" font-size="9" fill="#8b949e">侧壁开槽 20 × 5.5</text>
+
+  <path d="M480 318L510 318" fill="none" stroke="#B4B2A9" stroke-width="0.6"/>
+  <text x="514" y="315" font-size="10.5" fill="#57606a">喇叭座</text>
+  <path d="M480 358L510 358" fill="none" stroke="#B4B2A9" stroke-width="0.6"/>
+  <text x="514" y="355" font-size="10.5" fill="#57606a">VBAT 焊盘</text>
+  <path d="M412 142L500 118" fill="none" stroke="#B4B2A9" stroke-width="0.6"/>
+  <text x="504" y="114" font-size="10.5" fill="#57606a">麦孔 Φ1.5</text>
+
+  <path d="M120 392L448 392" fill="none" stroke="#E24B4A" stroke-width="1.4" stroke-dasharray="6 4"/>
+  <text x="284" y="410" text-anchor="middle" font-size="10.5" fill="#A32D2D">↓ 此边贴桌面：无开孔 · 无外露螺丝</text>
+
+  <path d="M120 440L448 440" fill="none" stroke="#8b949e" stroke-width="0.9" marker-start="url(#d4)" marker-end="url(#d4)"/>
+  <text x="284" y="434" text-anchor="middle" font-size="10.5" fill="#57606a">82 mm</text>
+  <text x="120" y="466" font-size="10" fill="#8b949e">82 × 82 × 24 mm　·　右壁：波轮槽 + 喇叭座 + 电池焊盘　·　左壁：USB-C + 针孔</text>
+</svg>
+<div class="caption">波轮整颗在机身内（虚线圈），只有右侧一段弧从侧壁槽露出；屏幕左移给轮子让位</div>
+</div>
+
+<div class="card warn">
+  <h4>为什么不做“在顶面挂到轮廓外”</h4>
+  那需要在右侧挖一个 17mm 深、20mm 宽的大缺口，82mm 的机身被啃掉一大块，强度和外观都不划算。
+  <strong>侧壁开一条 20×5.5 的槽、让轮缘只露 2.8mm</strong>，既满足“露出一点外框”，又不动大致轮廓。
+</div>
+
+<h2><span class="num">03</span>波轮与槽的具体尺寸</h2>
+
+<table>
+  <thead><tr><th style="width:22%">项目</th><th style="width:28%">数值</th><th style="width:50%">说明</th></tr></thead>
+  <tbody>
+    <tr><td>波轮</td><td class="mono">Φ24 × 5 mm</td><td>Φ24 是为了让编码器本体还能坐在板内，见下面卡片</td></tr>
+    <tr><td>轮心 X</td><td class="mono">距左边缘 72.8 mm</td><td>轮缘到 84.8，超出 82 的外轮廓 <strong>2.8mm</strong></td></tr>
+    <tr><td>轮心 Y</td><td class="mono">40 mm</td><td>大致与屏幕同心高度</td></tr>
+    <tr><td>侧壁槽</td><td class="mono">20（长）× 5.5（高） mm</td><td>Z 向 17.8–23.3；槽口倒 C0.5 圆角，手指不刮</td></tr>
+    <tr><td>槽与轮间隙</td><td class="mono">0.8 mm</td><td>单边 0.8，转动不蹭、进灰也不卡</td></tr>
+    <tr><td>编码器位置</td><td class="mono">本体中心 X = 72.8</td><td>本体宽 12.4 → 占到 79.0，<strong>正好压在 PCB 右边缘</strong></td></tr>
+  </tbody>
+</table>
+
+<div class="card warn">
+  <h4>Φ24 不是随便定的</h4>
+  EC11 本体 12.4mm 宽，要完整坐在 PCB 上，本体中心最远只能到 79－6.2＝<strong>72.8mm</strong>。
+  而轮缘要超过 82，轮的半径就必须 ≥ 82－72.8＋2.8 ＝ 12mm，所以 <strong>Φ24 是下限</strong>。
+  想露出更多就把轮做大；想更小就得让编码器悬出板边，那会丢焊盘，不行。
+</div>
+
+<h2><span class="num">04</span>电路接线</h2>
+
+<table>
+  <thead><tr><th style="width:14%">脚位</th><th style="width:20%">接到</th><th style="width:66%">外围元件</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">A</td><td class="mono">GPIO2</td><td>10 kΩ 上拉到 3V3 ＋ 100 nF 到 GND（τ≈1ms）</td></tr>
+    <tr><td class="mono">B</td><td class="mono">GPIO6</td><td>同上</td></tr>
+    <tr><td class="mono">C</td><td class="mono">GND</td><td>公共端，接错整颗编码器乱码</td></tr>
+    <tr><td class="mono">SW1</td><td class="mono">GND</td><td>—</td></tr>
+    <tr><td class="mono">SW2</td><td class="mono">GPIO4</td><td>10 kΩ 上拉 ＋ 100 nF 到 GND，兼作对话/打断键</td></tr>
+  </tbody>
+</table>
+
+<div class="card tip">
+  <h4>按压怎么传出来</h4>
+  轴上装轮后，<strong>按压必须能传到 EC11 的按压开关</strong>：轮与本体之间留 0.4mm 轴肩，按住轮往下压时轴内缩触发开关。
+  轮的内孔要做成 <strong>D 型通孔到底</strong>，不能顶死在轴端，否则按不动。这是整个机构最容易做错的一处。
+</div>
+
+<h2><span class="num">05</span>装配要点</h2>
+<ul>
+  <li><strong>先焊编码器再装轮</strong>：编码器在板正面，轮子穿过侧壁槽后就没法再拆了。</li>
+  <li>轮子用 <strong>M2 顶丝</strong>（轮侧打 1 个 M2 螺孔）或过盈压装；轴是 D 型，压装也不会打滑。</li>
+  <li>侧壁槽内侧做 <strong>0.5mm 挡尘唇</strong>（槽内下沿起一条薄筋），减少桌面灰尘直接进轮室。</li>
+  <li>轮室那一圈加 2 条 <strong>1.2mm 加强筋</strong>连到侧壁，防止掏槽后侧壁发软。</li>
+  <li>两侧接口都靠后缘出线，线材向后垂；底面仍然零开孔、无外露螺丝。</li>
+</ul>
+
+<h2><span class="num">06</span>如果一定要 19mm（备选）</h2>
+
+<table>
+  <thead><tr><th style="width:24%">做法</th><th style="width:12%">总厚</th><th style="width:38%">说明</th><th style="width:26%">代价</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><span class="tag t-blue">备选 A</span> 卧式编码器</td>
+      <td class="mono">19 mm</td>
+      <td>换横轴编码器，或用 12×14 垂直转接小板，轮子改 Φ16 竖放</td>
+      <td>多一块小板 + 5 根弯针，装配难度明显上升</td>
+    </tr>
+    <tr>
+      <td><span class="tag t-amber">备选 B</span> 矮体 EC11</td>
+      <td class="mono">20 mm</td>
+      <td>找 5mm 高的矮体带开关编码器 + 3mm 薄轮</td>
+      <td>型号不好找，定位段力矩通常偏轻</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2><span class="num">07</span>体积核算</h2>
+
+<table>
+  <thead><tr><th style="width:26%">零件</th><th style="width:26%">包围盒</th><th style="width:24%">实体积</th><th style="width:24%">判定</th></tr></thead>
+  <tbody>
+    <tr><td>前壳（含轮室、屏筒）</td><td class="mono">82×82×22</td><td>约 <strong>31 cm³</strong></td><td><span class="tag t-teal">✓ ＜70</span></td></tr>
+    <tr><td>后盖</td><td class="mono">82×82×2</td><td>约 <strong>14 cm³</strong></td><td><span class="tag t-teal">✓ ＜70</span></td></tr>
+    <tr><td>波轮</td><td class="mono">Φ24×5</td><td>约 <strong>2 cm³</strong></td><td>第 3 款，需另下一单</td></tr>
+    <tr><td>合计</td><td>—</td><td>47 cm³</td><td><span class="tag t-blue">✓ 额度内</span></td></tr>
+  </tbody>
+</table>
+
+<h2><span class="num">08</span>下单参数</h2>
+
+<table>
+  <thead><tr><th style="width:24%">项目</th><th style="width:76%">选值</th></tr></thead>
+  <tbody>
+    <tr><td>PCB</td><td class="mono">4 层 / 76 × 60 mm / 1.6mm，5 片，单片出货</td></tr>
+    <tr><td>阻焊 / 表面</td><td>绿色（免费券仅支持绿油）/ 无铅喷锡或 OSP</td></tr>
+    <tr><td>3D 打印材料</td><td>尼龙 3301PA（外壳与波轮都用，树脂太滑太脆）</td></tr>
+    <tr><td>件数</td><td>第一单：前壳 + 后盖；第二单：波轮</td></tr>
+    <tr><td>模型文件</td><td>STL，单位 <strong>mm</strong></td></tr>
+  </tbody>
+</table>
+
+<h2><span class="num">09</span>出图前检查</h2>
+<ul class="check">
+  <li>外壳 82×82×24，三边均未超 100mm，抽壳后体积 &lt; 70 cm³</li>
+  <li>侧壁槽 20×5.5，槽口 C0.5 圆角，单边与轮间隙 0.8mm</li>
+  <li>波轮 Φ24，轮心距左缘 72.8mm，轮缘超出外轮廓 2.8mm</li>
+  <li>轮内孔为 D 型通孔到底，与本体留 0.4mm 轴肩，能按下触发开关</li>
+  <li>轮室内有 2 条 1.2mm 加强筋连到侧壁</li>
+  <li>EC11 本体落在 PCB 右边缘内（中心 ≤72.8mm）</li>
+  <li>屏幕与轮子最近距离 ≥3mm</li>
+  <li>底边/底面零开孔：无接口、无螺丝、无凸起，只留 4 个脚垫沉孔</li>
+  <li>左壁 USB-C 9.6×3.6、针孔 Φ2.5 均已定位</li>
+  <li>右壁喇叭座 8×4、VBAT 孔 Φ3.5 位于轮槽下方，互不干涉</li>
+  <li>天线净空 15mm 区域无螺柱、无筋位、无屏</li>
+  <li>编码器 A/B/SW 各有 10 kΩ 上拉 + 100 nF，C 接 GND</li>
+  <li>留 2 个 Φ2mm 排液孔；壁厚 ≥2mm</li>
+</ul>
+
+<footer>
+  尺寸需按实际选用的模组、屏、编码器与五金件规格书微调；打样规则以嘉立创当期活动页面为准。
+</footer>
+
+</div>
+</body>
+</html>

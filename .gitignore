@@ -41,3 +41,6 @@ DebugConfig/
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# ===== PlatformIO 构建目录（可再生成）=====
+.pio/

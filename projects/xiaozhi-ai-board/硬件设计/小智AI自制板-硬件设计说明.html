@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小智 AI 自制板 · 硬件设计说明（ESP32-S3）</title>
+<style>
+  :root{
+    --ink:#1f2328; --ink2:#57606a; --ink3:#8b949e;
+    --line:#e3e6ea; --bg:#ffffff; --bg2:#f6f8fa; --bg3:#eef1f4;
+    --blue:#185fa5; --blue-bg:#e6f1fb;
+    --teal:#0f6e56; --teal-bg:#e1f5ee;
+    --amber:#854f0b; --amber-bg:#faeeda;
+    --coral:#993c1d; --coral-bg:#faece7;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:40px 24px 80px;
+    background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    font-size:14px; line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:880px;margin:0 auto;}
+  header{border-bottom:2px solid var(--ink);padding-bottom:18px;margin-bottom:32px;}
+  .kicker{font-size:12px;letter-spacing:.12em;color:var(--ink3);text-transform:uppercase;margin-bottom:10px;}
+  h1{font-size:26px;font-weight:600;margin:0 0 10px;letter-spacing:-.01em;}
+  .sub{font-size:14px;color:var(--ink2);margin:0;}
+  .summary{
+    margin-top:20px;padding:16px 18px;background:var(--blue-bg);
+    border-left:3px solid var(--blue);border-radius:0 6px 6px 0;
+    font-size:13.5px;color:#0c447c;
+  }
+  h2{font-size:17px;font-weight:600;margin:44px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line);}
+  h2 .num{color:var(--ink3);font-weight:500;margin-right:8px;}
+  h3{font-size:14.5px;font-weight:600;margin:26px 0 8px;}
+  p{margin:0 0 12px;}
+  ul,ol{margin:0 0 14px;padding-left:22px;}
+  li{margin-bottom:6px;}
+  code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12.5px;background:var(--bg3);padding:1.5px 5px;border-radius:4px;color:#24292f;}
+  table{width:100%;border-collapse:collapse;margin:14px 0 20px;font-size:13px;}
+  th{text-align:left;font-weight:600;background:var(--bg2);color:var(--ink2);padding:9px 11px;border-bottom:1px solid var(--line);font-size:12.5px;}
+  td{padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  td.mono,th.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;}
+  .tag{display:inline-block;font-size:11px;line-height:1.6;padding:0 7px;border-radius:4px;font-weight:500;white-space:nowrap;}
+  .t-blue{background:var(--blue-bg);color:var(--blue);}
+  .t-teal{background:var(--teal-bg);color:var(--teal);}
+  .t-amber{background:var(--amber-bg);color:var(--amber);}
+  .t-coral{background:var(--coral-bg);color:var(--coral);}
+  .card{border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin:14px 0;background:var(--bg);}
+  .card h4{margin:0 0 8px;font-size:13.5px;font-weight:600;}
+  .card.warn{background:var(--amber-bg);border-color:#f0d6a8;}
+  .card.warn h4{color:var(--amber);}
+  .card.tip{background:var(--teal-bg);border-color:#bfe4d8;}
+  .card.tip h4{color:var(--teal);}
+  .diagram{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:16px 8px 8px;margin:16px 0;}
+  .caption{font-size:12px;color:var(--ink3);padding:0 12px 8px;text-align:center;}
+  .check{list-style:none;padding-left:0;}
+  .check li{position:relative;padding-left:26px;margin-bottom:8px;}
+  .check li::before{
+    content:"";position:absolute;left:0;top:5px;width:14px;height:14px;
+    border:1.5px solid var(--ink3);border-radius:3px;
+  }
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media (max-width:700px){.two{grid-template-columns:1fr;}}
+  footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:var(--ink3);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker">Hardware design spec · rev 1.0</div>
+  <h1>小智 AI 自制板硬件设计说明</h1>
+  <p class="sub">主控 ESP32-S3 · 目标：可跑通 xiaozhi-esp32 官方固件，支持唤醒词、全双工语音、屏幕表情<br>
+  <span style="font-size:12.5px;color:#8b949e">rev 1.1：喇叭与电池改为外接，USB-C 供电，预留 VBAT 焊盘</span></p>
+  <div class="summary">
+    <strong>一句话结论：</strong>一套能跑小智的最小系统 = <strong>ESP32-S3-WROOM-1-N16R8 模组 + 音频 ADC + 音频 DAC/功放 + 喇叭 + 3.3V 电源</strong>，共 5 类器件。
+    关键不在能不能响，而在<strong>麦克风有没有硬件回采参考通道</strong>——这决定它能不能做全双工打断，也决定了你选 ES8311 单芯片还是 ES7210+ES8311 两颗。
+  </div>
+</header>
+
+<h2><span class="num">01</span>先定方案：三档配置</h2>
+
+<table>
+  <thead>
+    <tr><th style="width:14%">方案</th><th style="width:22%">音频架构</th><th style="width:32%">能力边界</th><th style="width:32%">取舍</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="tag t-teal">A · 推荐</span><br><strong>单麦全双工</strong></td>
+      <td>1 模拟麦 → ES8311（ADC+DAC 单芯片）→ NS4150B 功放</td>
+      <td>1–2 m 内唤醒；支持 AEC 打断、半双工转全双工</td>
+      <td>器件最少、成本最低、PCB 最简单。远场（>3 m）唤醒率一般</td>
+    </tr>
+    <tr>
+      <td><span class="tag t-blue">B · 进阶</span><br><strong>双麦阵列</strong></td>
+      <td>2 模拟麦 + 参考 → ES7210（4 通道 ADC）→ ES8311（仅做 DAC）→ 功放</td>
+      <td>3–5 m 远场唤醒、降噪（NS）、可选 DOA 声源定位</td>
+      <td>多一颗芯片、I2S 要跑 TDM 4 通道、两麦公差需 ≤±1 dB，调试工作量翻倍</td>
+    </tr>
+    <tr>
+      <td><span class="tag t-amber">C · 仅验证</span><br><strong>模块飞线</strong></td>
+      <td>INMP441 数字麦 + MAX98357A 数字功放（免 codec）</td>
+      <td>只能近场、无硬件回采，AEC 靠软件参考，打断体验差</td>
+      <td>适合先在面包板上跑通固件，<strong>不要照搬到量产板</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="card tip">
+  <h4>选型判断</h4>
+  做<strong>桌面陪伴/玩具</strong>（对话距离 1 m 内）→ 选 A，一颗 ES8311 就够。<br>
+  做<strong>桌面音箱/远场中控/带屏机器人</strong>→ 选 B，远场唤醒和噪声环境下的识别率差距非常明显。
+</div>
+
+<h2><span class="num">02</span>系统框图</h2>
+
+<div class="diagram">
+<svg viewBox="0 0 800 366" width="100%" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>小智自制板系统框图</title>
+  <desc>USB-C 供电经电源模块给主控与音频供电，麦克风经 ES7210 进主控，主控经 ES8311 与功放驱动喇叭，功放输出分压回采至 ADC 作为 AEC 参考。</desc>
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <rect x="40" y="44" width="150" height="52" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="115" y="63" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#2C2C2A">USB-C 5V</text>
+  <text x="115" y="81" text-anchor="middle" dominant-baseline="central" font-size="11.5" fill="#5F5E5A">CC 5.1k ×2 · ESD</text>
+
+  <rect x="220" y="44" width="200" height="52" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+  <text x="320" y="63" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#0C447C">电源：Buck 3.3V ≥1A</text>
+  <text x="320" y="81" text-anchor="middle" dominant-baseline="central" font-size="11.5" fill="#185FA5">模拟 3.3V 走独立低噪 LDO</text>
+
+  <path d="M190 70L216 70" fill="none" stroke="#888780" stroke-width="1.2" marker-end="url(#ar)"/>
+  <path d="M320 96L320 156" fill="none" stroke="#888780" stroke-width="1.2" marker-end="url(#ar)"/>
+
+  <rect x="40" y="160" width="105" height="62" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="92" y="181" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#2C2C2A">MIC ×1/×2</text>
+  <text x="92" y="200" text-anchor="middle" dominant-baseline="central" font-size="11.5" fill="#5F5E5A">模拟 MEMS</text>
+
+  <rect x="165" y="160" width="105" height="62" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+  <text x="217" y="181" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#085041">ES7210</text>
+  <text x="217" y="200" text-anchor="middle" dominant-baseline="central" font-size="11.5" fill="#0F6E56">4ch ADC / TDM</text>
+
+  <rect x="290" y="152" width="130" height="78" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.8"/>
+  <text x="355" y="174" text-anchor="middle" dominant-baseline="central" font-size="13.5" font-weight="600" fill="#0C447C">ESP32-S3</text>
+  <text x="355" y="193" text-anchor="middle" dominant-baseline="central" font-size="11.5" fill="#185FA5">WROOM-1</text>
+  <text x="355" y="210" text-anchor="middle" dominant-baseline="central" font-size="11.5" fill="#185FA5">N16R8</text>
+
+  <rect x="440" y="160" width="105" height="62" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+  <text x="492" y="181" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#085041">ES8311</text>
+  <text x="492" y="200" text-anchor="middle" dominant-baseline="central" font-size="11.5" fill="#0F6E56">DAC / 单声道</text>
+
+  <rect x="565" y="160" width="105" height="62" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+  <text x="617" y="181" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#085041">NS4150B</text>
+  <text x="617" y="200" text-anchor="middle" dominant-baseline="central" font-size="11.5" fill="#0F6E56">Class-D 3W</text>
+
+  <rect x="690" y="160" width="70" height="62" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="725" y="181" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#2C2C2A">喇叭</text>
+  <text x="725" y="200" text-anchor="middle" dominant-baseline="central" font-size="11.5" fill="#5F5E5A">4Ω 3W</text>
+
+  <path d="M145 191L161 191" fill="none" stroke="#888780" stroke-width="1.2" marker-end="url(#ar)"/>
+  <path d="M270 191L286 191" fill="none" stroke="#888780" stroke-width="1.2" marker-end="url(#ar)"/>
+  <text x="278" y="181" text-anchor="middle" font-size="10" fill="#8b949e">I2S</text>
+  <path d="M420 191L436 191" fill="none" stroke="#888780" stroke-width="1.2" marker-end="url(#ar)"/>
+  <text x="428" y="181" text-anchor="middle" font-size="10" fill="#8b949e">I2S</text>
+  <path d="M545 191L561 191" fill="none" stroke="#888780" stroke-width="1.2" marker-end="url(#ar)"/>
+  <path d="M670 191L686 191" fill="none" stroke="#888780" stroke-width="1.2" marker-end="url(#ar)"/>
+
+  <rect x="265" y="276" width="140" height="52" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="335" y="295" text-anchor="middle" dominant-baseline="central" font-size="12.5" font-weight="500" fill="#2C2C2A">SPI 屏 / OLED</text>
+  <text x="335" y="313" text-anchor="middle" dominant-baseline="central" font-size="11.5" fill="#5F5E5A">ST7789 / GC9A01</text>
+
+  <rect x="440" y="276" width="150" height="52" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="515" y="295" text-anchor="middle" dominant-baseline="central" font-size="12.5" font-weight="500" fill="#2C2C2A">按键 / WS2812</text>
+  <text x="515" y="313" text-anchor="middle" dominant-baseline="central" font-size="11.5" fill="#5F5E5A">对话键 · 状态灯</text>
+
+  <path d="M330 230L330 272" fill="none" stroke="#888780" stroke-width="1.2" marker-end="url(#ar)"/>
+  <path d="M390 230L430 272" fill="none" stroke="#888780" stroke-width="1.2" marker-end="url(#ar)"/>
+
+  <path d="M617 222L617 250L217 250L217 226" fill="none" stroke="#993C1D" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+  <text x="410" y="243" text-anchor="middle" font-size="11" fill="#993C1D">AEC 参考回采：功放输出 → 分压衰减 → 隔直 → ADC 第 4 通道</text>
+</svg>
+<div class="caption">实线为信号/供电主路径，红色虚线为 AEC 回声参考通道（方案 B 必备；方案 A 可省）</div>
+</div>
+
+<h2><span class="num">03</span>BOM 清单</h2>
+
+<h3>核心器件（方案 A 单麦）</h3>
+<table>
+  <thead>
+    <tr><th style="width:16%">类别</th><th style="width:26%">推荐型号</th><th style="width:34%">关键参数</th><th style="width:24%">备注</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>主控模组</td>
+      <td class="mono">ESP32-S3-WROOM-1-N16R8</td>
+      <td>16 MB Flash + 8 MB PSRAM（八线）</td>
+      <td><strong>R8 是硬门槛</strong>。N8R2 也能跑，但要改 PSRAM 模式、Flash 大小和分区表，不推荐</td>
+    </tr>
+    <tr>
+      <td>音频 codec</td>
+      <td class="mono">ES8311</td>
+      <td>单声道 ADC+DAC，I2S + I2C 控制，内置 PGA</td>
+      <td>一颗芯片搞定收和放，方案 A 的核心</td>
+    </tr>
+    <tr>
+      <td>功放</td>
+      <td class="mono">NS4150B / AW88298</td>
+      <td>3 W 单声道 Class-D，模拟输入</td>
+      <td>AW88298 是 I2S 数字功放，可省掉 ES8311 的 DAC</td>
+    </tr>
+    <tr>
+      <td>麦克风</td>
+      <td>模拟 MEMS（如 <span class="mono">MSM261S4030H0</span>）</td>
+      <td>灵敏度 ≥ −38 dBV @1 Pa，SNR ≥ 62 dB，50 Hz–16 kHz 波动 ≤ ±3 dB</td>
+      <td>灵敏度低于 −38 dB 会导致唤醒距离明显变短</td>
+    </tr>
+    <tr>
+      <td>喇叭<span class="tag t-teal">外接</span></td>
+      <td>MX1.25 2P 卧贴座 + 4 Ω 3 W 腔体喇叭</td>
+      <td>座子贴板边；喇叭用带腔体的独立件</td>
+      <td>BTL 输出两根线都不能接地；线长 &gt;10cm 需加 10 Ω + 220 pF 吸收</td>
+    </tr>
+    <tr>
+      <td>电源</td>
+      <td class="mono">MP2143 / SY8089 / TPS563201</td>
+      <td>5 V → 3.3 V，≥ 1 A，同步 Buck</td>
+      <td>WiFi 发射瞬时 350 mA，加音频峰值需留足余量</td>
+    </tr>
+    <tr>
+      <td>模拟 LDO</td>
+      <td class="mono">SGM2019-3.3 / RT9013</td>
+      <td>低噪声，PSRR &gt; 60 dB</td>
+      <td>专供 codec 的 AVDD，与数字 3.3 V 分开</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>外围与结构件</h3>
+<table>
+  <thead>
+    <tr><th style="width:16%">类别</th><th style="width:26%">推荐型号</th><th style="width:34%">参数</th><th style="width:24%">备注</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>USB 接口</td><td class="mono">Type-C 16P 母座</td><td>CC1/CC2 各串 5.1 kΩ 下拉</td><td>漏了 5.1 k 电阻，C-to-C 线会不供电</td></tr>
+    <tr><td>ESD 保护</td><td class="mono">USBLC6-2SC6</td><td>D+/D− 双向 TVS</td><td>接在连接器与模组之间</td></tr>
+    <tr><td>按键</td><td>6×6 轻触 ×2</td><td>BOOT（GPIO0）+ RESET（EN）</td><td>刷砖后的唯一救砖通道，务必留</td></tr>
+    <tr><td>波轮</td><td class="mono">EC11 带按压开关</td><td>20 脉冲/圈，18 定位段，Φ6 半轴</td><td>旋转调音量，按压做对话/打断；轴长 15mm 需锯短到 12mm</td></tr>
+    <tr><td>状态灯</td><td class="mono">WS2812B-2020</td><td>单线 RGB</td><td>小智用它做表情/状态指示</td></tr>
+    <tr><td>屏幕（可选）</td><td class="mono">GC9A01 1.28″ 圆屏 / ST7789 1.54″</td><td>SPI，240×240 / 240×280</td><td>带背光三极管，BL 脚 PWM 调光</td></tr>
+    <tr><td>电池<span class="tag t-teal">外接</span></td><td class="mono">VBAT/GND 焊盘 + 可选 TP4056</td><td>PMOS 自动切换；充电与保护封装空贴预留</td><td>供电默认走 USB-C；分压电阻先贴，方便后续读电量</td></tr>
+    <tr><td>天线</td><td>模组自带 PCB 天线</td><td>净空区 ≥ 15 mm 无铜、远离电池与金属</td><td>射频经验不足就别用 IPEX + 外置天线</td></tr>
+  </tbody>
+</table>
+
+<h3>电源与外部接口（rev 1.1）</h3>
+<table>
+  <thead>
+    <tr><th style="width:18%">部分</th><th style="width:82%">做法</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>供电</td>
+      <td>USB-C 5V → 自恢复保险丝 → TVS → Buck 3.3V（≥1A）。无电池，峰值约 500mA，余量充足</td>
+    </tr>
+    <tr>
+      <td>喇叭输出</td>
+      <td>NS4150B 输出直连板边 MX1.25 2P 座；<strong>BTL 桥接，两根线都不接地</strong>，可与 2 个焊盘并联做双方案</td>
+    </tr>
+    <tr>
+      <td>电池预留</td>
+      <td>VBAT / GND 两个焊盘（或 2P 座），经 PMOS 与 USB 5V 自动切换后进 Buck；<strong>Buck 必须宽压输入（低至 2.5V）</strong></td>
+    </tr>
+    <tr>
+      <td>可选充电</td>
+      <td>TP4056 + DW01 的封装位置预留空贴，后续想用 USB 充电时补焊即可，无需改板</td>
+    </tr>
+    <tr>
+      <td>电量检测</td>
+      <td>VBAT 经 100 kΩ / 100 kΩ 分压进 ADC，<strong>分压电阻首版就贴</strong>，不接电池时读到 0</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="card tip">
+  <h4>板边接口布局（rev 1.3）</h4>
+  整机底面贴桌面，所以<strong>所有连接器都不能放在 PCB 底边</strong>。76×60 的板这样分配：<br>
+  <strong>左边</strong>：USB-C（贴边，供供电与烧录）＋ 两个 Φ2.5 救砖针孔（对应 EN 与 GPIO0 的测试点）；<br>
+  <strong>右边</strong>：MX1.25 喇叭座 ＋ VBAT/GND 焊盘；<br>
+  <strong>底边</strong>：不放任何连接器，只保留测试点焊盘（沉金圆点，不凸出）。
+</div>
+
+<div class="card warn">
+  <h4>别省这几颗</h4>
+  ① 模组旁的 <strong>10 µF + 0.1 µF 去耦</strong>（每个电源脚一组，别共用大电容了事）；② 功放电源脚 <strong>100 µF 电解 + 0.1 µF</strong>，否则大音量时电压跌落会把主控拉复位；③ 喇叭输出走线<strong>并联 RC 吸收网络</strong>（10 Ω + 220 pF），抑制 EMI。
+</div>
+
+<h2><span class="num">04</span>推荐引脚分配</h2>
+
+<p>下面这套分配避开全部 strapping 脚（GPIO0/3/45/46 不做输出）和 USB 专用脚（GPIO19/20），可直接抄进 <code>main/boards/&lt;你的板名&gt;/config.h</code>。</p>
+
+<table>
+  <thead>
+    <tr><th style="width:20%">功能</th><th style="width:14%">GPIO</th><th style="width:66%">说明</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>I2S_MCLK</td><td class="mono">GPIO14</td><td>codec 主时钟，ES8311 与 ES7210 可共用一个 MCLK</td></tr>
+    <tr><td>I2S_BCLK</td><td class="mono">GPIO15</td><td>位时钟，输入输出共用</td></tr>
+    <tr><td>I2S_WS / LRCK</td><td class="mono">GPIO16</td><td>声道帧同步</td></tr>
+    <tr><td>I2S_DIN（收）</td><td class="mono">GPIO17</td><td>ES7210 SDOUT → 主控，麦克风数据</td></tr>
+    <tr><td>I2S_DOUT（发）</td><td class="mono">GPIO18</td><td>主控 → ES8311 SDIN，TTS 播放数据</td></tr>
+    <tr><td>I2C_SDA / SCL</td><td class="mono">GPIO41 / 42</td><td>codec 寄存器配置；屏触摸可共用这条总线</td></tr>
+    <tr><td>PA_EN</td><td class="mono">GPIO7</td><td>功放使能，串 RC（10 kΩ + 1 µF）延时，消除上电 POP 声</td></tr>
+    <tr><td>KEY_BOOT</td><td class="mono">GPIO0</td><td>下载模式（strapping，仅上电瞬间采样，正常可用）</td></tr>
+    <tr><td>KNOB_A</td><td class="mono">GPIO2</td><td>波轮 A 相；10 kΩ 外部上拉 + 100 nF 到地</td></tr>
+    <tr><td>KNOB_B</td><td class="mono">GPIO6</td><td>波轮 B 相；同上</td></tr>
+    <tr><td>KNOB_SW</td><td class="mono">GPIO4</td><td>波轮按压（兼作对话/打断键）；10 kΩ 上拉 + 100 nF</td></tr>
+    <tr><td>LED_DIN</td><td class="mono">GPIO48</td><td>WS2812 数据</td></tr>
+    <tr><td>LCD_SCLK / MOSI</td><td class="mono">GPIO12 / 11</td><td>SPI 时钟与数据</td></tr>
+    <tr><td>LCD_DC / CS / RST / BL</td><td class="mono">GPIO13 / 10 / 9 / 8</td><td>BL 建议接三极管做 PWM 调光</td></tr>
+    <tr><td>BAT_ADC</td><td class="mono">GPIO5</td><td>电池分压检测（100 kΩ / 100 kΩ）</td></tr>
+  </tbody>
+</table>
+
+<h3>波轮（旋钮编码器）电路</h3>
+<table>
+  <thead><tr><th style="width:14%">脚位</th><th style="width:20%">接到</th><th style="width:66%">外围元件</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">A</td><td class="mono">GPIO2</td><td>10 kΩ 上拉到 3V3 ＋ 100 nF 到 GND（RC 时间常数约 1ms）</td></tr>
+    <tr><td class="mono">B</td><td class="mono">GPIO6</td><td>同上</td></tr>
+    <tr><td class="mono">C</td><td class="mono">GND</td><td>公共端。接错会表现为「转不动」或「乱跳」</td></tr>
+    <tr><td class="mono">SW1</td><td class="mono">GND</td><td>—</td></tr>
+    <tr><td class="mono">SW2</td><td class="mono">GPIO4</td><td>10 kΩ 上拉 ＋ 100 nF 到 GND</td></tr>
+  </tbody>
+</table>
+
+<div class="card warn">
+  <h4>必须用外部上拉</h4>
+  IC 内部上拉约 45 kΩ，机械编码器触点氧化后接触电阻上升到几 kΩ 就会误触发，表现为「转一格跳好几格」或方向反了。
+  外部 10 kΩ 让触点电流到 0.33mA，带自清洁效果，抗干扰也更稳。三路各一颗电阻一颗电容，一共 6 个 0603，别省。
+</div>
+
+<div class="card tip">
+  <h4>固件侧</h4>
+  小智已内置 <code>iot_knob</code> 旋钮组件，板级只需在 <code>config.h</code> 里给出 <code>KNOB_PIN_A</code> / <code>KNOB_PIN_B</code>，
+  再给 <code>KNOB_LEFT</code> / <code>KNOB_RIGHT</code> 注册回调调音量。按压走普通按键注册即可。ESP32-S3 虽然有硬件 PCNT，但 10ms 软件轮询对手拧旋钮完全够用。
+</div>
+
+<h2><span class="num">05</span>三个决定成败的设计点</h2>
+
+<h3>① AEC 回声参考通道（最容易漏）</h3>
+<p>全双工对话和「说到一半打断」都依赖回声消除。算法需要一路<span class="tag t-coral">参考信号</span>——也就是「喇叭实际放出去的声音」。做法是从功放输出端（不是 DAC 输出端）取信号，经电阻分压衰减到 ADC 量程内、串隔直电容后送进 ADC 的独立通道。</p>
+<ul>
+  <li><strong>方案 B</strong>：ES7210 有 4 路 ADC，第 1、2 路接麦克风，第 4 路接参考，直接硬件回采，效果最好。</li>
+  <li><strong>方案 A</strong>：ES8311 只有 1 路 ADC，硬件回采需外加一颗单通道 ADC；若不加，只能由固件把播放的 PCM 当作参考填进去（软件参考），近场可用、打断体验明显差一档。</li>
+</ul>
+
+<div class="card warn">
+  <h4>分压取值</h4>
+  功放输出摆幅可能到 6–8 Vpp，必须衰减到 ADC 输入范围（通常 1 Vpp 以内）。先用 10 kΩ / 1 kΩ 分压（约 1/11），再串 1 µF 隔直电容，实测用示波器确认不削顶。
+</div>
+
+<h3>② 模拟与数字电源必须分开</h3>
+<p>Class-D 功放开关噪声 + WiFi 突发电流会直接串进麦克风，表现是「唤醒偶尔失灵」或「底噪大」。</p>
+<ul>
+  <li>数字 3.3 V 走 Buck；codec 的 AVDD 单独走低噪 LDO，中间用磁珠或 0 Ω 电阻做单点连接。</li>
+  <li>功放电源单独从 5 V 取，走线尽量短粗，不要和数字 3.3 V 共用一段走线。</li>
+  <li>地平面尽量完整，模拟地在 codec 下方单点汇入主地，不要割成两半再飞线连接。</li>
+</ul>
+
+<h3>③ 模组天线净空与结构</h3>
+<p>用 WROOM-1 自带 PCB 天线时，模组天线端下方及前方 <strong>15 mm 内禁铺铜、禁走线</strong>，且不能被电池、金属外壳、屏幕背板遮挡。如果结构上做不到，换 <code>WROOM-1U</code>（IPEX 外置天线），但需要自己调匹配网络——没有网分就别走这条路。</p>
+
+<h2><span class="num">06</span>打板前检查清单</h2>
+<ul class="check">
+  <li>模组型号确认为 <code>N16R8</code>（16 MB Flash / 8 MB PSRAM），脚位与封装一致</li>
+  <li>USB-C 的 CC1、CC2 各有 5.1 kΩ 下拉电阻</li>
+  <li>D+/D− 有 ESD 器件，且 <strong>GPIO19/20 未被其他功能占用</strong></li>
+  <li>BOOT（GPIO0）与 RESET（EN）两个按键都可物理触及</li>
+  <li>EN 脚有 10 kΩ 上拉 + 1 µF 到地（RC 复位）</li>
+  <li>GPIO0/3/45/46 上没有挂任何上电即拉低的外设</li>
+  <li>codec 的 MCLK/BCLK/WS/DIN/DOUT 五根线全部连通，I2C 上拉 4.7 kΩ 已加</li>
+  <li>功放使能脚有 RC 延时；喇叭输出有 RC 吸收网络</li>
+  <li>功放电源脚有 100 µF + 0.1 µF 就近去耦</li>
+  <li>模拟 3.3 V 与数字 3.3 V 通过磁珠单点连接，未直接并联</li>
+  <li>天线净空区已确认，结构件不遮挡</li>
+  <li>3.3 V 输出实测带载（500 mA）不低于 3.2 V，纹波 &lt; 50 mV</li>
+  <li>留出 UART0（TX/RX）测试点，作为 USB 失效时的救砖后路</li>
+</ul>
+
+<h2><span class="num">07</span>固件对接要点</h2>
+
+<p>硬件画完，固件侧只要做三件事就能跑起来：</p>
+
+<ol>
+  <li><strong>环境</strong>：ESP-IDF ≥ v6.0（当前主线在 v6.0/v6.1 之上），<code>idf.py set-target esp32s3</code>。</li>
+  <li><strong>分区表</strong>：用 16 MB 方案（<code>partitions/v2</code>），其中约 8 MB 是 assets 分区，用于在线下载唤醒词模型、字体和音效——<strong>Flash 小于 16 MB 会直接放不下</strong>。</li>
+  <li><strong>板型定义</strong>：在 <code>main/boards/</code> 下新建自己的目录，照抄 <code>bread-compact-wifi</code> 或 <code>esp-s3-devkitc</code> 的 <code>config.h</code>，把上面引脚表填进去，然后在 <code>menuconfig → Component config → XiaoZhi → Board Type</code> 里选中你的板型。</li>
+</ol>
+
+<div class="card tip">
+  <h4>调试顺序建议</h4>
+  先用方案 C 的模块飞线把固件跑通（确认服务器、唤醒词、账号都正常），再上自制板。自制板首次上电按「电源 → 串口识别 → 屏幕点亮 → 喇叭出声 → 麦克风录音」的顺序逐段验证，每段用示例工程单独测，不要一上来就跑完整固件。
+</div>
+
+<footer>
+  引脚分配与器件型号为通用参考方案，最终以乐鑫 ESP32-S3 数据手册、所选 codec 数据手册及 xiaozhi-esp32 仓库 <code>docs/custom-board.md</code> 为准。
+</footer>
+
+</div>
+</body>
+</html>
