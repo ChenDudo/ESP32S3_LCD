@@ -1,0 +1,112 @@
+<html>
+<body>
+<pre>
+<h1>礦ision Build Log</h1>
+<h2>Project:</h2>
+C:\Users\80685\Desktop\1.30IPS焊接12pin-ST7789技术资料-CTC\03-程序源码\02-1.3IPS程序源码\01-1.3IPS显示屏C51_SPI例程\LCD.uvproj
+Project File Date:  05/30/2020
+
+<h2>Output:</h2>
+Rebuild target 'Target 1'
+assembling STARTUP.A51...
+compiling main.c...
+compiling lcd_init.c...
+SRC\LCD\lcd_init.c(89): warning C294: unreachable code
+SRC\LCD\lcd_init.c(99): warning C294: unreachable code
+SRC\LCD\lcd_init.c(109): warning C294: unreachable code
+compiling lcd.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_DRAWRECTANGLE?LCD
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DRAW_CIRCLE?LCD
+Program Size: data=9.0 xdata=111 code=26126
+creating hex file from "LCD"...
+"LCD" - 0 Error(s), 5 Warning(s).
+Rebuild target 'Target 1'
+assembling STARTUP.A51...
+compiling main.c...
+compiling lcd_init.c...
+SRC\LCD\lcd_init.c(89): warning C294: unreachable code
+SRC\LCD\lcd_init.c(99): warning C294: unreachable code
+SRC\LCD\lcd_init.c(109): warning C294: unreachable code
+compiling lcd.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_DRAWRECTANGLE?LCD
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DRAW_CIRCLE?LCD
+Program Size: data=9.0 xdata=111 code=26151
+creating hex file from "LCD"...
+"LCD" - 0 Error(s), 5 Warning(s).
+Rebuild target 'Target 1'
+assembling STARTUP.A51...
+compiling main.c...
+compiling lcd_init.c...
+SRC\LCD\lcd_init.c(89): warning C294: unreachable code
+SRC\LCD\lcd_init.c(99): warning C294: unreachable code
+SRC\LCD\lcd_init.c(109): warning C294: unreachable code
+compiling lcd.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_DRAWRECTANGLE?LCD
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DRAW_CIRCLE?LCD
+Program Size: data=9.0 xdata=111 code=26131
+creating hex file from "LCD"...
+"LCD" - 0 Error(s), 5 Warning(s).
+Rebuild target 'Target 1'
+assembling STARTUP.A51...
+compiling main.c...
+compiling lcd_init.c...
+SRC\LCD\lcd_init.c(89): warning C294: unreachable code
+SRC\LCD\lcd_init.c(99): warning C294: unreachable code
+SRC\LCD\lcd_init.c(109): warning C294: unreachable code
+compiling lcd.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_DRAWRECTANGLE?LCD
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DRAW_CIRCLE?LCD
+Program Size: data=9.0 xdata=111 code=26151
+creating hex file from "LCD"...
+"LCD" - 0 Error(s), 5 Warning(s).
+Build target 'Target 1'
+compiling lcd_init.c...
+SRC\LCD\lcd_init.c(89): warning C294: unreachable code
+SRC\LCD\lcd_init.c(99): warning C294: unreachable code
+SRC\LCD\lcd_init.c(109): warning C294: unreachable code
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_DRAWRECTANGLE?LCD
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DRAW_CIRCLE?LCD
+Program Size: data=9.0 xdata=111 code=26151
+creating hex file from "LCD"...
+"LCD" - 0 Error(s), 5 Warning(s).
+Build target 'Target 1'
+compiling lcd_init.c...
+SRC\LCD\lcd_init.c(89): warning C294: unreachable code
+SRC\LCD\lcd_init.c(99): warning C294: unreachable code
+SRC\LCD\lcd_init.c(109): warning C294: unreachable code
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_DRAWRECTANGLE?LCD
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DRAW_CIRCLE?LCD
+Program Size: data=9.0 xdata=111 code=26151
+creating hex file from "LCD"...
+"LCD" - 0 Error(s), 5 Warning(s).
+Build target 'Target 1'
+compiling lcd_init.c...
+SRC\LCD\lcd_init.c(89): warning C294: unreachable code
+SRC\LCD\lcd_init.c(99): warning C294: unreachable code
+SRC\LCD\lcd_init.c(109): warning C294: unreachable code
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_DRAWRECTANGLE?LCD
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DRAW_CIRCLE?LCD
+Program Size: data=9.0 xdata=111 code=26151
+creating hex file from "LCD"...
+"LCD" - 0 Error(s), 5 Warning(s).

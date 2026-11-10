@@ -1,3 +1,43 @@
 # 本地 PlatformIO 虚拟环境（仅用于命令行编译，不入库）
 .pioenv/
 .cache/
+
+# ===== Keil MDK / uVision 编译产物（可再生成，不入库）=====
+# 输出目录
+Obj/
+OBJ/
+obj/
+Listings/
+Listing/
+Output/
+Objects/
+DebugConfig/
+# 目标文件与依赖
+*.o
+*.d
+*.crf
+*.dep
+*.lnp
+*.iex
+# 链接/镜像产物
+*.axf
+*.elf
+*.hex
+*.bin
+*.map
+*.lst
+# 编译日志
+*build_log.htm
+# 个人界面与本地配置（每台机器不同）
+*.uvgui.*
+*.uvguix.*
+*.uvopt
+*.uvoptx
+*.bak
+*.dbgconf
+*.scvd
+
+# ===== 系统/编辑器杂项 =====
+Thumbs.db
+desktop.ini
+.DS_Store

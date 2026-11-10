@@ -1,0 +1,1 @@
+"SRC\LCD\lcd_init.c" LARGE BROWSE INCDIR(.\SRC\LED;.\SRC\LCD) DEBUG OBJECTEXTEND PRINT(.\lcd_init.lst) TABS (2) OBJECT(lcd_init.obj)
