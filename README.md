@@ -7,7 +7,7 @@
 | 项目 | 目录 | 状态 | 一句话 |
 |---|---|---|---|
 | ESP32-S3 + 3.5″ 触摸屏终端 | [`projects/display-3.5in/`](projects/display-3.5in/) | **已打样** | ATK-MD0350 电容屏，自绘底板 + 全覆盖外壳，Rev I 定稿 |
-| 小智 AI 板 | [`projects/xiaozhi-ai-board/`](projects/xiaozhi-ai-board/) | 设计阶段 | ESP32-S3 语音终端，侧壁波轮 + 1.3″ 240×240 屏，自制 PCB |
+| 小智 AI 板 | [`projects/xiaozhi-ai-board/`](projects/xiaozhi-ai-board/) | 设计阶段 | ESP32-S3 语音终端，侧壁三向拨轮 + 1.3″ 240×240 屏 + TF 卡，自制 PCB |
 
 ## 目录约定
 

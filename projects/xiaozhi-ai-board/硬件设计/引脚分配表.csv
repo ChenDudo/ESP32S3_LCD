@@ -18,11 +18,12 @@
 音频,I2C_SDA,CODEC_SDA,GPIO41,双向,4.7kΩ 上拉到 3V3
 音频,I2C_SCL,CODEC_SCL,GPIO42,主控→codec,4.7kΩ 上拉到 3V3
 音频,PA_EN,PA_EN,GPIO7,主控→功放,串 10kΩ + 1µF 延时，消上电 POP
-交互,KNOB_A,KNOB_A,GPIO2,输入,10kΩ 上拉 + 100nF 到地
-交互,KNOB_B,KNOB_B,GPIO6,输入,10kΩ 上拉 + 100nF 到地
-交互,KNOB_SW,KNOB_SW,GPIO4,输入,10kΩ 上拉 + 100nF；按压＝对话/打断
+交互,WHEEL_UP,WHEEL_UP,GPIO2,输入,拨轮上拨；10kΩ 上拉 + 100nF 到地
+交互,WHEEL_DOWN,WHEEL_DOWN,GPIO6,输入,拨轮下拨；10kΩ 上拉 + 100nF 到地
+交互,WHEEL_PRESS,WHEEL_PRESS,GPIO4,输入,拨轮按压；10kΩ 上拉 + 100nF；兼作对话/打断
 交互,LED_DIN,WS2812_DIN,GPIO48,主控→灯,串 330Ω；状态灯
 电源,BAT_ADC,BAT_ADC,GPIO5,输入,VBAT 100kΩ/100kΩ 分压 + 100nF
+电源,VBUS_SENSE,VBUS_SENSE,GPIO1,输入,5V 100kΩ/100kΩ 分压 + 100nF；可选（不贴也能烧录）
 系统,BOOT,BOOT,GPIO0,输入,6×6 轻触到 GND；strapping，仅上电采样
 系统,EN,EN,EN,—,10kΩ 上拉 + 1µF 到地；6×6 轻触到 GND
 系统,UART0_TX,U0TXD,GPIO43,输出,测试点（救砖）

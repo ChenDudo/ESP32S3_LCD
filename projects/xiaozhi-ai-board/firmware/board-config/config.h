@@ -46,9 +46,9 @@
 #define AUDIO_SAMPLE_RATE        16000
 
 // ===== 交互 =====
-#define KNOB_PIN_A               GPIO_NUM_2
-#define KNOB_PIN_B               GPIO_NUM_6
-#define KNOB_SW_PIN              GPIO_NUM_4    // 按压 = 对话/打断
+#define WHEEL_UP_PIN             GPIO_NUM_2    // 拨轮上拨
+#define WHEEL_DOWN_PIN           GPIO_NUM_6    // 拨轮下拨
+#define WHEEL_PRESS_PIN          GPIO_NUM_4    // 拨轮按压 = 对话/打断
 #define LED_STRIP_GPIO           GPIO_NUM_48
 
 // ===== TF 卡（microSD，SPI3 独立总线）=====
@@ -64,3 +64,4 @@
 // ===== 系统 =====
 #define BOOT_BUTTON_GPIO         GPIO_NUM_0
 #define BAT_ADC_PIN              GPIO_NUM_5
+#define VBUS_SENSE_PIN           GPIO_NUM_1    // 5V 分压检测，可选

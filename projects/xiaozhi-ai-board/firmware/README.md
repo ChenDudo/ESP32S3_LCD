@@ -11,7 +11,7 @@
 | 框架 | ESP-IDF **v6.1**（当前最新稳定） | 小智主线已迁到 v6.0+；v5.2 已于 2026-08 EOL |
 | 板型 | 自定义板型，照抄 `main/boards/bread-compact-wifi` 改造 | 目录：`main/boards/xiaozhi-ai-board/` |
 | 分区表 | 16MB 方案（`partitions/v2`） | 其中 8MB 是 assets 分区，存唤醒词模型/字体/音效，**Flash 小于 16MB 放不下** |
-| 旋钮 | `iot_knob` 组件（小智已内置抽象） | 10ms 软件轮询，手拧场景足够；S3 虽带硬件 PCNT，暂不必用 |
+| 拨轮 | 6 脚贴片三向开关（上/下/按压） | 3 个普通按键；上/下音量 ±5%，按压对话；不是编码器，不用 PCNT |
 | 显示 | ESP-IDF `esp_lcd` + ST7789V2 面板驱动 | **必须用厂家初始化序列**（VCOM/gamma/0x21 反显），见 `board-config/` |
 | 编译路径 | **必须纯 ASCII** | ESP-IDF 对中文路径的报错极难排查 |
 
@@ -26,8 +26,8 @@
 | I2S_DOUT（发） | 18 | 主控 → ES8311 SDIN |
 | I2C_SDA / SCL | 41 / 42 | codec 寄存器；屏触摸可共用 |
 | PA_EN | 7 | 功放使能，串 RC 延时消 POP 声 |
-| KNOB_A / KNOB_B | 2 / 6 | 编码器 A/B 相 |
-| KNOB_SW | 4 | 波轮按压＝对话/打断键（**独立功能键已取消**） |
+| WHEEL_UP / WHEEL_DOWN | 2 / 6 | 拨轮上/下拨 |
+| WHEEL_PRESS | 4 | 拨轮按压＝对话/打断键 |
 | LED_DIN | 48 | WS2812 |
 | LCD_SCLK / MOSI | 12 / 11 | |
 | LCD_DC / CS / RST / BL | 13 / 10 / 9 / 8 | |
@@ -64,13 +64,34 @@
 CD 脚（GPIO21）10k 上拉、卡插入为低，可以先读 CD 再决定是否挂载，没卡不影响启动。
 卡座 CS 有 10k 上拉，启动时不会被卡抢总线。
 
+## 烧录与串口（USB-C 一根线）
+
+板子用 ESP32-S3 自带的 **USB-Serial/JTAG**（GPIO19/20 直连 USB-C），**没有 CH340**。插上 USB-C 就是串口：
+
+- Windows：设备管理器出现 `USB JTAG/serial debug unit (COMx)`
+- macOS / Linux：`/dev/tty.usbmodem*` / `/dev/ttyACM0`
+
+```bash
+idf.py -p COMx flash monitor
+```
+
+esptool 会通过 USB 控制线自动复位进下载模式，正常不用按按键。**固件跑飞或电脑不认口**时：用针捅住左壁的
+**BOOT** 针孔，再捅一下 **RST**，松开 BOOT，出现下载口后再烧。
+
+menuconfig 把控制台指到 USB：
+`Component config → ESP System Settings → Channel for console output → USB Serial/JTAG Controller`。
+UART0（GPIO43/44）只留测试点，作为最后救砖。
+
+注意：要用**数据线**，纯充电线不行；CC 的 5.1 kΩ 不能漏，否则 C-to-C 线不供电。
+
 ## 要写的代码
 
 1. **板型定义** `main/boards/xiaozhi-ai-board/config.h`
-   - 上表全部宏 + `KNOB_PIN_A` / `KNOB_PIN_B`
+   - 上表全部宏 + `WHEEL_UP_PIN` / `WHEEL_DOWN_PIN` / `WHEEL_PRESS_PIN`
    - 音频输出走 ES8311，输入按最终方案（单麦直连 / ES7210 双麦）二选一
 2. **板型类** 继承 `WifiBoard`，实现 `GetAudioCodec()`、`GetDisplay()`、初始化按键与旋钮
-3. **旋钮回调** 注册 `KNOB_LEFT` / `KNOB_RIGHT` → `SetOutputVolume()`，每格 5%（EC11 18 段正好一档一步）
+3. **拨轮回调** 注册三个按键：上/下 → `SetOutputVolume()` 每次 ±5%，按住 300ms 后每 100ms 连发；按压 → 对话/打断。
+   **不要用 `iot_knob`**：这颗开关没有 A/B 相，是三个独立轻触。
 4. **按压逻辑** 短按＝对话/打断，长按＝重新配网
 
 ## menuconfig 关键项
@@ -90,5 +111,5 @@ CD 脚（GPIO21）10k 上拉、卡插入为低，可以先读 CD 再决定是否
 - [ ] 建 PlatformIO / ESP-IDF 工程骨架
 - [ ] 把 `board-config/` 的宏与厂家初始化序列并入上游板型
 - [ ] 写板型 `config.h` 与板型类
-- [ ] 单测：LCD 点亮 / I2S 出声 / 编码器计数
+- [ ] 单测：LCD 点亮 / I2S 出声 / 拨轮三向按键
 - [ ] 接入小智主流程，验证唤醒与打断

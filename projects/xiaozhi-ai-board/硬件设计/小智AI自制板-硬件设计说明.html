@@ -71,13 +71,15 @@
 <div class="wrap">
 
 <header>
-  <div class="kicker">Hardware design spec · rev 1.4</div>
+  <div class="kicker">Hardware design spec · rev 1.6</div>
   <h1>小智 AI 自制板硬件设计说明</h1>
   <p class="sub">主控 ESP32-S3 · 目标：可跑通 xiaozhi-esp32 官方固件，支持唤醒词、全双工语音、屏幕表情<br>
   <span style="font-size:12.5px;color:#8b949e">rev 1.1：喇叭与电池改为外接，USB-C 供电，预留 VBAT 焊盘<br>
   rev 1.2：显示屏定案为中景园 ZJY133T-IG01（1.3″ 240×240 IPS / ST7789V2 / 12pin 焊接 FPC）<br>
   rev 1.3：机身缩到 64×64×22，PCB 58×52；天线净空压到 12.4mm，接口位置重排<br>
-  rev 1.4：增加 TF 卡（microSD，SPI3 独立总线，自弹式卡座在右壁上方）</span></p>
+  rev 1.4：增加 TF 卡（microSD，SPI3 独立总线，自弹式卡座在右壁上方）<br>
+  rev 1.5：侧壁 EC11 换成 L-ink 同款 <strong>6 脚贴片三向拨轮开关</strong>（上/下/按压），不再用编码器<br>
+  rev 1.6：明确 USB-C 走 <strong>ESP32-S3 原生 USB-Serial/JTAG</strong> 烧录（无需 CH340），BOOT/RST 针孔救砖；可选 VBUS 检测</span></p>
   <div class="summary">
     <strong>一句话结论：</strong>一套能跑小智的最小系统 = <strong>ESP32-S3-WROOM-1-N16R8 模组 + 音频 ADC + 音频 DAC/功放 + 喇叭 + 3.3V 电源</strong>，共 5 类器件。
     关键不在能不能响，而在<strong>麦克风有没有硬件回采参考通道</strong>——这决定它能不能做全双工打断，也决定了你选 ES8311 单芯片还是 ES7210+ES8311 两颗。
@@ -253,7 +255,7 @@
     <tr><td>USB 接口</td><td class="mono">Type-C 16P 母座</td><td>CC1/CC2 各串 5.1 kΩ 下拉</td><td>漏了 5.1 k 电阻，C-to-C 线会不供电</td></tr>
     <tr><td>ESD 保护</td><td class="mono">USBLC6-2SC6</td><td>D+/D− 双向 TVS</td><td>接在连接器与模组之间</td></tr>
     <tr><td>按键</td><td>6×6 轻触 ×2</td><td>BOOT（GPIO0）+ RESET（EN）</td><td>刷砖后的唯一救砖通道，务必留</td></tr>
-    <tr><td>波轮</td><td class="mono">EC11 带按压开关</td><td>20 脉冲/圈，18 定位段，Φ6 半轴</td><td>旋转调音量，按压做对话/打断；轴长 15mm 需锯短到 12mm</td></tr>
+    <tr><td>拨轮<span class="tag t-teal">定案</span></td><td class="mono">6 脚贴片三向拨轮开关（L-ink S1 同款：BL-XT 6P / WS-002DB）</td><td>上/下/按压三向自复位，约 14 × 12 × 6.6 mm（按型号）</td><td>贴片装板右缘，轮子从侧壁槽探出；三路各 10 kΩ 上拉 + 100 nF；<strong>不是编码器</strong></td></tr>
     <tr><td>状态灯</td><td class="mono">WS2812B-2020</td><td>单线 RGB</td><td>小智用它做表情/状态指示</td></tr>
     <tr><td>显示屏<span class="tag t-teal">定案</span></td><td class="mono">中景园 ZJY133T-IG01（瀚彩玻璃）</td><td>1.3″ IPS 240×240，ST7789V2，4 线 SPI，12pin 焊接 FPC（0.7 mm 间距）</td><td>自带背光（2×LED 并联，40 mA）；<strong>必须串 10 Ω 限流</strong>；接口细节见《显示屏接口设计》</td></tr>
     <tr><td>背光开关</td><td class="mono">2N7002 + 10 Ω + 100 Ω + 100 kΩ</td><td>低边 NMOS，20 kHz PWM 调光</td><td>屏的 LEDA 接 3V3、LEDK 经 10 Ω 到漏极；别用 GPIO 直接灌 LED 电流</td></tr>
@@ -293,10 +295,10 @@
 </table>
 
 <div class="card tip">
-  <h4>板边接口布局（rev 1.7）</h4>
+  <h4>板边接口布局（rev 1.8）</h4>
   整机底面贴桌面，所以<strong>所有连接器都不能放在 PCB 底边</strong>。58×52 的板这样分配：<br>
-  <strong>左壁上方</strong>：BOOT/RST 两个 Φ2.5 针孔（Y 10–12）；<strong>左壁下方</strong>：USB-C（Y 49–58）；<br>
-  <strong>右壁上方</strong>：TF 卡槽（Y 7–18，自弹式，按一下弹 3 mm）；<strong>右壁下方</strong>：MX1.25 喇叭座 ＋ VBAT/GND 焊盘（Y 46–60）；<br>
+  <strong>左壁上方</strong>：BOOT/RST 两个 Φ2.5 针孔（Y 9–12）；<strong>左壁下方</strong>：USB-C（Y 49–58）；<br>
+  <strong>右壁中段</strong>：拨轮槽（Y 27–37，轮缘露 2 mm）；<strong>右壁上方</strong>：TF 卡槽（Y 7–18，自弹式）；<strong>右壁下方</strong>：MX1.25 喇叭座 ＋ VBAT/GND 焊盘（Y 46–60）；<br>
   <strong>底边</strong>：不放任何连接器，只保留测试点焊盘（沉金圆点，不凸出）；<strong>顶部</strong>：只放模组天线，禁铜。
 </div>
 
@@ -322,15 +324,16 @@
     <tr><td>I2C_SDA / SCL</td><td class="mono">GPIO41 / 42</td><td>codec 寄存器配置；屏触摸可共用这条总线</td></tr>
     <tr><td>PA_EN</td><td class="mono">GPIO7</td><td>功放使能，串 RC（10 kΩ + 1 µF）延时，消除上电 POP 声</td></tr>
     <tr><td>KEY_BOOT</td><td class="mono">GPIO0</td><td>下载模式（strapping，仅上电瞬间采样，正常可用）</td></tr>
-    <tr><td>KNOB_A</td><td class="mono">GPIO2</td><td>波轮 A 相；10 kΩ 外部上拉 + 100 nF 到地</td></tr>
-    <tr><td>KNOB_B</td><td class="mono">GPIO6</td><td>波轮 B 相；同上</td></tr>
-    <tr><td>KNOB_SW</td><td class="mono">GPIO4</td><td>波轮按压（兼作对话/打断键）；10 kΩ 上拉 + 100 nF</td></tr>
+    <tr><td>WHEEL_UP</td><td class="mono">GPIO2</td><td>拨轮上拨；10 kΩ 外部上拉 + 100 nF 到地</td></tr>
+    <tr><td>WHEEL_DOWN</td><td class="mono">GPIO6</td><td>拨轮下拨；同上</td></tr>
+    <tr><td>WHEEL_PRESS</td><td class="mono">GPIO4</td><td>拨轮按压（兼作对话/打断键）；10 kΩ 上拉 + 100 nF</td></tr>
     <tr><td>LED_DIN</td><td class="mono">GPIO48</td><td>WS2812 数据</td></tr>
     <tr><td>LCD_SCLK / MOSI</td><td class="mono">GPIO12 / 11</td><td>SPI2（FSPI）的 IO_MUX 原生脚，各自串 33 Ω；屏只写不读，<strong>不需要 MISO</strong></td></tr>
     <tr><td>LCD_DC / CS / RST / BL</td><td class="mono">GPIO13 / 10 / 9 / 8</td><td>DC/CS 各串 33 Ω；RST 10 kΩ 上拉 + 100 nF；BL 经 100 Ω 驱动 2N7002 低边开关，20 kHz PWM</td></tr>
     <tr><td>SD_CLK / MOSI / MISO</td><td class="mono">GPIO39 / 40 / 38</td><td>SPI3 独立总线（20 MHz）；CLK 串 22 Ω，MISO 10 kΩ 上拉</td></tr>
     <tr><td>SD_CS / SD_CD</td><td class="mono">GPIO47 / 21</td><td>CS 10 kΩ 上拉（上电不选中）；CD 10 kΩ 上拉，卡插入→GND</td></tr>
     <tr><td>BAT_ADC</td><td class="mono">GPIO5</td><td>电池分压检测（100 kΩ / 100 kΩ）</td></tr>
+    <tr><td>VBUS_SENSE<span class="tag t-amber">可选</span></td><td class="mono">GPIO1</td><td>5V 经 100 kΩ / 100 kΩ 分压 + 100 nF；判断 USB 是否插入，不贴不影响烧录</td></tr>
   </tbody>
 </table>
 
@@ -368,28 +371,57 @@
 </div>
 <p>卡用 microSD（≤32 GB，FAT32），固件挂载后路径 <code>/sdcard</code>；CD 脚可做热插拔检测（检测到卡再挂载，没卡不影响启动）。</p>
 
-<h3>波轮（旋钮编码器）电路</h3>
+<h3>USB-C 烧录与调试（rev 1.6）</h3>
+<p>ESP32-S3 自带 <strong>USB-Serial/JTAG</strong>（GPIO19 = D−、GPIO20 = D+），USB-C 的 D+/D− 直连模组，<strong>不需要 CH340/CP2102 这类 USB 转串口芯片</strong>。
+插上 USB-C 电脑就认一个 COM 口，既能烧录也能当串口日志；同一根线刷机、看 log、供电三件事。</p>
 <table>
-  <thead><tr><th style="width:14%">脚位</th><th style="width:20%">接到</th><th style="width:66%">外围元件</th></tr></thead>
+  <thead><tr><th style="width:20%">项</th><th style="width:22%">接到</th><th style="width:58%">外围 / 要求</th></tr></thead>
   <tbody>
-    <tr><td class="mono">A</td><td class="mono">GPIO2</td><td>10 kΩ 上拉到 3V3 ＋ 100 nF 到 GND（RC 时间常数约 1ms）</td></tr>
-    <tr><td class="mono">B</td><td class="mono">GPIO6</td><td>同上</td></tr>
-    <tr><td class="mono">C</td><td class="mono">GND</td><td>公共端。接错会表现为「转不动」或「乱跳」</td></tr>
-    <tr><td class="mono">SW1</td><td class="mono">GND</td><td>—</td></tr>
-    <tr><td class="mono">SW2</td><td class="mono">GPIO4</td><td>10 kΩ 上拉 ＋ 100 nF 到 GND</td></tr>
+    <tr><td class="mono">USB_D− / D+</td><td class="mono">GPIO19 / 20</td><td>差分 90 Ω、等长、尽量短；<strong>不要再接别的东西</strong>；ESD（USBLC6-2SC6）贴连接器</td></tr>
+    <tr><td class="mono">CC1 / CC2</td><td class="mono">5.1 kΩ → GND</td><td>各一颗；漏了 C-to-C 线不供电，也认不到设备</td></tr>
+    <tr><td class="mono">VBUS</td><td class="mono">5V</td><td>自恢复保险丝 + TVS → Buck；<strong>烧录电流约 100 mA，不需要外部供电</strong></td></tr>
+    <tr><td class="mono">BOOT</td><td class="mono">GPIO0</td><td>10 kΩ 上拉 + 100 nF；左壁 Φ2.5 针孔捅到 GND（strapping，仅上电瞬间采样）</td></tr>
+    <tr><td class="mono">EN / RST</td><td class="mono">EN</td><td>10 kΩ 上拉 + 1 µF；左壁 Φ2.5 针孔捅到 GND</td></tr>
+    <tr><td class="mono">VBUS 检测<span class="tag t-amber">可选</span></td><td class="mono">GPIO1</td><td>5V 经 100 kΩ / 100 kΩ 分压 + 100 nF；固件判断“插着 USB”，不贴也能烧录</td></tr>
+  </tbody>
+</table>
+
+<div class="card tip">
+  <h4>烧录步骤</h4>
+  ① 用<strong>数据线</strong>（不是纯充电线）插 USB-C；② 正常情况下 esptool 通过 USB 控制线自动复位进下载模式，直接
+  <code>idf.py -p COMx flash monitor</code>（Linux 是 <code>/dev/ttyACM0</code>）；
+  ③ 固件跑飞、电脑不认口时：针捅住 <strong>BOOT</strong>，再捅一下 <strong>RST</strong>，松开 BOOT——出现下载口后再烧。
+</div>
+
+<div class="card warn">
+  <h4>三条不能错</h4>
+  ① GPIO19/20 是 USB 专用，<strong>不能复用</strong>；② CC 的 5.1 kΩ 两颗不能漏；③ D+/D− 上不要串大电阻或挂电容，ESD 器件贴连接器、走线越短越好。
+  烧录口和串口日志是同一个口，不用再引 UART 线；UART0（43/44）只留测试点做最后救砖。
+</div>
+
+<h3>拨轮开关（三向，L-ink 同款）电路</h3>
+<p>这不是编码器：内部是 <strong>3 个独立轻触开关</strong>（上拨、下拨、按压），松手自复位。6 个脚就是 3 组触点，每组一端接 GND、另一端接 GPIO。</p>
+<table>
+  <thead><tr><th style="width:14%">动作</th><th style="width:20%">接到</th><th style="width:66%">外围元件</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">上拨</td><td class="mono">GPIO2</td><td>10 kΩ 上拉到 3V3 ＋ 100 nF 到 GND；常开，拨上时拉低</td></tr>
+    <tr><td class="mono">下拨</td><td class="mono">GPIO6</td><td>同上</td></tr>
+    <tr><td class="mono">按压</td><td class="mono">GPIO4</td><td>10 kΩ 上拉 ＋ 100 nF；兼作对话/打断键</td></tr>
   </tbody>
 </table>
 
 <div class="card warn">
-  <h4>必须用外部上拉</h4>
-  IC 内部上拉约 45 kΩ，机械编码器触点氧化后接触电阻上升到几 kΩ 就会误触发，表现为「转一格跳好几格」或方向反了。
-  外部 10 kΩ 让触点电流到 0.33mA，带自清洁效果，抗干扰也更稳。三路各一颗电阻一颗电容，一共 6 个 0603，别省。
+  <h4>和 EC11 不一样，固件要改</h4>
+  没有 A/B 正交、没有 PCNT、没有绝对位置：每个方向一次只闭合一下，松手回中。<strong>按三个普通按键处理</strong>：
+  上/下每拨一次 = 音量 ±5%，按住 300 ms 后连发（每秒 10 次）；按压 = 对话/打断。
+  小智的 <code>iot_knob</code> 用不上了，直接在板型里注册三个按键回调。10 kΩ 外部上拉不能省——触点氧化后接触电阻升高会漏触发。
 </div>
 
 <div class="card tip">
-  <h4>固件侧</h4>
-  小智已内置 <code>iot_knob</code> 旋钮组件，板级只需在 <code>config.h</code> 里给出 <code>KNOB_PIN_A</code> / <code>KNOB_PIN_B</code>，
-  再给 <code>KNOB_LEFT</code> / <code>KNOB_RIGHT</code> 注册回调调音量。按压走普通按键注册即可。ESP32-S3 虽然有硬件 PCNT，但 10ms 软件轮询对手拧旋钮完全够用。
+  <h4>为什么换它</h4>
+  ① 贴片本体直接坐在 PCB 上，轮子从板边探出侧壁，<strong>不用 3D 打印 Φ24 轮、不用 D 型轴、不用压轴机构</strong>；
+  ② 自带按压，省掉独立对话键；③ 立创有货、约 1–2 元、寿命 10 万次。
+  代价：<strong>不能连续旋转</strong>，只能一格一格拨；音量要连续调得靠按住连发。
 </div>
 
 <h2><span class="num">05</span>三个决定成败的设计点</h2>
@@ -423,9 +455,10 @@
 <ul class="check">
   <li>模组型号确认为 <code>N16R8</code>（16 MB Flash / 8 MB PSRAM），脚位与封装一致</li>
   <li>USB-C 的 CC1、CC2 各有 5.1 kΩ 下拉电阻</li>
-  <li>D+/D− 有 ESD 器件，且 <strong>GPIO19/20 未被其他功能占用</strong></li>
-  <li>BOOT（GPIO0）与 RESET（EN）两个按键都可物理触及</li>
+  <li>D+/D− 直连 GPIO19/20、差分 90 Ω 等长，ESD 器件贴连接器</li>
+  <li>BOOT（GPIO0）与 RESET（EN）都能从左壁 Φ2.5 针孔捅到，BOOT 有 10 kΩ 上拉 + 100 nF</li>
   <li>EN 脚有 10 kΩ 上拉 + 1 µF 到地（RC 复位）</li>
+  <li>插数据线到电脑能认到 COM 口，<code>idf.py flash</code> 一次通过；固件跑飞时 BOOT+RST 能强制进下载模式</li>
   <li>GPIO0/3/45/46 上没有挂任何上电即拉低的外设</li>
   <li>codec 的 MCLK/BCLK/WS/DIN/DOUT 五根线全部连通，I2C 上拉 4.7 kΩ 已加</li>
   <li>功放使能脚有 RC 延时；喇叭输出有 RC 吸收网络</li>
