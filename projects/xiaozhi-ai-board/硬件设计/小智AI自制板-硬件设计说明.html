@@ -71,7 +71,7 @@
 <div class="wrap">
 
 <header>
-  <div class="kicker">Hardware design spec · rev 1.6</div>
+  <div class="kicker">Hardware design spec · rev 1.9</div>
   <h1>小智 AI 自制板硬件设计说明</h1>
   <p class="sub">主控 ESP32-S3 · 目标：可跑通 xiaozhi-esp32 官方固件，支持唤醒词、全双工语音、屏幕表情<br>
   <span style="font-size:12.5px;color:#8b949e">rev 1.1：喇叭与电池改为外接，USB-C 供电，预留 VBAT 焊盘<br>
@@ -79,7 +79,10 @@
   rev 1.3：机身缩到 64×64×22，PCB 58×52；天线净空压到 12.4mm，接口位置重排<br>
   rev 1.4：增加 TF 卡（microSD，SPI3 独立总线，自弹式卡座在右壁上方）<br>
   rev 1.5：侧壁 EC11 换成 L-ink 同款 <strong>6 脚贴片三向拨轮开关</strong>（上/下/按压），不再用编码器<br>
-  rev 1.6：明确 USB-C 走 <strong>ESP32-S3 原生 USB-Serial/JTAG</strong> 烧录（无需 CH340），BOOT/RST 针孔救砖；可选 VBUS 检测</span></p>
+  rev 1.6：明确 USB-C 走 <strong>ESP32-S3 原生 USB-Serial/JTAG</strong> 烧录（无需 CH340），BOOT/RST 针孔救砖；可选 VBUS 检测<br>
+  rev 1.7：增加温湿度传感器（复用 codec 的 I2C 总线 GPIO41/42，<strong>零新增引脚</strong>），用于环境温度上报；补齐总线 4.7 kΩ 上拉电阻<br>
+  rev 1.8：温湿度器件由 <strong>SHT30-DIS 换型为 AHT20</strong>（确定不加触摸、降本）：地址 0x44→固定 0x38，封装 DFN-8→LGA-6，命令/数据帧/换算全部改，采样周期 2 s→3 s；<strong>机械、通风孔与热隔离数值不变</strong><br>
+  rev 1.9：喇叭由「外接 4 Ω 3 W 腔体喇叭」改为 <strong>内置 GSPK151035PN（8 Ω 0.5 W，15×10×3.5）</strong>：塞进前腔右下空区，前壁新增出音孔，ES8311 音量上限 −8 dB + 软限幅；<strong>机身尺寸、Z 叠层、壁厚、屏槽与全部既有开孔位置不变</strong></span></p>
   <div class="summary">
     <strong>一句话结论：</strong>一套能跑小智的最小系统 = <strong>ESP32-S3-WROOM-1-N16R8 模组 + 音频 ADC + 音频 DAC/功放 + 喇叭 + 3.3V 电源</strong>，共 5 类器件。
     关键不在能不能响，而在<strong>麦克风有没有硬件回采参考通道</strong>——这决定它能不能做全双工打断，也决定了你选 ES8311 单芯片还是 ES7210+ES8311 两颗。
@@ -125,7 +128,7 @@
 <div class="diagram">
 <svg viewBox="0 0 800 366" width="100%" xmlns="http://www.w3.org/2000/svg" role="img">
   <title>小智自制板系统框图</title>
-  <desc>USB-C 供电经电源模块给主控与音频供电，麦克风经 ES7210 进主控，主控经 ES8311 与功放驱动喇叭，功放输出分压回采至 ADC 作为 AEC 参考。</desc>
+  <desc>USB-C 供电经电源模块给主控与音频供电，麦克风经 ES7210 进主控，主控经 ES8311 与功放驱动喇叭，功放输出分压回采至 ADC 作为 AEC 参考；AHT20 温湿度传感器与 codec 共用 I2C 总线 GPIO41/42。</desc>
   <defs>
     <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
       <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -165,8 +168,8 @@
   <text x="617" y="200" text-anchor="middle" dominant-baseline="central" font-size="11.5" fill="#0F6E56">Class-D 3W</text>
 
   <rect x="690" y="160" width="70" height="62" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
-  <text x="725" y="181" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#2C2C2A">喇叭</text>
-  <text x="725" y="200" text-anchor="middle" dominant-baseline="central" font-size="11.5" fill="#5F5E5A">4Ω 3W</text>
+  <text x="725" y="181" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#2C2C2A">内置喇叭</text>
+  <text x="725" y="200" text-anchor="middle" dominant-baseline="central" font-size="11.5" fill="#5F5E5A">8Ω 0.5W</text>
 
   <path d="M145 191L161 191" fill="none" stroke="#888780" stroke-width="1.2" marker-end="url(#ar)"/>
   <path d="M270 191L286 191" fill="none" stroke="#888780" stroke-width="1.2" marker-end="url(#ar)"/>
@@ -189,6 +192,13 @@
 
   <path d="M617 222L617 250L217 250L217 226" fill="none" stroke="#993C1D" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#ar)"/>
   <text x="410" y="243" text-anchor="middle" font-size="11" fill="#993C1D">AEC 参考回采：功放输出 → 分压衰减 → 隔直 → ADC 第 4 通道</text>
+
+  <!-- rev 1.8: AHT20 on shared I2C -->
+  <rect x="610" y="276" width="150" height="52" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.8"/>
+  <text x="685" y="295" text-anchor="middle" dominant-baseline="central" font-size="12.5" font-weight="500" fill="#085041">AHT20 温湿度</text>
+  <text x="685" y="313" text-anchor="middle" dominant-baseline="central" font-size="11.5" fill="#0F6E56">I2C 0x38 · 环境温度</text>
+  <path d="M420 230H600V340H685V332" fill="none" stroke="#0F6E56" stroke-width="1.2" marker-end="url(#ar)"/>
+  <text x="555" y="356" text-anchor="middle" font-size="10" fill="#0F6E56">I2C SDA/SCL（GPIO41/42）· 与 ES8311 共总线 · 4.7 kΩ 上拉</text>
 </svg>
 <div class="caption">实线为信号/供电主路径，红色虚线为 AEC 回声参考通道（方案 B 必备；方案 A 可省）</div>
 </div>
@@ -226,10 +236,10 @@
       <td>灵敏度低于 −38 dB 会导致唤醒距离明显变短</td>
     </tr>
     <tr>
-      <td>喇叭<span class="tag t-teal">外接</span></td>
-      <td>MX1.25 2P 卧贴座 + 4 Ω 3 W 腔体喇叭</td>
-      <td>座子贴板边；喇叭用带腔体的独立件</td>
-      <td>BTL 输出两根线都不能接地；线长 &gt;10cm 需加 10 Ω + 220 pF 吸收</td>
+      <td>喇叭<span class="tag t-teal">内置</span></td>
+      <td class="mono">GSPK151035PN-8R0.5W-L35-1.25T</td>
+      <td>15 × 10 × 3.5 mm，8 Ω / 0.5 W；1.25T 端子插 J2（MX1.25 2P），引线 35 mm；放前腔右下 X 44–59 / Y 50–60，泡棉圈密封 + 后腔 ≈1.15 cm³</td>
+      <td><strong>ES8311 音量上限 −8 dB + 软限幅</strong>（8 Ω 下功放约 1.5 W，是额定的 3 倍）；BTL 两根线都不接地；前壁开出音孔，详见 §03 与结构 rev 2.0</td>
     </tr>
     <tr>
       <td>电源</td>
@@ -260,6 +270,7 @@
     <tr><td>显示屏<span class="tag t-teal">定案</span></td><td class="mono">中景园 ZJY133T-IG01（瀚彩玻璃）</td><td>1.3″ IPS 240×240，ST7789V2，4 线 SPI，12pin 焊接 FPC（0.7 mm 间距）</td><td>自带背光（2×LED 并联，40 mA）；<strong>必须串 10 Ω 限流</strong>；接口细节见《显示屏接口设计》</td></tr>
     <tr><td>背光开关</td><td class="mono">2N7002 + 10 Ω + 100 Ω + 100 kΩ</td><td>低边 NMOS，20 kHz PWM 调光</td><td>屏的 LEDA 接 3V3、LEDK 经 10 Ω 到漏极；别用 GPIO 直接灌 LED 电流</td></tr>
     <tr><td>TF 卡<span class="tag t-teal">定案</span></td><td class="mono">TF-01A 自弹式（带 CD）</td><td>microSD，SPI 模式，14 × 14 × 1.9 mm</td><td>装板正面右上角，卡从右壁上方插入；CS/MISO/CD 各 10 kΩ 上拉，10 µF + 100 nF</td></tr>
+    <tr><td>温湿度传感器<span class="tag t-teal">定案</span></td><td class="mono">AHT20（奥松 AOSONG）</td><td>LGA-6 3×3；I2C 固定 0x38（无 ADDR 脚）；2.0–5.5 V；±0.3 °C / ±2 %RH（typ.）</td><td>复用 GPIO41/42，不占新脚；100 nF 就近去耦；板边 1 mm 热隔离槽 + 左壁通风孔，详见 §04 与结构 rev 2.0；<strong>本项目不加触摸</strong></td></tr>
     <tr><td>电池<span class="tag t-teal">外接</span></td><td class="mono">VBAT/GND 焊盘 + 可选 TP4056</td><td>PMOS 自动切换；充电与保护封装空贴预留</td><td>供电默认走 USB-C；分压电阻先贴，方便后续读电量</td></tr>
     <tr><td>天线</td><td>模组自带 PCB 天线</td><td>净空区 ≥ 15 mm 无铜、远离电池与金属</td><td>本机屏顶距天线只有 <strong>12.4 mm</strong>，靠顶部全层禁铜 + 纯塑料外壳补偿，详见结构 rev 1.6</td></tr>
   </tbody>
@@ -277,7 +288,7 @@
     </tr>
     <tr>
       <td>喇叭输出</td>
-      <td>NS4150B 输出直连板边 MX1.25 2P 座；<strong>BTL 桥接，两根线都不接地</strong>，可与 2 个焊盘并联做双方案</td>
+      <td>NS4150B BTL 输出 → 板边 J2（MX1.25 2P）→ 35 mm 引线 → 内置 LS1；<strong>两根线都不接地、不与电池负极共地</strong>，可与 2 个焊盘并联做双方案；J2 是接线座，不是出音口</td>
     </tr>
     <tr>
       <td>电池预留</td>
@@ -295,16 +306,36 @@
 </table>
 
 <div class="card tip">
-  <h4>板边接口布局（rev 1.8）</h4>
+  <h4>板边接口布局（rev 2.0）</h4>
   整机底面贴桌面，所以<strong>所有连接器都不能放在 PCB 底边</strong>。58×52 的板这样分配：<br>
-  <strong>左壁上方</strong>：BOOT/RST 两个 Φ2.5 针孔（Y 9–12）；<strong>左壁下方</strong>：USB-C（Y 49–58）；<br>
-  <strong>右壁中段</strong>：拨轮槽（Y 27–37，轮缘露 2 mm）；<strong>右壁上方</strong>：TF 卡槽（Y 7–18，自弹式）；<strong>右壁下方</strong>：MX1.25 喇叭座 ＋ VBAT/GND 焊盘（Y 46–60）；<br>
+  <strong>左壁上方</strong>：BOOT/RST 两个 Φ2.5 针孔（Y 9–12）；<strong>左壁中段</strong>：AHT20 通风孔（Y 20–32，上下两组 3 × Φ1.2，详见结构 rev 2.0）；<strong>左壁下方</strong>：USB-C（Y 49–58）；<br>
+  <strong>右壁中段</strong>：拨轮槽（Y 27–37，轮缘露 2 mm）；<strong>右壁上方</strong>：TF 卡槽（Y 7–18，自弹式）；<strong>右壁下方</strong>：MX1.25 喇叭<strong>接线</strong>座（内置 LS1 引线，非外接出音口）＋ VBAT/GND 焊盘（Y 46–60）；<br>
+  <strong>前壁右下</strong>：内置喇叭出音孔 8–10 × Φ1.2（X 46–57 / Y 52–58），在视窗 X 18–42 之外；底边/底面仍零开孔；<br>
   <strong>底边</strong>：不放任何连接器，只保留测试点焊盘（沉金圆点，不凸出）；<strong>顶部</strong>：只放模组天线，禁铜。
 </div>
 
 <div class="card warn">
   <h4>别省这几颗</h4>
-  ① 模组旁的 <strong>10 µF + 0.1 µF 去耦</strong>（每个电源脚一组，别共用大电容了事）；② 功放电源脚 <strong>100 µF 低矮聚合物（6.3×4.2，腔高只有 4.6）+ 0.1 µF</strong>，否则大音量时电压跌落会把主控拉复位；③ 喇叭输出走线<strong>并联 RC 吸收网络</strong>（10 Ω + 220 pF），抑制 EMI。
+  ① 模组旁的 <strong>10 µF + 0.1 µF 去耦</strong>（每个电源脚一组，别共用大电容了事）；② 功放电源脚 <strong>100 µF 低矮聚合物（6.3×4.2，腔高只有 4.6）+ 0.1 µF</strong>，否则大音量时电压跌落会把主控拉复位；③ 喇叭输出走线<strong>并联 RC 吸收网络</strong>（10 Ω + 220 pF，35 mm 引线可按需贴装），抑制 EMI；④ <strong>ES8311 数字音量上限 −8 dB + 软限幅</strong>，否则 8 Ω 0.5 W 喇叭会被约 1.5 W 的功放输出烧毁。
+</div>
+
+<h3>内置喇叭与音腔（rev 1.9 新增）</h3>
+<p>喇叭从 rev 1.1 的「外接」改回<strong>内置</strong>，但不改模具尺寸：机身 64×64×22、Z 向叠层、壁厚、屏槽 26.5×29.6×1.7、视窗 24×24 与所有既有开孔位置全部不动，只在<strong>前壁新增出音孔位</strong>并占用前腔右下空区。</p>
+<table>
+  <thead><tr><th style="width:20%">项</th><th style="width:30%">取值</th><th style="width:50%">说明</th></tr></thead>
+  <tbody>
+    <tr><td>器件</td><td class="mono">GSPK151035PN-8R0.5W-L35-1.25T</td><td>15 × 10 × 3.5 mm，8 Ω / 额定 0.5 W，引线 35 mm，1.25T 端子直插 J2（MX1.25 2P）；BOM 位号 LS1</td></tr>
+    <tr><td>摆放</td><td class="mono">X 44–59 / Y 50–60，Z 17.5–21.0</td><td>振膜朝前壁、贴前壁内表面；距视窗右边 2 mm、FPC 出口 12 mm、拨轮下沿 12 mm、右壁内侧 3 mm、贴桌面底边 2 mm</td></tr>
+    <tr><td>后腔</td><td class="mono">≈1.15 cm³</td><td>壁外自由高 11.2 mm（Z 9.8–21.0）减去喇叭 3.5 mm，余 7.7 mm × 15×10；用泡棉圈围成密闭后腔，振膜面与前壁之间另贴泡棉圈密封前腔，防声短路</td></tr>
+    <tr><td>出音孔</td><td class="mono">前壁 8–10 × Φ1.2</td><td>X 46–57 / Y 52–58，总开口 ≥10 mm²；视窗在 X 18–42，不重叠；<strong>底面/底边仍零开孔</strong></td></tr>
+    <tr><td>禁区</td><td class="mono">天线区 / 左带 / 拨轮 / FPC</td><td>喇叭有磁钢，不进天线净空 15×25；不占 AHT20 通风带（X 2–16.75）；避开拨轮 Y 26–38 与 FPC 出口 X 21.75–32.05</td></tr>
+    <tr><td>功率限幅</td><td class="mono">−8 dB（相对满幅）</td><td>8 Ω 下 NS4150B 约 1.5 W（4 Ω 3 W 减半），是 0.5 W 额定的 3 倍；ES8311 数字音量上限 + 软限幅，开机提示音与拨轮调节都不得越过</td></tr>
+    <tr><td>布线</td><td class="mono">BTL 两线，35 mm</td><td>两根都不接 GND、不与电池负极共地；线长 &lt;10 cm，10 Ω + 220 pF 吸收可按需贴装；喇叭距麦孔约 41 mm、距 AHT20 约 55 mm</td></tr>
+  </tbody>
+</table>
+<div class="card warn">
+  <h4>两条硬约束</h4>
+  ① <strong>限幅不做就别上电放音</strong>：功放能力 3 倍于额定，音量上限与峰值限制必须在板型里落地并实测；② <strong>出音孔与泡棉密封缺一不可</strong>：密闭壳内若不开孔或振膜前后不隔离，前后声波短路，喇叭基本听不见。此外内置后前腔被占，结构文档「压到 19.5 mm」的减薄备选基本作废。
 </div>
 
 <h2><span class="num">04</span>推荐引脚分配</h2>
@@ -321,7 +352,7 @@
     <tr><td>I2S_WS / LRCK</td><td class="mono">GPIO16</td><td>声道帧同步</td></tr>
     <tr><td>I2S_DIN（收）</td><td class="mono">GPIO17</td><td>ES7210 SDOUT → 主控，麦克风数据</td></tr>
     <tr><td>I2S_DOUT（发）</td><td class="mono">GPIO18</td><td>主控 → ES8311 SDIN，TTS 播放数据</td></tr>
-    <tr><td>I2C_SDA / SCL</td><td class="mono">GPIO41 / 42</td><td>codec 寄存器配置；屏触摸可共用这条总线</td></tr>
+    <tr><td>I2C_SDA / SCL</td><td class="mono">GPIO41 / 42</td><td>codec 寄存器配置 + <strong>AHT20 温湿度（固定 0x38）</strong>；本项目<strong>不加触摸</strong>（0x38 与常见触摸 IC 冲突）；全总线一组 4.7 kΩ 上拉</td></tr>
     <tr><td>PA_EN</td><td class="mono">GPIO7</td><td>功放使能，串 RC（10 kΩ + 1 µF）延时，消除上电 POP 声</td></tr>
     <tr><td>KEY_BOOT</td><td class="mono">GPIO0</td><td>下载模式（strapping，仅上电瞬间采样，正常可用）</td></tr>
     <tr><td>WHEEL_UP</td><td class="mono">GPIO2</td><td>拨轮上拨；10 kΩ 外部上拉 + 100 nF 到地</td></tr>
@@ -336,6 +367,36 @@
     <tr><td>VBUS_SENSE<span class="tag t-amber">可选</span></td><td class="mono">GPIO1</td><td>5V 经 100 kΩ / 100 kΩ 分压 + 100 nF；判断 USB 是否插入，不贴不影响烧录</td></tr>
   </tbody>
 </table>
+
+<h3>温湿度传感器 AHT20（rev 1.7 新增，rev 1.8 换型）</h3>
+<p>用 <strong>AHT20</strong>（奥松 AOSONG）测环境温度与湿度，挂在 codec 已有的 <strong>I2C 总线（GPIO41 / 42）</strong>上，<strong>不占用任何新 GPIO</strong>——本板可用脚已排满：26–37 被 Flash/八线 PSRAM 占用，19/20 是 USB 专用，3/45/46 是 strapping。确定不做触摸后，用它替代 SHT30-DIS 降本；代价是精度略低、地址固定、数据帧无 CRC。</p>
+<table>
+  <thead><tr><th style="width:20%">项</th><th style="width:26%">取值</th><th style="width:54%">说明</th></tr></thead>
+  <tbody>
+    <tr><td>器件 / 封装</td><td class="mono">AHT20 / LGA-6 3×3</td><td>奥松 AOSONG；典型精度 ±0.3 °C / ±2 %RH（25 °C，以最新版 datasheet 为准）；量程 −40~+85 °C / 0–100 %RH</td></tr>
+    <tr><td>I2C 地址</td><td class="mono">固定 0x38（写 0x70 / 读 0x71）</td><td><strong>没有 ADDR 脚，地址不可改</strong>；ES8311 在 0x18 段（7-bit，部分库写 0x30 是 8-bit 形式），不冲突。上电扫描应看到 2 个设备。<strong>本项目确定不加触摸</strong>：常见电容触摸 IC（FT6x36 等）默认地址也是 0x38，若以后要加必须换传感器或加 I2C mux</td></tr>
+    <tr><td>供电 / 去耦</td><td class="mono">3V3 + 100 nF</td><td>100 nF 距 VDD 焊盘 ≤2 mm；器件支持 2.0–5.5 V，直接挂 3V3 轨</td></tr>
+    <tr><td>总线上拉</td><td class="mono">4.7 kΩ ×2 → 3V3</td><td><strong>整条总线只一组</strong>（SDA/SCL 各一），不要给 codec 和 AHT20 各配一组并联；400 kHz</td></tr>
+    <tr><td>未用引脚</td><td class="mono">LGA-6 的 NC 脚</td><td>AHT20 <strong>没有</strong> ADDR / nRESET / ALERT 引脚，NC 脚悬空；BOM 里的 R23 作为空贴预留位号保留</td></tr>
+    <tr><td>摆放</td><td class="mono">PCB 左边缘 (5, 26)</td><td>距 ESP32-S3 模组 ≥12 mm、Buck ≥20 mm、功放 ≥40 mm；正对左壁通风孔，详见《结构与打样方案》rev 2.0（机械数值不随换型改变）</td></tr>
+  </tbody>
+</table>
+<div class="card warn">
+  <h4>测的是环境温度，不是板温：热隔离比精度更重要</h4>
+  ① 器件周围开 <strong>≥1.0 mm 宽 U 形隔离槽</strong>（只留细颈连板），正下方与四周 2 mm 内<strong>禁铺铜</strong>，四根线用 0.15 mm 细线引出，切断 PCB 导热；
+  ② 远离模组、Buck、功放与 LDO 的热羽流，不要放在它们正上方或下风侧；③ 外壳开对流孔（左壁两组 Φ1.2，见结构 rev 2.0），密闭腔体里读数会稳定高出室温 3–8 °C；
+  ④ 感湿孔<strong>不能涂三防漆、不能超声波水洗、不能贴泡棉/标签</strong>，回流后助焊剂残留按 datasheet 烘烤恢复。
+  打样后若读数偏高，先改布局与通风，<strong>不要用软件偏移掩盖</strong>。
+</div>
+<div class="card tip">
+  <h4>固件怎么读（与 SHT30 完全不同，别照抄旧驱动）</h4>
+  与 ES8311 <strong>共用同一个 i2c_master bus / device handle</strong>，不要另建一条总线。上电 ≥40 ms 后先读状态字，检查校准位 CAL(bit3)；未置位则发初始化命令 <code>0xE1</code>（必要时 <code>0xBA</code> 软复位重来）。
+  触发单次测量 <code>0xAC 0x33 0x00</code>，约 <strong>75–80 ms</strong> 后（或轮询 busy(bit7) 清零）读 <strong>7 字节</strong>：1 状态字节 + 5 数据字节，内含 20 bit 湿度与 20 bit 温度；
+  换算 <code>RH = 100·raw20/2²⁰</code>、<code>T = 200·raw20/2²⁰ − 50</code>。
+  <strong>AHT20 数据帧不带 CRC</strong>：靠状态位 busy/CAL、连续两次读数一致、量程合理性（RH 0–100、T −40~85 °C）三项兜底，异常直接丢弃本次。
+  <strong>采样周期 3 s</strong>（单次测量，测量窗口比 SHT30 长，压低自热占空比）；读不到器件时只记日志，<strong>不能阻塞开机</strong>。
+</div>
+<p>读数用于对话里回答室温/湿度与状态上报；器件参数以奥松 <strong>AHT20</strong> 数据手册为准，手册入库后放到 <code>硬件资料/</code>。</p>
 
 <h3>显示屏接口（rev 1.2 定案）</h3>
 <p>屏是 <strong>12pin 焊接式 FPC</strong>，没有连接器，焊盘直接做在 PCB 正面上。四个数字先记住，画封装和结构都靠它们：</p>
@@ -435,7 +496,8 @@
 
 <div class="card warn">
   <h4>分压取值</h4>
-  功放输出摆幅可能到 6–8 Vpp，必须衰减到 ADC 输入范围（通常 1 Vpp 以内）。先用 10 kΩ / 1 kΩ 分压（约 1/11），再串 1 µF 隔直电容，实测用示波器确认不削顶。
+  功放输出摆幅可能到 6–8 Vpp，必须衰减到 ADC 输入范围（通常 1 Vpp 以内）。先用 10 kΩ / 1 kΩ 分压（约 1/11），再串 1 µF 隔直电容，实测用示波器确认不削顶。<br>
+  <strong>8 Ω 轻载时摆幅更接近上限</strong>，分压比要按实测复核；AEC 参考取自功放输出端，与喇叭阻抗及内置位置无关。
 </div>
 
 <h3>② 模拟与数字电源必须分开</h3>
@@ -476,16 +538,28 @@
   <li>SD_CS / SD_MISO / SD_CD 各有 10 kΩ 上拉；上电瞬间 CS 为高</li>
   <li>卡座 3V3 旁有 10 µF + 100 nF；卡座金属壳距天线 ≥16 mm</li>
   <li>留出 UART0（TX/RX）测试点，作为 USB 失效时的救砖后路</li>
+  <li>I2C 总线<strong>只有一组 4.7 kΩ 上拉</strong>（SDA/SCL 各一），上电扫描同时看到 codec 与 <code>0x38</code></li>
+  <li>AHT20 的 VDD 接 3V3、100 nF 在焊盘 2 mm 内；LGA-6 的 NC 脚悬空，<strong>没有 ADDR/nRESET 引脚</strong>；R23 空贴</li>
+  <li>AHT20 距模组 ≥12 mm、Buck ≥20 mm、功放 ≥40 mm；周围 ≥1 mm U 形热隔离槽，2 mm 内禁铺铜</li>
+  <li>传感器区域不涂三防漆、不水洗、不贴泡棉/标签，感湿孔不被筋位或屏槽壁罩住</li>
+  <li>外壳左壁 Y 20–32 的上下两组 Φ1.2 通风孔与采样位对正（结构 rev 2.0）</li>
+  <li>喇叭为内置 LS1（GSPK151035PN，8 Ω / 0.5 W），J2 的 1.25T 端子极性已核对，35 mm 引线不蹭 FPC/拨轮</li>
+  <li>ES8311 数字音量上限 −8 dB + 软限幅已实现；示波器实测功放输出不过功率、AEC 分压不削顶</li>
+  <li>喇叭在 X 44–59 / Y 50–60、Z 17.5–21.0；前壁出音孔 8–10 × Φ1.2 总开口 ≥10 mm²，未侵占视窗 X 18–42</li>
+  <li>前腔泡棉圈密封、后腔 ≈1.15 cm³；未占用 FPC 出口 X 21.75–32.05、拨轮 Y 26–38、天线净空区与 AHT20 通风带</li>
+  <li>喇叭磁钢距顶部天线约 50 mm、距 AHT20 约 55 mm；底边与底面仍零开孔（结构 rev 2.0）</li>
 </ul>
 
 <h2><span class="num">07</span>固件对接要点</h2>
 
-<p>硬件画完，固件侧只要做三件事就能跑起来：</p>
+<p>硬件画完，固件侧只要做五件事就能跑起来：</p>
 
 <ol>
   <li><strong>环境</strong>：ESP-IDF ≥ v6.0（当前主线在 v6.0/v6.1 之上），<code>idf.py set-target esp32s3</code>。</li>
   <li><strong>分区表</strong>：用 16 MB 方案（<code>partitions/v2</code>），其中约 8 MB 是 assets 分区，用于在线下载唤醒词模型、字体和音效——<strong>Flash 小于 16 MB 会直接放不下</strong>。</li>
   <li><strong>板型定义</strong>：在 <code>main/boards/</code> 下新建自己的目录，照抄 <code>bread-compact-wifi</code> 或 <code>esp-s3-devkitc</code> 的 <code>config.h</code>，把上面引脚表填进去，然后在 <code>menuconfig → Component config → XiaoZhi → Board Type</code> 里选中你的板型。</li>
+  <li><strong>温湿度</strong>：复用 codec 的 I2C handle 读 AHT20（0x38），3 s 一次、状态位 + 双读数校验（无 CRC），读数失败不影响开机；见 <code>firmware/README.md</code>。</li>
+  <li><strong>音量限幅</strong>：内置 8 Ω / 0.5 W 喇叭，输出上限 −8 dB + 软限幅，提示音与拨轮调节都受上限约束；见 <code>firmware/board-config/config.h</code>。</li>
 </ol>
 
 <div class="card tip">
@@ -495,7 +569,7 @@
 
 <footer>
   引脚分配与器件型号为通用参考方案，最终以乐鑫 ESP32-S3 数据手册、所选 codec 数据手册及 xiaozhi-esp32 仓库 <code>docs/custom-board.md</code> 为准。
-  显示屏部分以《显示屏接口设计-ZJY133T-IG01》与中景园规格书 Ver D 为准。
+  显示屏部分以《显示屏接口设计-ZJY133T-IG01》与中景园规格书 Ver D 为准；温湿度器件以奥松 AHT20 数据手册为准；喇叭以 GSPK151035PN 规格书为准（外形含端子凸出、额定/最大功率、灵敏度、1.25T 端子极性、推荐后腔容积）。
 </footer>
 
 </div>

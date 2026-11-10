@@ -15,9 +15,16 @@
 音频,I2S_WS,CODEC_LRCK,GPIO16,双向,帧同步
 音频,I2S_DIN,CODEC_ASDOUT,GPIO17,codec→主控,麦克风数据
 音频,I2S_DOUT,CODEC_DSDIN,GPIO18,主控→codec,播放数据
-音频,I2C_SDA,CODEC_SDA,GPIO41,双向,4.7kΩ 上拉到 3V3
-音频,I2C_SCL,CODEC_SCL,GPIO42,主控→codec,4.7kΩ 上拉到 3V3
+音频,I2C_SDA,CODEC_SDA,GPIO41,双向,4.7kΩ 上拉到 3V3（全总线仅一组）；复用 AHT20 温湿度
+音频,I2C_SCL,CODEC_SCL,GPIO42,主控→codec,4.7kΩ 上拉到 3V3（全总线仅一组）；复用 AHT20 温湿度
+传感,AHT20_SDA,CODEC_SDA,GPIO41,双向,与 ES8311 共总线；器件地址固定 0x38（无 ADDR 脚）；不新增 GPIO
+传感,AHT20_SCL,CODEC_SCL,GPIO42,主控→器件,与 ES8311 共总线；400kHz；不新增 GPIO
+传感,AHT20_VDD,3V3,—,电源,100nF 就近去耦（≤2mm）；器件周围 1mm 热隔离槽 + 2mm 禁铺铜
+传感,AHT20_NC,NC,—,空,LGA-6 的 NC 脚悬空；无 ADDR/nRESET/ALERT 引脚，地址不可改；本项目不做触摸
+传感,AHT20_GND,GND,—,电源,就近打地；感湿孔朝上、不涂三防漆
 音频,PA_EN,PA_EN,GPIO7,主控→功放,串 10kΩ + 1µF 延时，消上电 POP
+音频,SPK_P,SPK_P,—,功放→喇叭,NS4150B BTL 输出＋；经 J2 接 LS1 内置喇叭；两根都不接地/不与电池负极共地
+音频,SPK_N,SPK_N,—,功放→喇叭,NS4150B BTL 输出−；35mm 引线；10Ω+220pF 吸收可选；ES8311 数字音量上限 −8dB
 交互,WHEEL_UP,WHEEL_UP,GPIO2,输入,拨轮上拨；10kΩ 上拉 + 100nF 到地
 交互,WHEEL_DOWN,WHEEL_DOWN,GPIO6,输入,拨轮下拨；10kΩ 上拉 + 100nF 到地
 交互,WHEEL_PRESS,WHEEL_PRESS,GPIO4,输入,拨轮按压；10kΩ 上拉 + 100nF；兼作对话/打断

@@ -73,7 +73,7 @@
   <div class="kicker">LCD interface design · rev 1.0</div>
   <h1>显示屏接口设计：中景园 ZJY133T-IG01</h1>
   <p class="sub">1.3″ IPS 240×240 · ST7789V2 · 4 线 SPI · 12 pin 焊接式 FPC（0.7 mm 间距）· 瀚彩（HSD）玻璃<br>
-  <span style="font-size:12.5px;color:#8b949e">适用：小智 AI 板 rev 1.8（机身 64×64×22）· 2026-11-10</span></p>
+  <span style="font-size:12.5px;color:#8b949e">适用：小智 AI 板 rev 2.0（机身 64×64×22）· 2026-11-10</span></p>
   <div class="summary">
     <strong>一句话结论：</strong>这是一块<strong>自带背光、没有触摸、只能写不能读</strong>的 SPI 裸屏模组。三件事必须先定死：
     ① VDD 只用 3.3 V，且轨道要压在 <strong>3.30 V 以内</strong>（规格上限就是 3.3 V）；
@@ -106,7 +106,7 @@
 <div class="card warn">
   <h4>和上一版结构文档的差别</h4>
   结构方案 rev 1.4 里预留的是 <strong>Φ40 圆屏（GC9A01）</strong>，rev 1.5 换成这块方屏，rev 1.6 又把机身从 82×82×24 缩到 <strong>64×64×22</strong>。
-  屏在面板上偏左 2mm，右侧是 Φ10 拨轮；屏顶到天线只剩 <strong>12.4mm</strong>（建议 15），取舍见结构文档 rev 1.8。
+  屏在面板上偏左 2mm，右侧是 Φ10 拨轮；屏顶到天线只剩 <strong>12.4mm</strong>（建议 15），取舍见结构文档 rev 2.0。
 </div>
 
 <h2><span class="num">02</span>12 pin 定义与 GPIO 分配</h2>
@@ -497,7 +497,7 @@
 
 <h2><span class="num">07</span>结构与装配：13.13 mm 的 FPC 决定一切</h2>
 
-<p>屏背面到 PCB 正面的距离不能超过 <strong>10.7 mm</strong>（13.13 − 折弯 0.6 − 焊盘 1.85）。按 rev 1.8 的 Z 向叠层算：前壁内表面 21.0，屏槽深 1.7（屏 1.5 + 泡棉 0.2），屏背 19.5，PCB 正面 9.8，间隙 <strong>9.7</strong>。</p>
+<p>屏背面到 PCB 正面的距离不能超过 <strong>10.7 mm</strong>（13.13 − 折弯 0.6 − 焊盘 1.85）。按 rev 2.0 的 Z 向叠层算：前壁内表面 21.0，屏槽深 1.7（屏 1.5 + 泡棉 0.2），屏背 19.5，PCB 正面 9.8，间隙 <strong>9.7</strong>。</p>
 
 <div class="diagram">
 <svg viewBox="0 0 700 360" width="100%" xmlns="http://www.w3.org/2000/svg" role="img">
@@ -581,7 +581,7 @@
 <h3>机身已缩到 64：屏的位置与代价</h3>
 <p>82×82 那版屏只占前面板 29%，框显得很大，所以 rev 1.6 把机身缩到 <strong>64 × 64 × 22</strong>，屏占比升到 37.5%。
 屏中心落在 <strong>(30.0, 33.0)</strong>，比面板几何中心左 2 mm——右侧留给 Φ10 拨轮；左边框 18、视窗到轮 14，视觉上是平衡的。</p>
-<p>代价是屏顶到模组天线只剩 <strong>12.4 mm</strong>（乐鑫建议 15）。补偿措施见结构文档 rev 1.8：PCB 顶部全层禁铜、外壳纯塑料、天线区不放螺柱；
+<p>代价是屏顶到模组天线只剩 <strong>12.4 mm</strong>（乐鑫建议 15）。补偿措施见结构文档 rev 2.0：PCB 顶部全层禁铜、外壳纯塑料、天线区不放螺柱；
 打样后实测 RSSI，低于 −70 dBm 就把屏下移 3mm，仍不行换 <code>WROOM-1U</code> + IPEX。</p>
 
 <h2><span class="num">08</span>上电验证与故障表</h2>
@@ -620,15 +620,15 @@
   <li>SPI 四线各串 33 Ω，位置靠 ESP32；SCLK=12、SDA=11、DC=13、CS=10</li>
   <li>RESET 有 10 kΩ 上拉 + 100 nF，接 GPIO9；没有直接接 3V3</li>
   <li>4 个 GND 脚各自就近过孔下地，不是只靠一根线串过去</li>
-  <li>SPI 走线没进顶部天线禁铜区；本机屏顶距天线只有 12.4 mm，天线区全层禁铜（见结构 rev 1.8）</li>
+  <li>SPI 走线没进顶部天线禁铜区；本机屏顶距天线只有 12.4 mm，天线区全层禁铜（见结构 rev 2.0）</li>
   <li>3.3 V 实测 ≤3.30 V（带屏 + 背光 100%）</li>
-  <li>3D 打印前确认：视窗 24.0、屏槽 26.5 × 29.6 × 1.7、屏背到 PCB <strong>9.7</strong>（结构 rev 1.8）、FPC 出口 ≥10.6 宽</li>
+  <li>3D 打印前确认：视窗 24.0、屏槽 26.5 × 29.6 × 1.7、屏背到 PCB <strong>9.7</strong>（结构 rev 2.0）、FPC 出口 ≥10.6 宽</li>
   <li>首批焊接后做 08 节的 6 步点屏验证，再装壳</li>
 </ul>
 
 <footer>
   数据来源：中景园《ZJY133T-IG01 Product Specification》Ver D（2020-06-30）、ST7789V3 规格书、厂家 <code>lcd_init.c</code> 例程；
-  结构数值对应《小智AI板-结构与打样方案》rev 1.8。FPC 整排偏置 3.0 mm 为图纸量测值，打样前请用实物卡尺复核。
+  结构数值对应《小智AI板-结构与打样方案》rev 2.0（rev 2.0 新增内置喇叭位与前壁出音孔，屏与 Z 向叠层数值未变）。FPC 整排偏置 3.0 mm 为图纸量测值，打样前请用实物卡尺复核。
 </footer>
 
 </div>

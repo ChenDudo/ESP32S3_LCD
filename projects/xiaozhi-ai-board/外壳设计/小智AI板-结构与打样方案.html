@@ -63,13 +63,15 @@
 <div class="wrap">
 
 <header>
-  <div class="kicker">Mechanical layout · rev 1.8</div>
-  <h1>结构与打样方案：64 × 64 × 22 mm（侧壁拨轮 + 1.3″ 方屏 + TF 卡）</h1>
-  <p class="sub">6 脚贴片三向拨轮开关 · 轮缘露 2mm · 底面零开孔 · USB-C 左壁下方 · TF 卡右壁上方 · 屏顶到天线 12.4mm</p>
+  <div class="kicker">Mechanical layout · rev 2.0</div>
+  <h1>结构与打样方案：64 × 64 × 22 mm（侧壁拨轮 + 1.3″ 方屏 + TF 卡 + 温度通风孔 + 内置喇叭）</h1>
+  <p class="sub">6 脚贴片三向拨轮开关 · 轮缘露 2mm · 底面零开孔 · USB-C 左壁下方 · TF 卡右壁上方 · 屏顶到天线 12.4mm · AHT20 左壁通风 · 前壁右下出音孔</p>
   <div class="summary">
-    <strong>rev 1.8 变更：</strong>侧壁控制件从 <strong>EC11 编码器 + 3D 打印 Φ24 轮</strong> 换成 <strong>L-ink 同款 6 脚贴片三向拨轮开关</strong>
-    （上拨/下拨/按压，自复位，不是编码器）。开关本体贴片坐在 PCB 右缘，Φ10 轮子从侧壁槽探出 2mm；<strong>不再需要打印轮、D 型轴、压轴机构</strong>。
-    屏因此从偏左 10.6mm 回到接近居中：<strong>屏中心 (30, 33.0)</strong>。
+    <strong>rev 2.0 变更：</strong>喇叭由外接改为<strong>内置</strong>：GSPK151035PN（15×10×3.5，8 Ω 0.5 W）放在前腔右下 <strong>X 44–59 / Y 50–60</strong>，Z 贴前壁内表面，前壁新增 <strong>8–10 × Φ1.2 出音孔</strong>，泡棉圈围出 ≈1.15 cm³ 后腔。<br>
+    <span style="font-size:12.5px;color:#57606a"><strong>尺寸不变项</strong>：64×64×22、Z 向叠层、壁厚、屏槽 26.5×29.6×1.7、视窗 24×24、底边/底面零开孔、全部既有开孔的位置与孔径；本次只新增前壁出音孔位与壳内喇叭位。</span><br>
+    <strong>rev 1.9 变更：</strong>新增 <strong>AHT20 环境温度采样</strong>：器件贴 PCB 左边缘 (5, 26)，左壁 Y 20–32 开上下两组 Φ1.2 通风孔形成对流；<strong>底面仍零开孔</strong>，64×64×22 不变。<br>
+    <span style="font-size:12.5px;color:#57606a">器件型号由 SHT30-DIS 换型为 AHT20（硬件说明 rev 1.8）；<strong>采样位、通风孔、热隔离与全部机械数值不变</strong>，当时维持 rev 1.9 未升版（rev 2.0 才因新增内置喇叭升版）。</span><br>
+    <span style="font-size:12.5px;color:#57606a">rev 1.8：侧壁控制件从 EC11 编码器 + 3D 打印 Φ24 轮换成 <strong>L-ink 同款 6 脚贴片三向拨轮开关</strong>（上拨/下拨/按压，自复位，不是编码器）。Φ10 轮子从侧壁槽探出 2mm；<strong>不再需要打印轮、D 型轴、压轴机构</strong>。屏中心 (30, 33.0)。</span>
   </div>
 </header>
 
@@ -149,6 +151,15 @@
   <!-- left wall -->
   <circle cx="118" cy="95" r="4" fill="none" stroke="#8b949e" stroke-width="0.7" stroke-dasharray="2 2"/>
   <circle cx="118" cy="107" r="4" fill="none" stroke="#8b949e" stroke-width="0.7" stroke-dasharray="2 2"/>
+  <!-- rev 1.9: temp vent holes + AHT20 -->
+  <circle cx="118" cy="143" r="2.4" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.7"/>
+  <circle cx="118" cy="159" r="2.4" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.7"/>
+  <circle cx="118" cy="175" r="2.4" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.7"/>
+  <rect x="132" y="153" width="12" height="12" rx="2" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.9"/>
+  <path d="M126 159L132 159" fill="none" stroke="#0F6E56" stroke-width="0.7"/>
+  <text x="86" y="155" text-anchor="end" font-size="9.5" fill="#085041">通风孔 ×3</text>
+  <text x="86" y="168" text-anchor="end" font-size="8.5" fill="#8b949e">Y 20–32 · Φ1.2</text>
+  <text x="150" y="159" font-size="9" fill="#085041">AHT20 (5, 26)</text>
   <rect x="112" y="251" width="14" height="37" rx="3" fill="#ffffff" stroke="#5F5E5A" stroke-width="0.9"/>
   <path d="M104 268L92 268" fill="none" stroke="#B4B2A9" stroke-width="0.6"/>
   <text x="86" y="272" text-anchor="end" font-size="10" fill="#57606a">USB-C</text>
@@ -160,18 +171,27 @@
   <rect x="370" y="239" width="12" height="34" rx="2" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.9"/>
   <rect x="370" y="283" width="12" height="18" rx="2" fill="#FAEEDA" stroke="#BA7517" stroke-width="0.9"/>
   <path d="M382 256L420 256" fill="none" stroke="#B4B2A9" stroke-width="0.6"/>
-  <text x="424" y="253" font-size="10" fill="#57606a">喇叭座</text>
+  <text x="424" y="253" font-size="10" fill="#57606a">喇叭接线座（J2）</text>
   <path d="M382 292L420 292" fill="none" stroke="#B4B2A9" stroke-width="0.6"/>
   <text x="424" y="289" font-size="10" fill="#57606a">VBAT</text>
 
+  <!-- rev 2.0: internal speaker + front-wall sound holes -->
+  <rect x="296" y="255" width="60" height="40" rx="3" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.9"/>
+  <text x="326" y="270" text-anchor="middle" font-size="9" fill="#173404">内置喇叭 15×10</text>
+  <text x="326" y="282" text-anchor="middle" font-size="8.5" fill="#3B6D11">X44–59 / Y50–60</text>
+  <circle cx="307" cy="290" r="1.7" fill="#3B6D11"/>
+  <circle cx="318" cy="290" r="1.7" fill="#3B6D11"/>
+  <circle cx="329" cy="290" r="1.7" fill="#3B6D11"/>
+  <circle cx="340" cy="290" r="1.7" fill="#3B6D11"/>
+  <text x="326" y="304" text-anchor="middle" font-size="8" fill="#3B6D11">前壁出音孔 8×Φ1.2</text>
   <path d="M120 320H376" fill="none" stroke="#E24B4A" stroke-width="1.4" stroke-dasharray="6 4"/>
   <text x="248" y="336" text-anchor="middle" font-size="10" fill="#A32D2D">↓ 此边贴桌面：无开孔 · 无外露螺丝</text>
 
   <path d="M120 356H376" fill="none" stroke="#8b949e" stroke-width="0.9" marker-start="url(#d8)" marker-end="url(#d8)"/>
   <text x="248" y="350" text-anchor="middle" font-size="10" fill="#57606a">64 mm</text>
-  <text x="120" y="380" font-size="9.5" fill="#8b949e">64 × 64 × 22mm　·　左壁：USB-C + 针孔　·　右壁：TF 卡槽 + 拨轮槽 + 喇叭座 + 电池焊盘</text>
+  <text x="120" y="380" font-size="9.5" fill="#8b949e">64 × 64 × 22mm　·　左壁：USB-C + 针孔 + 温感通风孔　·　右壁：TF 卡槽 + 拨轮槽 + 喇叭接线座 + 电池焊盘　·　前壁右下：出音孔</text>
 </svg>
-<div class="caption">屏居中偏左 2mm；Φ10 拨轮在右壁中段露出 2mm；顶部 20.6mm 留给天线与麦克风</div>
+<div class="caption">屏居中偏左 2mm；Φ10 拨轮在右壁中段露出 2mm；左壁中段 Y 20–32 为 AHT20 通风孔与采样位；右下 X 44–59 / Y 50–60 为内置喇叭与前壁出音孔；顶部 20.6mm 留给天线与麦克风</div>
 </div>
 
 <div class="card warn">
@@ -179,6 +199,44 @@
   模组天线在 PCB 上边沿（机身 Y=6），屏顶在 18.4，只剩 <strong>12.4mm</strong>，低于乐鑫建议的 15mm。
   补偿：① PCB 顶部 6mm 全层禁铜；② 该区域外壳纯塑料，无螺柱/筋位/金属；③ 屏背不贴铜箔。
   打样后测 RSSI，低于 −70 dBm 就把屏下移 3mm，仍不行换 <code>WROOM-1U</code> + IPEX。
+</div>
+
+<h3>环境温度采样位与通风（rev 1.9 新增）</h3>
+<p>AHT20 要测的是<strong>室温</strong>，不是板温。桌面机密闭腔体里，主控 + Buck + 功放会稳稳把腔内抬到比室温高 3–8 °C，所以位置与通风比传感器精度更决定读数是否可用。</p>
+<table>
+  <thead><tr><th style="width:22%">项</th><th style="width:26%">取值</th><th style="width:52%">说明</th></tr></thead>
+  <tbody>
+    <tr><td>器件位置</td><td class="mono">PCB 左边缘 (5.0, 26.0)</td><td>贴 PCB 正面（朝前腔），感应孔朝上，正对左壁通风孔；距模组 ≥12 mm、Buck ≥20 mm、功放 ≥40 mm</td></tr>
+    <tr><td>进气孔</td><td class="mono">左壁 3 × Φ1.2，Y 22/26/30，Z 11.0</td><td>低位进冷空气；孔口 C0.3，内侧避开 PCB 与螺柱</td></tr>
+    <tr><td>出气孔</td><td class="mono">左壁 3 × Φ1.2，Y 22/26/30，Z 17.5</td><td>高位出热空气；上下相差 6.5 mm 形成微烟囱效应</td></tr>
+    <tr><td>PCB 热隔离</td><td class="mono">U 形槽 ≥1.0 mm</td><td>器件三面开槽只留细颈，正下方与四周 2 mm 禁铺铜，四根线 0.15 mm 细线引出</td></tr>
+    <tr><td>不变项</td><td class="mono">底面零开孔</td><td>全部通风孔都在左壁，底边/底面仍无接口、无螺丝、无凸起</td></tr>
+  </tbody>
+</table>
+<div class="card warn">
+  <h4>三条不能错</h4>
+  ① 左壁 Y 20–32 是唯一空段：上方 Y 9–12 是 BOOT/RST 针孔、下方 Y 49–58 是 USB-C，<strong>通风孔不能侵占这两段</strong>；② 通风孔不得开进顶部天线净空区（Y &lt; 15 的禁铜/无金属区）；
+  ③ 传感器区域<strong>不涂三防漆、不超声波水洗、不贴泡棉或标签</strong>，装壳时别让屏槽壁/筋位把器件罩成死腔。
+  打样后拿室温计比对：偏差 &gt; 2 °C 先查热源与通风，不要用软件偏移硬补。
+</div>
+
+<h3>内置喇叭与音腔（rev 2.0 新增）</h3>
+<p>喇叭从「外接」改为内置，占用前腔右下角空区。<strong>机身 64×64×22、Z 叠层、壁厚、屏槽与所有既有开孔位置全部不变</strong>，只在前壁新增出音孔位与壳内喇叭固定/密封特征。</p>
+<table>
+  <thead><tr><th style="width:22%">项</th><th style="width:26%">取值</th><th style="width:52%">说明</th></tr></thead>
+  <tbody>
+    <tr><td>器件</td><td class="mono">15 × 10 × 3.5 mm</td><td>GSPK151035PN-8R0.5W-L35-1.25T，8 Ω / 0.5 W；1.25T 端子插 J2，引线 35 mm</td></tr>
+    <tr><td>喇叭位</td><td class="mono">X 44–59 / Y 50–60</td><td>振膜朝前壁、贴前壁内表面 Z 21.0；距视窗右边 2 mm、右壁内侧 3 mm、贴桌面底边 2 mm</td></tr>
+    <tr><td>Z 向</td><td class="mono">喇叭 Z 17.5–21.0</td><td>壁外自由高 11.2 mm（PCB 正面 9.8 → 前壁内表面 21.0），喇叭占 3.5 mm</td></tr>
+    <tr><td>后腔</td><td class="mono">7.7 mm ≈ 1.15 cm³</td><td>喇叭背后到 PCB 面的空间，用泡棉圈围成密闭后腔；振膜面与前壁之间另贴泡棉圈密封前腔，防声短路</td></tr>
+    <tr><td>出音孔</td><td class="mono">前壁 8–10 × Φ1.2</td><td>X 46–57 / Y 52–58，总开口 ≥10 mm²；在视窗 X 18–42 之外；<strong>底面/底边仍零开孔</strong></td></tr>
+    <tr><td>可用区判定</td><td class="mono">X 43–62 / Y 48–62</td><td>上带是天线净空 15×25（禁金属），左带是 AHT20 通风带，右上是 TF 卡座，右中是拨轮 Y 26–38，屏下是 FPC 出口 X 21.75–32.05，均不可占</td></tr>
+  </tbody>
+</table>
+<div class="card warn">
+  <h4>三条不能错</h4>
+  ① <strong>出音孔与泡棉密封缺一不可</strong>：不开孔或振膜前后不隔离，密闭壳里喇叭基本听不见；② 喇叭<strong>不能放元件腔</strong>（Z 1.6–8.2 虽塞得下 3.5 mm，但那一侧朝贴桌面的后盖且零开孔）；
+  ③ 内置后前腔余量被占，<strong>「19.5 mm 减薄」备选基本作废</strong>（后腔只剩 3.7 mm）。功率侧另见硬件说明 rev 1.9：ES8311 音量上限 −8 dB + 软限幅。
 </div>
 
 <h2><span class="num">03</span>屏开窗与屏槽</h2>
@@ -267,6 +325,10 @@
   <li><strong>TF 卡座</strong>在 PCB 正面右上角，卡口对准右壁槽（Y 7–18）；装壳后先插一张卡，确认不刮屏槽壁。</li>
   <li>USB-C 在<strong>左壁下方</strong>（Y 49–58），线材向下走；BOOT/RST 针孔在左壁上方（Y 9–12）。</li>
   <li><strong>烧录/救砖</strong>：装壳后不用拆；USB-C 插数据线即认 COM 口，固件跑飞时用针捅 BOOT + RST 进下载模式。</li>
+  <li><strong>AHT20 通风孔</strong>：装壳后逐个通孔确认没被筋位/螺柱挡住；下组 Z 11.0 进气、上组 Z 17.5 出气，孔内不塞泡棉。</li>
+  <li><strong>传感器区域免涂覆</strong>：不喷三防漆、不贴标签、不超声波清洗；装壳后拿室温计比对，偏差 &gt; 2 °C 先查通风与热源。</li>
+  <li><strong>内置喇叭</strong>：先把 LS1 引线插 J2，喇叭贴前壁内表面并用泡棉圈压紧；装壳前确认出音孔通透、振膜前后不串音。</li>
+  <li><strong>喇叭隔振</strong>：泡棉圈同时做隔振，别让喇叭直接顶到前壁硬塑料或屏槽壁；线材盘在右下空区，避开 FPC 折弯处。</li>
 </ul>
 
 <h2><span class="num">07</span>还想更小 / 更薄？</h2>
@@ -278,7 +340,7 @@
       <td><span class="tag t-teal">备选 A</span> 19.5mm 薄</td>
       <td class="mono">−2.5mm</td>
       <td>前腔 9.7 → 7.2，FPC 走 S 弯；拨轮开关 6.6 仍放得下</td>
-      <td>FPC 多一道弯，需要打样验证不折伤；屏槽壁变浅</td>
+      <td>FPC 多一道弯，需要打样验证不折伤；屏槽壁变浅；<strong>rev 2.0 内置喇叭后基本作废</strong>（后腔只剩 3.7 mm）</td>
     </tr>
     <tr>
       <td><span class="tag t-blue">备选 B</span> 60 × 60 × 22</td>
@@ -332,14 +394,21 @@
   <li>麦孔在正面 (38, 16)，与 TF 卡座 8mm、与拨轮 12mm</li>
   <li>底边/底面零开孔：无接口、无螺丝、无凸起，只留 4 个脚垫沉孔</li>
   <li>左壁 USB-C 9.6×3.6（Y 49–58）、针孔 Φ2.5（Y 9–12）已定位</li>
-  <li>右壁喇叭座 8×4、VBAT 孔 Φ3.5 位于拨轮槽下方，互不干涉</li>
+  <li>右壁喇叭接线座 8×4（J2，非出音口）、VBAT 孔 Φ3.5 位于拨轮槽下方，互不干涉</li>
+  <li>内置喇叭 15×10×3.5 在 X 44–59 / Y 50–60、Z 17.5–21.0，后腔 7.7 mm ≈1.15 cm³</li>
+  <li>前壁出音孔 8–10 × Φ1.2（X 46–57 / Y 52–58）总开口 ≥10 mm²，不侵占视窗 X 18–42</li>
+  <li>喇叭位未占用 FPC 出口 X 21.75–32.05、拨轮 Y 26–38、天线净空区与 AHT20 通风带</li>
+  <li>喇叭振膜面与前壁、背面与 PCB 面各有泡棉圈密封；底边/底面仍零开孔</li>
   <li>拨轮上/下/按压三路各有 10 kΩ 上拉 + 100 nF，COM 接地</li>
   <li>壁厚 ≥1.0mm（前壁）与 ≥2mm（侧壁），后盖 ≥1.6mm</li>
+  <li>AHT20 采样位 (5.0, 26.0) 贴 PCB 左边缘，距模组 ≥12mm、Buck ≥20mm、功放 ≥40mm</li>
+  <li>左壁 Y 20–32 两组 3 × Φ1.2 通风孔：Z 11.0（进气）/ Z 17.5（出气），不侵占针孔 Y 9–12 与 USB-C Y 49–58，不进天线净空区</li>
+  <li>传感器周围 U 形热隔离槽 ≥1.0mm、2mm 内禁铺铜；装壳后通风孔通透、无泡棉/筋位遮挡</li>
 </ul>
 
 <footer>
   尺寸需按实际选用的模组、屏、拨轮开关与五金件规格书微调；打样规则以嘉立创当期活动页面为准。
-  拨轮开关型号以实物为准（L-ink S1 同款：6 脚贴片三向），屏的电气与封装数值以《显示屏接口设计-ZJY133T-IG01》rev 1.0 为准。
+  拨轮开关型号以实物为准（L-ink S1 同款：6 脚贴片三向），屏的电气与封装数值以《显示屏接口设计-ZJY133T-IG01》rev 1.0 为准；内置喇叭的外形（含端子凸出）、灵敏度与推荐后腔容积以 GSPK151035PN 规格书复核后再出图。
 </footer>
 
 </div>
