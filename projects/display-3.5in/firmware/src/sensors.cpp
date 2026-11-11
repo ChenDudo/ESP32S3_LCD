@@ -157,6 +157,26 @@ bool bmp280Read(float &temperature, float &pressureHpa) {
   return true;
 }
 
+// ---------------- TMP117（外接温度探头） ----------------
+
+bool tmpProbed = false;
+bool tmpPresent = false;
+
+bool tmp117Init() {
+  // 0x0F DEVICE_ID，应为 0x0117
+  uint8_t id[2];
+  if (!readReg(TMP117_ADDR, 0x0F, id, 2)) return false;
+  return (((uint16_t)id[0] << 8) | id[1]) == 0x0117;
+}
+
+bool tmp117Read(float &temperature) {
+  // 0x00 TEMP_RESULT，有符号 16 bit，1 LSB = 0.0078125℃
+  uint8_t b[2];
+  if (!readReg(TMP117_ADDR, 0x00, b, 2)) return false;
+  temperature = (int16_t)(((uint16_t)b[0] << 8) | b[1]) * 0.0078125f;
+  return true;
+}
+
 // ---------------- ATGM336H (NMEA 0183) ----------------
 
 char line[100];
@@ -268,7 +288,21 @@ bool readEnvironment(Environment &env) {
     }
   }
 
-  return env.aht20Ok || env.bmp280Ok;
+  // 外接 TMP117 优先做温度：它不受壳内背光/射频烘烤，读数才接近环境
+  if (!tmpProbed) {
+    tmpProbed = true;
+    tmpPresent = tmp117Init();
+  }
+  if (tmpPresent) {
+    float t = 0.0f;
+    if (tmp117Read(t)) {
+      env.tmp117Temperature = t;
+      env.tmp117Ok = true;
+      env.temperature = t;  // 覆盖 AHT20 的温度
+    }
+  }
+
+  return env.aht20Ok || env.bmp280Ok || env.tmp117Ok;
 }
 
 bool gpsPoll(GpsFix &fix) {

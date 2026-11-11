@@ -12,14 +12,17 @@ namespace sensors {
 
 constexpr uint8_t AHT20_ADDR = 0x38;
 constexpr uint8_t BMP280_ADDR = 0x76;  // GY-BMP280 默认 0x76；SDO 拉高则 0x77
+constexpr uint8_t TMP117_ADDR = 0x48;  // ADD0 接 GND；外接探头，与上面两个不冲突
 
 struct Environment {
   bool aht20Ok = false;
   bool bmp280Ok = false;
-  float temperature = 0.0f;  // ℃，优先取 AHT20
+  bool tmp117Ok = false;
+  float temperature = 0.0f;  // ℃，优先取外接 TMP117，其次 AHT20
   float humidity = 0.0f;     // %RH
   float pressure = 0.0f;     // hPa
   float bmpTemperature = 0.0f;
+  float tmp117Temperature = 0.0f;
 };
 
 struct GpsFix {

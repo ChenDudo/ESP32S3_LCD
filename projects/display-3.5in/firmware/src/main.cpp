@@ -13,6 +13,7 @@
 //
 // 底板扩展（未接外设时可用 display_test 环境单独点屏）：
 //   AHT20 温湿度（I2C 0x38）与 GY-BMP280 气压（I2C 0x76）挂在触摸同一条 I2C 上（J4）
+//   外接 TMP117 温度探头（I2C 0x48）同总线，TEMP 卡优先显示它
 //   ATGM336H-5N31 GNSS 走 UART1（IO44 收 / IO43 发），即原 J3 调试口
 
 Lcd lcd;
@@ -53,11 +54,15 @@ void drawCardFrame(int x, int y, int w, int h, const char *title) {
 
 void drawEnvValues() {
   char t[12], h[12], p[12];
-  if (env.aht20Ok) {
+  const bool hasTemp = env.tmp117Ok || env.aht20Ok;  // 优先外接 TMP117
+  if (hasTemp) {
     snprintf(t, sizeof(t), "%.1f", env.temperature);
-    snprintf(h, sizeof(h), "%.1f", env.humidity);
   } else {
     snprintf(t, sizeof(t), "--");
+  }
+  if (env.aht20Ok) {
+    snprintf(h, sizeof(h), "%.1f", env.humidity);
+  } else {
     snprintf(h, sizeof(h), "--");
   }
   if (env.bmp280Ok) {
@@ -68,7 +73,7 @@ void drawEnvValues() {
 
   const char *values[3] = {t, h, p};
   const char *units[3] = {"C", "%RH", "hPa"};
-  const bool ok[3] = {env.aht20Ok, env.aht20Ok, env.bmp280Ok};
+  const bool ok[3] = {hasTemp, env.aht20Ok, env.bmp280Ok};
 
   for (int i = 0; i < 3; ++i) {
     const int x = CARD_X[i];
@@ -212,9 +217,9 @@ void loop() {
     lastEnvMs = millis();
     sensors::readEnvironment(env);
     drawEnvValues();
-    Serial.printf("T=%.1fC RH=%.1f%% P=%.1fhPa (aht:%d bmp:%d) gps:fix=%d sats=%u\n",
+    Serial.printf("T=%.1fC RH=%.1f%% P=%.1fhPa (aht:%d bmp:%d tmp117:%d) gps:fix=%d sats=%u\n",
                   env.temperature, env.humidity, env.pressure, env.aht20Ok,
-                  env.bmp280Ok, gps.locationValid, gps.satellites);
+                  env.bmp280Ok, env.tmp117Ok, gps.locationValid, gps.satellites);
   }
 
   // 触摸

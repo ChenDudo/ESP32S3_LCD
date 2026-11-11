@@ -634,13 +634,14 @@ touch_.config(tcfg);</pre>
   <tbody>
     <tr><td>温湿度</td><td class="mono">AHT20</td><td class="c">I²C</td><td class="c mono">0x38</td><td>J4 排针（与触摸共总线）</td></tr>
     <tr><td>气压 / 温度</td><td class="mono">GY-BMP280</td><td class="c">I²C</td><td class="c mono">0x76</td><td>J4 排针（同上）</td></tr>
+    <tr><td>温度（外接）</td><td class="mono">TMP117</td><td class="c">I²C</td><td class="c mono">0x48</td><td>J4A/J4B 空座（与触摸共总线），探头放壳外</td></tr>
     <tr><td>GNSS 定位</td><td class="mono">ATGM336H-5N31</td><td class="c">UART</td><td class="c mono">9600 8N1</td><td>J3（TX→IO44，RX→IO43，PPS→IO47）</td></tr>
   </tbody>
 </table>
 
 <div class="callout info">
   <span class="t">地址不冲突，可以直接并联</span>
-  实测触摸芯片为 <b>GT1151Q，地址固定 <code>0x14</code></b>（GT911 才是 0x5D），AHT20 是 <code>0x38</code>，BMP280 是 <code>0x76</code>（GY 模块把 SDO 拉高可改 0x77）。三个挂同一条 I²C 上没有冲突。
+  实测触摸芯片为 <b>GT1151Q，地址固定 <code>0x14</code></b>（GT911 才是 0x5D），AHT20 是 <code>0x38</code>，BMP280 是 <code>0x76</code>（GY 模块把 SDO 拉高可改 0x77），外接 TMP117 是 <code>0x48</code>。四个挂同一条 I²C 上没有冲突。
 </div>
 
 <h3>12.2 I²C 总线（IO41 / IO42）</h3>
@@ -727,6 +728,27 @@ touch_.config(tcfg);</pre>
 </ul>
 
 
+
+<h3>12.8 外接 TMP117 温度探头</h3>
+<p>板载 AHT20 在壳内会被背光和 Wi-Fi 烤高 3~8℃（见 12.5）。要测真实环境温度，用 <b>TMP117 做外接探头</b>：
+±0.1℃（−20~50℃）、16 bit（0.0078℃/LSB）、1.8–5.5V、1 Hz 仅 3.5 µA。插在 I²C 座上、探头放壳外，读数才准。</p>
+<table>
+  <thead><tr><th style="width:150px">项目</th><th>做法</th></tr></thead>
+  <tbody>
+    <tr><td>模块引脚</td><td>4P：V+ / GND / SDA / SCL；模块多出来的 ALERT 不接，<b>确认 ADD0 已接 GND</b>（这才是 0x48）</td></tr>
+    <tr><td>接哪个座</td><td>J4A / J4B 任意空座（3V3 / GND / SCL / SDA）。两个都占用时用 XH 一分二线并到同一总线，或直接焊到 J4 的四个脚上——I²C 本来就是总线，允许并联</td></tr>
+    <tr><td>地址</td><td><code>0x48</code>（ADD0 接地）；现有触摸 <code>0x14</code>、AHT20 <code>0x38</code>、BMP280 <code>0x76</code>，不冲突</td></tr>
+    <tr><td>线长 / 速率</td><td>20–50cm XH 成品线；<code>APP_I2C_FREQ</code> 默认 <b>100kHz</b>，50cm 也稳。想改 400kHz 先在短线材上验证</td></tr>
+    <tr><td>上拉</td><td>触摸 4.7k + AHT20/BMP280 各 4.7k ≈ 1.6k；TMP117 模块若自带 4.7k 并到 ≈1.2k，仍可用，<b>不要再加</b></td></tr>
+    <tr><td>探头位置</td><td>伸出壳外，或用顶板 I²C 口外挂；远离屏背光、ESP32、DC-DC；别贴着塑料壳（晒热）</td></tr>
+    <tr><td>固件</td><td><code>sensors.cpp</code> 已加驱动：0x0F 读 ID 应为 <code>0x0117</code>，0x00 读温度 ×0.0078125；TEMP 卡优先 TMP117，AHT20 只作湿度</td></tr>
+  </tbody>
+</table>
+<div class="callout info">
+  <span class="t">为什么不在板上再焊一颗</span>
+  TMP117 再准，焊在板子上读到的也是板温——82mA 背光和 Wi-Fi 会把局部抬高好几度。外接才是它的正确用法；
+  以后若要板载，必须放板边、开透气孔，并且做偏移校准。
+</div>
 
 <h3>12.5 改成可插拔：接插件选型与引脚定义</h3>
 <p>

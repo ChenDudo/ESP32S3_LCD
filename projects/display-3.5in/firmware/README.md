@@ -113,24 +113,26 @@ board_build.partitions = default_16MB.csv
 - LovyanGFX 没有 `Panel_NT35310`；两者都不行时需要按 NT35310 的初始化表写一个自定义 Panel 类。
 - 底板上 `LCD_RD` 接了 GPIO39 并留了上拉，需要读 ID 时把 `cfg.readable = true`、`cfg.pin_rd = 39` 即可。
 
-## 6. 扩展外设：AHT20 / GY-BMP280 / ATGM336H
+## 6. 扩展外设：AHT20 / GY-BMP280 / TMP117 / ATGM336H
 
-三个外设**不占新 GPIO**：两个传感器挂在触摸的 I²C 上，GPS 用原 J3 调试口的 UART。
+四个外设**不占新 GPIO**：三个传感器挂在触摸的 I²C 上，GPS 用原 J3 调试口的 UART。
 驱动都写在 `src/sensors.cpp` 里，**不引第三方库**。
 
 | 外设 | 型号 | 接口 | 地址 / 波特率 | 接线 |
 | :--- | :--- | :--- | :--- | :--- |
 | 温湿度 | AHT20 | I²C | 0x38 | J4-2 SDA → IO42，J4-3 SCL → IO41 |
 | 气压 | GY-BMP280 | I²C | 0x76 | 与 AHT20 并联同一组 SDA/SCL |
+| 温度（外接） | TMP117 | I²C | 0x48 | J4A/J4B 空闲座，V+/GND/SCL/SDA；探头放壳外 |
 | GNSS | ATGM336H-5N31 | UART | 9600 8N1 | 模块 TXD → IO44，RXD → IO43，PPS → IO47（可选） |
 
 J4 排针顺序：**3V3 / SDA / SCL / GND**。
 
 注意：
 
-- 三个 I²C 器件地址不冲突（触摸 0x14、AHT20 0x38、BMP280 0x76）。三块板载上拉并联后约 1.6K，正常可用。
+- 四个 I²C 器件地址不冲突（触摸 0x14、AHT20 0x38、BMP280 0x76、TMP117 0x48）。板载上拉并联后约 1.6K，正常可用。
 - GPS 占用 UART0 的两个引脚（43/44）后，**硬件串口日志就没有了**，控制台走 USB-CDC，烧录也走 USB。
 - AHT20 必须远离背光和 DC-DC，并开透气孔，否则温度读数会高 3~8℃。
+- **TMP117 是外接探头**：读数优先于 AHT20 填 TEMP 卡；AHT20 只留湿度。线长 20~50cm，`APP_I2C_FREQ` 保持 100kHz；若通信不稳先查上拉与线序。
 - 室内基本定不到位，测 GPS 要拿到窗边或室外，冷启动等 30~40 秒。
 - 屏幕界面用的是 LovyanGFX 内置 ASCII 字体（TEMP / HUMI / PRES / GNSS），要显示中文需引入 `fonts::efontCN_16`，会明显增加固件体积。
 

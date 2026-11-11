@@ -78,7 +78,7 @@
     <strong>一句话结论：</strong>这是一块<strong>自带背光、没有触摸、只能写不能读</strong>的 SPI 裸屏模组。三件事必须先定死：
     ① VDD 只用 3.3 V，且轨道要压在 <strong>3.30 V 以内</strong>（规格上限就是 3.3 V）；
     ② 背光两颗 LED 并联，<strong>必须串 10 Ω 限流</strong>，直接接 3.3 V 会烧；
-    ③ FPC 只有 <strong>13.13 mm</strong>，屏背到 PCB 的距离被它锁死在 <strong>9.7 mm</strong>，这直接决定外壳屏槽深度。
+    ③ FPC 只有 <strong>13.13 mm</strong>，屏背到 PCB 压到 <strong>7.7 mm</strong> 后多出 2.98 mm，必须在腔里走 S 弯。
   </div>
 </header>
 
@@ -511,7 +511,7 @@
 
   <!-- front wall -->
   <rect x="90" y="40" width="480" height="10" fill="#F1EFE8" stroke="#B4B2A9"/>
-  <text x="580" y="50" font-size="10.5" fill="#5F5E5A">前壁 1.0</text>
+  <text x="580" y="50" font-size="10.5" fill="#5F5E5A">前壁 0.9</text>
 
   <!-- panel -->
   <rect x="245" y="50" width="210" height="12" fill="#E6F1FB" stroke="#185FA5"/>
@@ -538,10 +538,10 @@
   <path d="M478 50V64" stroke="#8b949e" stroke-width="0.9" marker-start="url(#d2)" marker-end="url(#d2)"/>
   <text x="486" y="60" font-size="9.5" fill="#57606a">1.7</text>
   <path d="M120 64V144" stroke="#8b949e" stroke-width="0.9" marker-start="url(#d2)" marker-end="url(#d2)"/>
-  <text x="126" y="107" font-size="9.5" fill="#57606a">9.7</text>
+  <text x="126" y="107" font-size="9.5" fill="#57606a">7.7</text>
 
-  <text x="80" y="230" font-size="11" fill="#57606a">FPC 总长 13.13 = 竖直 9.7 + 折弯 0.6 + 焊盘 1.85 ≈ 12.15</text>
-  <text x="80" y="252" font-size="11" fill="#0F6E56">余量 0.98 mm —— 屏槽再深 1 mm 就拉不到焊盘</text>
+  <text x="80" y="230" font-size="11" fill="#57606a">FPC 总长 13.13 = 竖直 7.7 + 折弯 0.6 + 焊盘 1.85 ≈ 10.15</text>
+  <text x="80" y="252" font-size="11" fill="#0F6E56">余量 2.98 mm —— 在腔里走 S 弯，弓高约 3 mm，不许左右扭</text>
   <text x="80" y="282" font-size="10.5" fill="#8b949e">折弯半径按 R0.3 走，FPC 只能朝“背面朝外”单面折，别反向折</text>
   <text x="80" y="304" font-size="10.5" fill="#8b949e">FPC 宽 10.30，屏槽壁在下边这一段必须开口 ≥10.6</text>
 </svg>
@@ -553,9 +553,9 @@
   <tbody>
     <tr><td>视窗</td><td class="mono">24.0 × 24.0</td><td>对 AA 每边压 0.3 mm；中心相对屏外形中心<strong>上移 0.41 mm</strong>（29.22 比 28.40 多在 FPC 侧）</td></tr>
     <tr><td>屏槽</td><td class="mono">26.5 × 29.6 × 1.7</td><td>单边间隙 0.17–0.19；前唇 1.25 mm 宽贴 0.2 mm 双面胶，屏背垫 0.5 mm 泡棉防震</td></tr>
-    <tr><td>屏槽壁</td><td>深 9.7，厚 1.0</td><td>从前壁内表面向 PCB 延伸，距板面留 0.3 mm；定位 + 遮光 + 挡灰</td></tr>
+    <tr><td>屏槽壁</td><td>深 7.7，厚 1.0</td><td>从前壁内表面向 PCB 延伸，距板面留 0.3 mm；定位 + 遮光 + 挡灰</td></tr>
     <tr><td>FPC 出口</td><td class="mono">宽 ≥10.6</td><td>屏下边居中偏 pin 1 侧 3.0 mm；槽壁在这一段必须开口，不能压住 FPC</td></tr>
-    <tr><td>屏中心</td><td class="mono">(30.0, 33.0)</td><td>机身边长 64；左边框 18.0，到 Φ10 拨轮 14.0</td></tr>
+    <tr><td>屏中心</td><td class="mono">(32.0, 33.0)</td><td>X 居中（左右各 18.9）；Y 低 1mm 换天线净空，到小头拨轮 13.9</td></tr>
     <tr><td>视窗边缘</td><td>C0.2 倒角</td><td>前壁内侧倒角，避免注塑/打印毛边压到玻璃</td></tr>
   </tbody>
 </table>

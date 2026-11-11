@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>小智 AI 板 · 结构与打样方案 rev1.8（64×64×22，侧壁拨轮 + 1.3″ 方屏 + TF 卡）</title>
+<title>小智 AI 板 · 结构与打样方案 rev1.9（64×64×19.5，侧壁拨轮 + 1.3″ 方屏 + TF 卡）</title>
 <style>
   :root{
     --ink:#1f2328; --ink2:#57606a; --ink3:#8b949e;
@@ -75,37 +75,42 @@
   </div>
 </header>
 
-<h2><span class="num">01</span>22mm 的 Z 向叠层</h2>
+<h2><span class="num">01</span>19.5mm 的 Z 向叠层</h2>
 
 <table>
   <thead><tr><th style="width:16%">Z 区间</th><th style="width:14%">厚度</th><th style="width:70%">内容</th></tr></thead>
   <tbody>
-    <tr><td class="mono">0 – 1.6</td><td>1.6 mm</td><td>后盖板（贴桌面，无接口）</td></tr>
-    <tr><td class="mono">1.6 – 8.2</td><td>6.6 mm</td><td>元件腔：模组朝下，<strong>限高 4.6 mm</strong></td></tr>
-    <tr><td class="mono">8.2 – 9.8</td><td>1.6 mm</td><td>PCB（右边缘 61.0，拨轮开关压在边缘上）</td></tr>
-    <tr><td class="mono">9.8 – 19.5</td><td>9.7 mm</td><td>前腔：屏槽壁 + 拨轮开关（6.6 高）+ 轮盘；<strong>这段由屏的 FPC 决定</strong></td></tr>
-    <tr><td class="mono">19.5 – 21.0</td><td>1.5 mm</td><td>屏模组（含背光、铁框）</td></tr>
-    <tr><td class="mono">21.0 – 22.0</td><td>1.0 mm</td><td>前壁（视窗 24.0 开在这里）</td></tr>
+    <tr><td class="mono">0 – 1.4</td><td>1.4 mm</td><td>后盖板（贴桌面，无接口）</td></tr>
+    <tr><td class="mono">1.4 – 7.8</td><td>6.4 mm</td><td>元件腔：模组朝下，<strong>限高 4.4 mm</strong></td></tr>
+    <tr><td class="mono">7.8 – 9.4</td><td>1.6 mm</td><td>PCB（右边缘 61.0，拨轮开关压在边缘上）</td></tr>
+    <tr><td class="mono">9.4 – 17.1</td><td>7.7 mm</td><td>前腔：屏槽壁 + 拨轮开关（6.6）+ FPC 的 S 弯</td></tr>
+    <tr><td class="mono">17.1 – 18.6</td><td>1.5 mm</td><td>屏模组（含背光、铁框）</td></tr>
+    <tr><td class="mono">18.6 – 19.5</td><td>0.9 mm</td><td>前壁（视窗 24.0 开在这里）</td></tr>
   </tbody>
 </table>
 
 <div class="card warn">
-  <h4>去掉 EC11 了，为什么还是 22mm</h4>
-  因为厚度不是波轮决定的，是<strong>屏的 FPC</strong>：屏背到 PCB 要留 9.7mm 让 13.13mm 的 FPC 竖直走到焊盘。
-  这版把 EC11 的 6.5 + 轮 4.0 全删了，前腔里只剩 6.6 的拨轮开关，<strong>还空着 3mm 左右</strong>。
-  下一版想压到 <strong>19.5mm</strong>：把 9.7 缩到 7.2（拨轮开关 6.6 + 0.6 间隙），FPC 在腔里走一个 S 弯（余量 3.5mm），需要先打样验证 FPC 不折伤。
+  <h4>这 2.5mm 从哪来</h4>
+  ① 后盖 1.6 → <strong>1.4</strong>（打印下限 1.2）；② 元件腔 6.6 → <strong>6.4</strong>（限高 4.4，模组 3.5、100µF 聚合物 4.2 都还能进）；
+  ③ 前腔 9.7 → <strong>7.7</strong>；④ 前壁 1.0 → <strong>0.9</strong>。PCB 1.6 与屏 1.5 不动。
+  <strong>前腔 7.7 是屏 FPC 的极限</strong>：再压 1mm，FPC 弓高要到 4mm，静态弯没余量。
 </div>
 
-<p><strong>屏的 FPC 预算：</strong>屏背 19.5 → PCB 9.8，间隙 9.7；FPC 13.13 = 竖直 9.7 + 折弯 0.6 + 焊盘 1.85 = 12.15，余 0.98mm。</p>
+<div class="card tip">
+  <h4>FPC 多出的 2.98mm 怎么放</h4>
+  屏背 17.1 → PCB 9.4，竖直段 7.7；FPC 13.13 = 7.7 + 折弯 0.6 + 焊盘 1.85 = 10.15，<strong>余 2.98mm</strong>。
+  让它朝屏的<strong>外侧（+Y）</strong>鼓一个弓高约 3mm 的浅弧（半径约 4mm），不要左右扭。
+  屏槽壁下沿贴一片 0.3mm PET 导片，把 FPC 压在 +Y 一侧；装壳后从视窗看 FPC 不应顶到屏背。
+</div>
 
 <h2><span class="num">02</span>布局</h2>
 
 <div class="diagram">
 <svg viewBox="0 0 700 400" width="100%" xmlns="http://www.w3.org/2000/svg" role="img">
-  <title>64×64mm 布局：屏居中、拨轮在右壁、USB-C 在左壁下方</title>
-  <desc>外壳 64×64mm，屏 26.16×29.22 居中偏左 2mm，右侧壁内嵌 Φ10 拨轮，轮缘超出轮廓 2mm；顶部左侧为天线净空。</desc>
+  <title>64×64mm 布局：屏横向居中、拨轮在右壁、USB-C 在左壁下方</title>
+  <desc>外壳 64×64mm，屏 26.16×29.22 横向居中（中心 X=32），右侧壁内嵌 Φ7 小头拨轮，轮缘超出轮廓 2mm；顶部左侧为天线净空。</desc>
   <defs>
-    <marker id="d8" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <marker id="d9" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M1 1L9 5L1 9" fill="none" stroke="#8b949e" stroke-width="1.1"/>
     </marker>
   </defs>
@@ -118,24 +123,25 @@
   <text x="187" y="93" text-anchor="middle" font-size="8.5" fill="#A32D2D">屏距 12.4</text>
   <text x="187" y="106" text-anchor="middle" font-size="8" fill="#A32D2D">机内禁金属</text>
 
-  <!-- screen: center (30,33) -> (240,187), 26.16x29.22 -->
-  <rect x="187.7" y="128.6" width="104.6" height="116.9" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.8"/>
-  <rect x="192" y="137.4" width="96" height="96" fill="none" stroke="#185FA5" stroke-width="0.5" stroke-dasharray="3 2"/>
-  <text x="240" y="178" text-anchor="middle" font-size="10" font-weight="500" fill="#0C447C">1.3″ 240×240</text>
-  <text x="240" y="192" text-anchor="middle" font-size="8.5" fill="#185FA5">26.16 × 29.22</text>
+  <!-- screen: center (32,33) -> (248,187), 26.16x29.22 -->
+  <rect x="195.7" y="128.6" width="104.6" height="116.9" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.8"/>
+  <rect x="200" y="137.4" width="96" height="96" fill="none" stroke="#185FA5" stroke-width="0.5" stroke-dasharray="3 2"/>
+  <text x="248" y="178" text-anchor="middle" font-size="10" font-weight="500" fill="#0C447C">1.3″ 240×240</text>
+  <text x="248" y="192" text-anchor="middle" font-size="8.5" fill="#185FA5">26.16 × 29.22</text>
+  <path d="M248 128.6V245.5" stroke="#B4B2A9" stroke-width="0.6" stroke-dasharray="3 3"/>
 
   <!-- FPC tab -->
-  <rect x="207" y="245.5" width="41.2" height="12" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.6"/>
-  <text x="227.6" y="254.5" text-anchor="middle" font-size="7" fill="#854F0B">FPC</text>
+  <rect x="215" y="245.5" width="41.2" height="12" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.6"/>
+  <text x="235.6" y="254.5" text-anchor="middle" font-size="7" fill="#854F0B">FPC</text>
 
-  <!-- wheel: center (61,32) -> (364,183), r=20 -->
-  <circle cx="364" cy="183" r="20" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.9"/>
-  <path d="M364 163V203M344 183H384" stroke="#0F6E56" stroke-width="0.5" stroke-dasharray="2 2"/>
-  <text x="364" y="214" text-anchor="middle" font-size="8.5" fill="#0F6E56">Φ10 拨轮</text>
+  <!-- wheel: center (62.5,32) -> (370,183), r=14 (Φ7) -->
+  <circle cx="370" cy="183" r="14" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.9"/>
+  <path d="M370 169V197M356 183H384" stroke="#0F6E56" stroke-width="0.5" stroke-dasharray="2 2"/>
+  <text x="370" y="210" text-anchor="middle" font-size="8.5" fill="#0F6E56">小头拨轮 Φ7</text>
 
   <!-- slot in right wall -->
   <rect x="372" y="173" width="12" height="20" rx="2" fill="#ffffff" stroke="#0F6E56" stroke-width="0.8"/>
-  <text x="424" y="180" font-size="9.5" fill="#085041">拨轮槽 10 × 3.4</text>
+  <text x="424" y="180" font-size="9.5" fill="#085041">拨轮槽 10 × 3.6</text>
   <text x="424" y="193" font-size="8.5" fill="#8b949e">轮缘露出 2mm</text>
 
   <!-- TF slot -->
@@ -187,7 +193,7 @@
   <path d="M120 320H376" fill="none" stroke="#E24B4A" stroke-width="1.4" stroke-dasharray="6 4"/>
   <text x="248" y="336" text-anchor="middle" font-size="10" fill="#A32D2D">↓ 此边贴桌面：无开孔 · 无外露螺丝</text>
 
-  <path d="M120 356H376" fill="none" stroke="#8b949e" stroke-width="0.9" marker-start="url(#d8)" marker-end="url(#d8)"/>
+  <path d="M120 356H376" fill="none" stroke="#8b949e" stroke-width="0.9" marker-start="url(#d9)" marker-end="url(#d9)"/>
   <text x="248" y="350" text-anchor="middle" font-size="10" fill="#57606a">64 mm</text>
   <text x="120" y="380" font-size="9.5" fill="#8b949e">64 × 64 × 22mm　·　左壁：USB-C + 针孔 + 温感通风孔　·　右壁：TF 卡槽 + 拨轮槽 + 喇叭接线座 + 电池焊盘　·　前壁右下：出音孔</text>
 </svg>
@@ -195,10 +201,10 @@
 </div>
 
 <div class="card warn">
-  <h4>天线：12.4mm 仍然是这次缩小的代价</h4>
-  模组天线在 PCB 上边沿（机身 Y=6），屏顶在 18.4，只剩 <strong>12.4mm</strong>，低于乐鑫建议的 15mm。
-  补偿：① PCB 顶部 6mm 全层禁铜；② 该区域外壳纯塑料，无螺柱/筋位/金属；③ 屏背不贴铜箔。
-  打样后测 RSSI，低于 −70 dBm 就把屏下移 3mm，仍不行换 <code>WROOM-1U</code> + IPEX。
+  <h4>天线：12.4mm 净空不能再让</h4>
+  屏顶在 18.4，PCB 上边沿 6.0，中间 12.4mm——低于乐鑫建议的 15mm，但这是 64mm 机身的极限。
+  所以屏 <strong>X 可以居中、Y 不能居中</strong>：Y 居中会再吃掉 1mm，只剩 11.4。
+  补偿：PCB 顶部 6mm 全层禁铜、纯塑料、无螺柱；打样后测 RSSI，低于 −70 dBm 就把屏下移 3mm 或换 WROOM-1U。
 </div>
 
 <h3>环境温度采样位与通风（rev 1.9 新增）</h3>
@@ -245,56 +251,46 @@
   <thead><tr><th style="width:24%">项目</th><th style="width:26%">数值</th><th style="width:50%">说明</th></tr></thead>
   <tbody>
     <tr><td>屏外形</td><td class="mono">26.16 × 29.22 × 1.5</td><td>中景园 ZJY133T-IG01，含背光与铁框；AA 23.40 × 23.40</td></tr>
-    <tr><td>视窗</td><td class="mono">24.0 × 24.0</td><td>对 AA 每边压 0.3 mm，装配公差 ±0.2 仍不露边</td></tr>
-    <tr><td>屏中心</td><td class="mono">(30.0, 33.0)</td><td>机身边长 64；左边框 18.0，到拨轮 14.0</td></tr>
-    <tr><td>视窗中心</td><td class="mono">(30.0, 32.6)</td><td>比屏外形中心<strong>上移 0.41 mm</strong>（29.22 比 28.40 多的 0.82 在 FPC 侧）</td></tr>
+    <tr><td>视窗</td><td class="mono">24.0 × 24.0</td><td>对 AA 每边压 0.3 mm</td></tr>
+    <tr><td>屏中心</td><td class="mono">(32.0, 33.0)</td><td><strong>X 居中</strong>（左右各 18.9）；Y 比中心低 1mm 换天线净空</td></tr>
+    <tr><td>视窗中心</td><td class="mono">(32.0, 32.6)</td><td>比屏外形中心上移 0.41mm（29.22 比 28.40 多的 0.82 在 FPC 侧）</td></tr>
     <tr><td>屏槽</td><td class="mono">26.5 × 29.6 × 1.7</td><td>单边间隙 0.17–0.19；前唇 1.25 宽贴 0.2 双面胶，屏背垫 0.5 泡棉</td></tr>
-    <tr><td>屏槽壁</td><td>深 9.7 / 厚 1.0</td><td>从前壁内表面向 PCB 延伸，距板面留 0.3 mm；定位 + 遮光</td></tr>
-    <tr><td>FPC 出口</td><td class="mono">宽 ≥10.6</td><td>屏下边，中心偏 pin 1 侧 3.0 mm；槽壁在这一段必须断开</td></tr>
+    <tr><td>屏槽壁</td><td>深 7.7 / 厚 1.0</td><td>从前壁内表面向 PCB 延伸，距板面留 0.3 mm</td></tr>
+    <tr><td>FPC 出口</td><td class="mono">宽 ≥10.6</td><td>屏下边，中心偏 pin 1 侧 3.0 mm；槽壁在这一段断开</td></tr>
     <tr><td>窗边倒角</td><td class="mono">C0.2</td><td>内侧倒角，别让打印毛边压到玻璃</td></tr>
   </tbody>
 </table>
 
 <div class="card warn">
-  <h4>FPC 只有 13.13 mm，三条硬约束</h4>
-  ① 屏背到 PCB 不能超过 <strong>10.7 mm</strong>——本版 9.7，还剩 0.98 余量；
-  ② <strong>FPC 只能单面折</strong>，折弯方向按规格书第 5 页；
-  ③ <strong>折弯处不许灌热熔胶、不许压硬垫块</strong>，塞 0.5 mm 泡棉做应力释放即可。
-</div>
-
-<div class="card tip">
-  <h4>装配顺序</h4>
-  屏和 PCB 是<strong>先焊后装</strong>：FPC 先焊到 PCB 上 → 点亮测试 → 把屏放进前壳屏槽 → PCB 落到螺柱 → 盖后盖。
-  屏不能从视窗塞进去（视窗 24 小于屏 26.16），必须从内侧装。
+  <h4>FPC：余 2.98mm，必须走 S 弯</h4>
+  ① 屏背到 PCB <strong>7.7mm</strong>，FPC 竖直段 7.7 + 折弯 0.6 + 焊盘 1.85 = 10.15，余 2.98；
+  ② 让 FPC 朝 <strong>+Y 外侧</strong>鼓一个弓高约 3mm 的浅弧（半径约 4mm），<strong>不许左右扭、不许压死折</strong>；
+  ③ 屏槽壁下沿贴 0.3mm PET 导片；<strong>首件必须装壳验证</strong>：FPC 不顶屏背、不蹭 PCB 元件、不挡 TF 卡。
 </div>
 
 <h2><span class="num">04</span>拨轮开关与侧壁槽</h2>
 
-<p>器件是 <strong>6 脚贴片三向拨轮开关</strong>（L-ink Card 的 S1 同款；立创在售 BL-XT 6P / WS-002DB，约 1–2 元）。
-内部是 3 组轻触开关：上拨、下拨、按压，松手自复位。<strong>不是编码器</strong>，没有 A/B 相，固件按三个按键读。</p>
-
 <table>
   <thead><tr><th style="width:24%">项目</th><th style="width:26%">数值</th><th style="width:50%">说明</th></tr></thead>
   <tbody>
-    <tr><td>开关本体</td><td class="mono">约 14 × 12 × 6.6</td><td>贴片 6 脚；<strong>以选定型号图纸为准</strong>，首版按 BL-XT 6P 画封装</td></tr>
-    <tr><td>轮盘</td><td class="mono">Φ10 × 3.5</td><td>塑料轮盘与本体一体，轮缘从板边探出</td></tr>
-    <tr><td>轮心</td><td class="mono">(61.0, 32.0)</td><td>X 正好在 PCB 右缘；轮缘到 66.0，超出外壳 <strong>2.0mm</strong></td></tr>
-    <tr><td>开关本体位置</td><td class="mono">PCB X 16–29，Y −6–+6</td><td>即机身 X 48–61、Y 26–38；轮盘在 Z 16.4–19.4</td></tr>
-    <tr><td>侧壁槽</td><td class="mono">10（Y）× 3.4（Z）</td><td>Y 27–37，Z 16.2–19.6；口部倒 C0.5，轮缘露 2mm</td></tr>
-    <tr><td>轮心高度</td><td class="mono">Z ≈ 18.0</td><td>轮盘顶 19.4，离前壁内表面 21.0 还有 1.6mm；<strong>装壳前用实物复核</strong></td></tr>
+    <tr><td>开关本体</td><td class="mono">约 14 × 12 × 6.6</td><td>6 脚贴片三向；<strong>以选定型号图纸为准</strong></td></tr>
+    <tr><td>轮盘</td><td class="mono">Φ7 左右（小头版）</td><td>含在本体 6.6 总高内；<strong>大头版 Φ10+ 总高约 10mm，19.5 机身放不下</strong></td></tr>
+    <tr><td>轮心</td><td class="mono">(62.5, 32.0, Z≈12.5)</td><td>X = 64 + 2 − r（Φ7 → 62.5）；轮缘到 66.0，超出外壳 2.0mm</td></tr>
+    <tr><td>开关本体位置</td><td class="mono">PCB X 16–30.5，Y −6–+6</td><td>机身 X 48–62.5、Y 26–38；<strong>悬出板边 1.5mm</strong>，本体 Z 9.4–16.0</td></tr>
+    <tr><td>侧壁槽</td><td class="mono">10（Y）× 3.6（Z）</td><td>Y 27–37，Z 11.0–14.6；口部 C0.5</td></tr>
+    <tr><td>轮心高度</td><td class="mono">Z ≈ 12.5</td><td>本体顶 16.0，离前壁内表面 18.6 还有 2.6mm；<strong>按实物复核</strong></td></tr>
   </tbody>
 </table>
 
 <div class="card tip">
   <h4>为什么它比 EC11 方案好装</h4>
-  EC11 要立式焊、轴锯短、D 型孔、压轴肩、3D 打印轮、M2 顶丝——一共 6 个容易错的环节。
-  这颗开关是 SMD，回流焊一次过；轮子自带，只要侧壁槽对准轮心，装机时把 PCB 落到螺柱上就到位。
+  贴片回流焊一次过，轮子自带，只要侧壁槽对准轮心；不用立式焊、不用锯轴、不用打印轮。
   代价是<strong>不能连续旋转</strong>：一次拨一格，音量靠按住连发。
 </div>
 
 <div class="card warn">
   <h4>轮心高度是唯一需要实物复核的尺寸</h4>
-  不同厂家的 6 脚拨轮开关，轮盘相对本体的高度差 0.5–1mm。首版按 BL-XT 6P 图纸开槽；收到实物后先量
+  不同厂家的 6 脚拨轮开关，轮盘相对本体的高度差 0.5–1mm。首版按 BL-XT 6P 图纸开槽；收到实物先量
   <strong>PCB 面到轮盘顶</strong>，再决定槽的 Z 位置。槽开低了轮子蹭壁，开高了露不出。
 </div>
 
@@ -310,15 +306,9 @@
   </tbody>
 </table>
 
-<div class="card tip">
-  <h4>固件怎么读</h4>
-  三个普通按键：上/下每触发一次 = 音量 ±5%，按住 300 ms 后每 100 ms 连发一次；按压 = 对话/打断。
-  小智的 <code>iot_knob</code> 用不上，直接在板型里注册按键回调。10 kΩ 外部上拉不要省，触点氧化后会漏触发。
-</div>
-
 <h2><span class="num">06</span>装配要点</h2>
 <ul>
-  <li><strong>拨轮开关是 SMD</strong>，和屏 FPC 一起过回流焊；焊完先用手拨两下，确认上/下/按压三向手感一致。</li>
+  <li><strong>拨轮开关是 SMD</strong>，和屏 FPC 一起过回流焊；焊完先拨两下，确认上/下/按压三向手感一致。</li>
   <li>轮盘从 PCB 右缘探出，装壳前确认<strong>轮心与侧壁槽对中</strong>；PCB 落柱后轮子应能自由拨动、不蹭槽壁。</li>
   <li>侧壁槽内侧做 <strong>0.5mm 挡尘唇</strong>，减少桌面灰尘进轮室。</li>
   <li>麦孔在<strong>正面 (38, 16)</strong>，离 TF 卡座 8mm、离拨轮 12mm，别开在天线区。</li>
@@ -331,7 +321,7 @@
   <li><strong>喇叭隔振</strong>：泡棉圈同时做隔振，别让喇叭直接顶到前壁硬塑料或屏槽壁；线材盘在右下空区，避开 FPC 折弯处。</li>
 </ul>
 
-<h2><span class="num">07</span>还想更小 / 更薄？</h2>
+<h2><span class="num">07</span>还想更薄？</h2>
 
 <table>
   <thead><tr><th style="width:24%">方向</th><th style="width:14%">结果</th><th style="width:38%">说明</th><th style="width:24%">代价</th></tr></thead>
@@ -343,16 +333,16 @@
       <td>FPC 多一道弯，需要打样验证不折伤；屏槽壁变浅；<strong>rev 2.0 内置喇叭后基本作废</strong>（后腔只剩 3.7 mm）</td>
     </tr>
     <tr>
-      <td><span class="tag t-blue">备选 B</span> 60 × 60 × 22</td>
-      <td class="mono">−12%</td>
-      <td>PCB 54 × 48；屏中心 (28,31)，Φ10 拨轮仍露 2mm</td>
-      <td>左边框降到 16，屏到轮 12；布局更紧</td>
+      <td><span class="tag t-blue">备选</span> 改 1.2mm PCB</td>
+      <td class="mono">−0.4mm</td>
+      <td>4 层 1.2 板，嘉立创可做</td>
+      <td>板子更软，屏 FPC 焊盘区要加铜平衡；省 0.4 不值</td>
     </tr>
     <tr>
-      <td><span class="tag t-red">不建议</span> 56 × 56</td>
+      <td><span class="tag t-red">不建议</span> 换薄屏</td>
       <td class="mono">—</td>
-      <td>PCB 只剩 50 × 44</td>
-      <td>模组 25.5×18 + 音频 + 电源 + TF 卡座 + 螺柱放不下</td>
+      <td>屏 1.5 → 1.0 需换型号</td>
+      <td>屏是定案件，不为一毫米换供应商</td>
     </tr>
   </tbody>
 </table>
@@ -362,9 +352,9 @@
 <table>
   <thead><tr><th style="width:26%">零件</th><th style="width:26%">包围盒</th><th style="width:24%">实体积</th><th style="width:24%">判定</th></tr></thead>
   <tbody>
-    <tr><td>前壳（含轮室、屏槽壁）</td><td class="mono">64×64×21</td><td>约 <strong>17 cm³</strong></td><td><span class="tag t-teal">✓ ＜70</span></td></tr>
-    <tr><td>后盖</td><td class="mono">64×64×1.6</td><td>约 <strong>6 cm³</strong></td><td><span class="tag t-teal">✓ ＜70</span></td></tr>
-    <tr><td>合计</td><td>—</td><td>约 23 cm³</td><td><span class="tag t-blue">✓ 额度内</span></td></tr>
+    <tr><td>前壳（含轮室、屏槽壁）</td><td class="mono">64×64×18.6</td><td>约 <strong>15 cm³</strong></td><td><span class="tag t-teal">✓ ＜70</span></td></tr>
+    <tr><td>后盖</td><td class="mono">64×64×1.4</td><td>约 <strong>5.3 cm³</strong></td><td><span class="tag t-teal">✓ ＜70</span></td></tr>
+    <tr><td>合计</td><td>—</td><td>约 20 cm³</td><td><span class="tag t-blue">✓ 额度内</span></td></tr>
   </tbody>
 </table>
 
@@ -376,22 +366,23 @@
     <tr><td>PCB</td><td class="mono">4 层 / 58 × 52 mm / 1.6mm，5 片，单片出货</td></tr>
     <tr><td>阻焊 / 表面</td><td>绿色（免费券仅支持绿油）/ 无铅喷锡或 OSP</td></tr>
     <tr><td>3D 打印材料</td><td>尼龙 3301PA（外壳用，树脂太滑太脆）</td></tr>
-    <tr><td>件数</td><td><strong>只有前壳 + 后盖两件，一单搞定</strong>（轮子不再打印）</td></tr>
+    <tr><td>件数</td><td><strong>前壳 + 后盖两件，一单搞定</strong></td></tr>
     <tr><td>模型文件</td><td>STL，单位 <strong>mm</strong></td></tr>
   </tbody>
 </table>
 
 <h2><span class="num">10</span>出图前检查</h2>
 <ul class="check">
-  <li>外壳 64×64×22，三边均未超 100mm，抽壳后体积 &lt; 70 cm³</li>
-  <li>侧壁拨轮槽 10×3.4（Y 27–37，Z 16.2–19.6），口部 C0.5，轮缘露出 2mm</li>
-  <li>拨轮开关本体在 PCB 右缘（X 16–29，Y −6–+6），轮心 (61, 32)</li>
-  <li>轮心高度按实物复核（PCB 面到轮盘顶），槽上下各留 0.3mm</li>
-  <li>屏中心 (30.0, 33.0)、视窗 24.0×24.0、屏槽 26.5×29.6×1.7</li>
-  <li>屏背到 PCB 9.7mm；FPC 出口宽 ≥10.6 且槽壁断开</li>
-  <li>屏到拨轮 14mm（视窗边到轮缘），不干涉</li>
+  <li>外壳 64×64×19.5，三边未超 100mm，抽壳后体积 &lt; 70 cm³</li>
+  <li>Z 叠层：1.4 + 6.4 + 1.6 + 7.7 + 1.5 + 0.9 = 19.5</li>
+  <li>屏中心 (32.0, 33.0)，X 左右各 18.9；视窗 24×24 中心 (32.0, 32.6)</li>
+  <li>屏背到 PCB 7.7mm，FPC 余 2.98mm，S 弯朝 +Y，弓高约 3mm</li>
+  <li>屏槽壁 26.5×29.6、深 7.7、厚 1.0，FPC 出口 ≥10.6 且断开</li>
+  <li>侧壁拨轮槽 10×3.6（Y 27–37，Z 12.6–16.2），轮缘露 2mm</li>
+  <li>拨轮开关本体 PCB X 16–30.5、Y −6–+6，轮心 (62.5,32)，高度按实物复核</li>
   <li>顶部天线区 15×25：全层禁铜、无螺柱/筋位/金属，屏顶距天线 12.4mm</li>
-  <li>麦孔在正面 (38, 16)，与 TF 卡座 8mm、与拨轮 12mm</li>
+  <li>麦孔 (38,16)：离 TF 卡座 8mm、离拨轮 12mm、在天线区外</li>
+  <li>TF 卡座 14×14 贴板右缘，卡口对右壁槽 Y 7–18，插拔顺畅</li>
   <li>底边/底面零开孔：无接口、无螺丝、无凸起，只留 4 个脚垫沉孔</li>
   <li>左壁 USB-C 9.6×3.6（Y 49–58）、针孔 Φ2.5（Y 9–12）已定位</li>
   <li>右壁喇叭接线座 8×4（J2，非出音口）、VBAT 孔 Φ3.5 位于拨轮槽下方，互不干涉</li>
