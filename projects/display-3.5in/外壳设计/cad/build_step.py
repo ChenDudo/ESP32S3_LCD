@@ -88,7 +88,9 @@ def build_top(win_w, win_h):
 
 def build_base():
     body = rr_prism(P.W, P.H, P.R_OUT, P.W / 2, P.H / 2, 0, P.T_BASE)
-    screw_boss = [cylinder(P.POST_D / 2, P.T_BASE - 0.1, P.Z_PCB_BOT, x, y)
+    # 第七次修订：四角 Φ6 凸台并入底板（上沿 T_BASE），与 build_v2.py 一致；
+    # 原凸台 Z 2.30~3.40 会与上盖四角侧壁干涉、把上盖顶高 1.00 mm。
+    screw_boss = [cylinder(P.POST_D / 2, P.T_BASE - 0.1, P.T_BASE, x, y)
                   for x, y in P.SCREW_POS]
     pcb_boss = [cylinder(P.BASE_BOSS_D / 2, P.T_BASE - 0.1, P.Z_PCB_BOT, x, y)
                 for x, y in P.HOLES]

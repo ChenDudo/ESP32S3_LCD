@@ -4300,7 +4300,7 @@
     },
     "ESP32S3_LCD_全覆盖外壳_底座_3D打印.stl": {
       "watertight": true,
-      "volume_cm3": 19.47,
+      "volume_cm3": 19.39,
       "bounds": [
         [
           0.0,
@@ -4313,7 +4313,7 @@
           5.0
         ]
       ],
-      "faces": 2874
+      "faces": 2634
     }
   }
 }
