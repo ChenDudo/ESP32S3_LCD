@@ -13,7 +13,7 @@ EDA 工程源,ref/esp32s3_lcd/project2.json,157,json,EDA 工程元数据,3bcedd4
 关键设计依据,ref/输入资料/用户截图_EDA_PCB_LCD显示窗Y偏心.png,296479,png,★ 第四次修订：Y 偏心 0.90 判定依据（8.210 / 10.010 标注，左旋 90° 即屏幕正视）,42ed8929c7dfe7c11b4f8cf8c40494db
 参数化源码,cad/build_fcstd.py,3776,py,FreeCADCmd 生成 .FCStd 工程（上盖 Z 2.40~25.50）,d9f3bbfbe3d85f36ec4892ac2e7de8f0
 参数化源码,cad/build_step.py,8065,py,生成 3 个 STEP 解析实体（含 9 组凸字 / 菱形销 / 开口上沿 12.20）,e16f17e34b1f2bce4a1bbf3becb5ea6a
-参数化源码,cad/build_v2.py,54886,py,生成 STL、DXF、报价、下单说明、geom_v2.json（第七次：screw_boss 并入底板消除四角干涉；25.10 总高 + Z 堆叠校核 + 双偏心 + 9 组凸字 + 2 销定位 + A/B 分组开口带与双 Type-C Z 链）,8d7d8da92af79d3061ae7e1b3e3283f1
+参数化源码,cad/build_v2.py,56582,py,生成 STL、DXF、报价、下单说明、geom_v2.json（第七次：screw_boss 并入底板消除四角干涉；25.10 总高 + Z 堆叠校核 + 双偏心 + 9 组凸字 + 2 销定位 + A/B 分组开口带与双 Type-C Z 链）,7180916854bc51103ada4146a7b57273
 参数化源码,cad/make_pdf_v2.py,23412,py,生成 3 页 A4 工程图（剖面沿 WIN_CY=35.60 / Φ4 孔引线 / 页 3 下边 B 组展开图 Z 6.00~16.20 / 剖面 SCL 1.30）,b224870414c34b3e0302ec23cd3f235e
 参数化源码,cad/make_preview.py,6845,py,生成俯视/等距预览 PNG（俯视含 X 左移 2.75 / Y 下移 0.90 双偏心标注与 POWER 全大写）,aed64332b4366ef2723a308b85d16e7c
 参数化源码,cad/make_views.py,23549,py,生成 A3 三视图 PDF/DXF（含「窗口非 Y 居中」说明 / 25.10 总高 / A/B 分组开口带 / 右视图左移避让尺寸表）,5ecc96cdfeba26941e3137de53980c95
@@ -35,6 +35,6 @@ EDA 工程源,ref/esp32s3_lcd/project2.json,157,json,EDA 工程元数据,3bcedd4
 最终交付,cad/deliverables/上盖_顶板完整_俯视预览.png,124445,png,绿虚线 A.A / 红实线显示窗让位对比 + 顶板 9 组凸字（POWER 全大写、I2C 字头朝上）+ 外壳/窗口双中心线与 Y 下移标注,a3982dc0fefe0b2a62a10ce8e91e9b72
 最终交付,cad/deliverables/上盖_顶板完整_等距预览.png,167829,png,上盖 3D 等距预览,eed4edf9ab1403c309ff403ed645d00b
 最终交付,cad/deliverables/外壳实物报价.csv,1019,csv,外壳实物报价（不含 PCB/LCD/核心板；整套 38.37 cm3）,681053e5275377efc77208d5aa7ed544
-最终交付,cad/deliverables/给商家的下单说明.txt,21309,txt,给商家的下单说明与装配顺序（含按 BOM 加高到 25.10 的 Z 堆叠校核 / 核心板双 Type-C 完整 Z 链与 B 组开口带 / Y 偏心 0.90 推导 / POWER 全大写 / I2C 字头朝上 / 2 销定位 / 22P 排母不焊接 / 第七次底座四角无凸台与旧件削平 1mm 处理 / 打磨禁忌 / SLA 建议）,f77de3c222c2316a3249b66b30aaf460
-说明文档,README.md,44232,md,本目录总说明（★ 2026-11-13 第七次修订定稿：四角干涉已消除）：精简策略、导航、参数（总高 25.10 / 双偏心 / POWER 全大写 / I2C 字头朝上 / 开口带 A 4.00~12.20 与 B 6.00~16.20 分组）、Z 堆叠与核心板 Z 链校核、版本演进、重跑、报价,6175b5f78b91241b70094fb6f89d8480
+最终交付,cad/deliverables/给商家的下单说明.txt,22699,txt,给商家的下单说明与装配顺序（含按 BOM 加高到 25.10 的 Z 堆叠校核 / 核心板双 Type-C 完整 Z 链与 B 组开口带 / Y 偏心 0.90 推导 / POWER 全大写 / I2C 字头朝上 / 2 销定位 / 22P 排母不焊接 / 第七次底座四角无凸台、旧件削平 1mm 处理（含坐标与「削 A 不动 B/C」识别口诀及只削四角的原因） / 打磨禁忌 / SLA 建议）,f3e7314d952003b2b57a1ec2a1463ae5
+说明文档,README.md,45796,md,本目录总说明（★ 2026-11-13 第七次修订定稿：四角干涉已消除）：精简策略、导航、参数（总高 25.10 / 双偏心 / POWER 全大写 / I2C 字头朝上 / 开口带 A 4.00~12.20 与 B 6.00~16.20 分组）、Z 堆叠与核心板 Z 链校核、版本演进、重跑、报价、旧件削平位置识别（四角 Φ6 凸台 vs PCB 四角 Φ7 支撑台 / 2 定位销，不可混淆）,7da16e6b1da9ddac19d257af030f68f4
 说明文档,文件清单.csv,-,csv,关键文件索引（本文件）,-
